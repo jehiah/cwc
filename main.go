@@ -47,7 +47,7 @@ func main() {
 		log.Fatalf("err %s", err)
 	}
 
-	f, err := os.Create(path.Join(baseDir, "note.txt"))
+	f, err := os.Create(path.Join(baseDir, "notes.txt"))
 	if err != nil {
 		log.Fatalf("err %s", err)
 	}
@@ -98,7 +98,10 @@ func confirm() bool {
 }
 
 func expandReg(r string) string {
-	if strings.Contains(r, "bike lane") {
+	switch {
+	case strings.Contains(r, "driving in bike lane"):
+		return fmt.Sprintf("driving in bike lane, dangerously forcing bikers (including myself) into traffic lane, %s", r)
+	case strings.Contains(r, "bike lane"):
 		return fmt.Sprintf("stopped in bike lane, dangerously forcing bikers (including myself) into traffic lane, %s", r)
 	}
 	return r
