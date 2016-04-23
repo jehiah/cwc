@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strings"
 	"time"
 )
 
@@ -45,6 +46,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("err %s", err)
 	}
+	where = strings.TrimSpace(where)
 
 	f, err := os.Create(path.Join(baseDir, "notes.txt"))
 	if err != nil {
@@ -56,7 +58,7 @@ func main() {
 	reg := getReg()
 	reg.FHV = fhv
 
-	fmt.Fprintf(f, "\n%s driver %s. Pictures included.\n", fhvStr(fhv), expandReg(reg.String()))
+	fmt.Fprintf(f, "\n%s\n", SelectSample(reg, where))
 	f.Close()
 
 	fmt.Printf("done\n")
