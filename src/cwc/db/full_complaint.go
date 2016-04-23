@@ -17,10 +17,10 @@ type FullComplaint struct {
 	Location    string    `json:"location"`
 	Description string    `json:"description"`
 
-	Status           State `json:"status"`
+	Status           State  `json:"status"`
 	ServiceRequestID string `json:"311_service_request_id"`
 	TLCID            string `json:"tlc_id,omitempty"`
-	Hearing          bool `json:"hearing"`
+	Hearing          bool   `json:"hearing"`
 
 	Body       string    `json:"body"`
 	Violations []reg.Reg `json:"violations"`
@@ -53,9 +53,9 @@ func ParseComplaint(c Complaint, body []byte) (*FullComplaint, error) {
 		License:     c.License(),
 		VehicleType: reg.Taxi.String(),
 
-		Body: b,
+		Body:    b,
 		Hearing: contains("scheduled"),
-		Status: DetectState(b),
+		Status:  DetectState(b),
 	}
 	if contains("FHV") {
 		f.VehicleType = reg.FHV.String()
@@ -105,5 +105,3 @@ func splitLines(s string) []string {
 	}
 	return o
 }
-
-

@@ -7,15 +7,15 @@ import (
 type State string
 
 const (
-	Unknown State = "Unknown"
-	Submitted = "Submitted"
-	Invalid = "Invalid"
-	Fined = "FINED"
-	ClosedPenalty = "Plead Guilty"
-	HearingScheduled = "Hearing Scheduled"
-	ClosedGuilty = "FINED (guilty)"
-	ClosedNotGuilty = "CLOSED (not guilty)"
-	ClosedInspection = "CLOSED (Referred to S&E)"
+	Unknown          State = "Unknown"
+	Submitted              = "Submitted"
+	Invalid                = "Invalid"
+	Fined                  = "FINED"
+	ClosedPenalty          = "Plead Guilty"
+	HearingScheduled       = "Hearing Scheduled"
+	ClosedGuilty           = "FINED (guilty)"
+	ClosedNotGuilty        = "CLOSED (not guilty)"
+	ClosedInspection       = "CLOSED (Referred to S&E)"
 )
 
 func (s State) String() string {

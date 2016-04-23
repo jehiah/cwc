@@ -35,7 +35,7 @@ func New(d db.DB, templatePath string) *Server {
 		}
 		return ""
 	}}).ParseGlob(filepath.Join(templatePath, "*.html"))
-	
+
 	if err != nil {
 		log.Fatalf("%s", err)
 	}
@@ -108,7 +108,7 @@ func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) error {
 	r.ParseForm()
 	type payload struct {
 		FullComplaints []*db.FullComplaint
-		Query string
+		Query          string
 	}
 	p := payload{
 		Query: r.Form.Get("q"),

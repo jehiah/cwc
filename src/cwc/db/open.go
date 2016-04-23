@@ -2,6 +2,7 @@ package db
 
 import (
 	"errors"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -37,4 +38,15 @@ func (d DB) Open(c Complaint) (*os.File, error) {
 
 func (d DB) ShowInFinder(c Complaint) error {
 	return exec.Command("/usr/bin/open", d.FullPath(c)).Run()
+}
+
+func (d DB) Append(c Complaint, s string) error {
+	fullPath := filepath.Join(d.FullPath(c), "notes.txt")
+	f, err := os.OpenFile(fullPath, os.O_APPEND|os.O_WRONLY, 066)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	_, err = io.WriteString(f, s)
+	return err
 }
