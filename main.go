@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"strings"
 	"time"
 )
 
@@ -55,8 +54,9 @@ func main() {
 	fmt.Fprintf(f, "%s %s %s %s\n", dt.Format("2006/01/02 3:04pm"), fhvStr(fhv), license, where)
 
 	reg := getReg()
+	reg.FHV = fhv
 
-	fmt.Fprintf(f, "\n%s driver %s. Pictures included.\n", fhvStr(fhv), expandReg(formatReg(reg, fhv)))
+	fmt.Fprintf(f, "\n%s driver %s. Pictures included.\n", fhvStr(fhv), expandReg(reg.String()))
 	f.Close()
 
 	fmt.Printf("done\n")
@@ -96,17 +96,3 @@ func confirm() bool {
 	fmt.Scanf("%1s\n", &s)
 	return s == "y" || s == "Y"
 }
-
-func expandReg(r string) string {
-	switch {
-	case strings.Contains(r, "driving in bike lane"):
-		return fmt.Sprintf("driving in bike lane, dangerously forcing bikers (including myself) into traffic lane, %s", r)
-	case strings.Contains(r, "bike lane"):
-		return fmt.Sprintf("stopped in bike lane, dangerously forcing bikers (including myself) into traffic lane, %s", r)
-	}
-	return r
-}
-
-//
-// mate $DIR
-// open $DIR
