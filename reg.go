@@ -26,17 +26,17 @@ var allReg []Reg = []Reg{
 
 func getReg() Reg {
 	for i, r := range allReg {
-		fmt.Printf("%d: %s\n", i, r.Description)
+		fmt.Printf("%d: %s\n", i+1, r.Description)
 	}
 
 	fmt.Printf("Violation: ")
 	var n int
 	fmt.Scanf("%d\n", &n)
-	if n > len(allReg) {
+	if n < 1 || n > len(allReg) {
 		log.Printf("invalid option %d", n)
 		return Reg{}
 	}
-	return allReg[n]
+	return allReg[n-1]
 }
 
 func formatReg(reg Reg, fhv bool) string {
