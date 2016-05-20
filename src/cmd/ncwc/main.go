@@ -33,6 +33,8 @@ func main() {
 	fmt.Scanln(&license)
 
 	baseDir := fmt.Sprintf("/Users/jehiah/Documents/cyclists_with_cameras/%s_%s_%s", yyyymmdd, hhmm, license)
+	fmt.Printf("\tcreating ~/Documents/cyclists_with_cameras/%s_%s_%s\n", yyyymmdd, hhmm, license)
+
 	err = os.MkdirAll(baseDir, os.ModePerm)
 	if err != nil {
 		log.Fatalf("err %s", err)
@@ -55,8 +57,7 @@ func main() {
 
 	fmt.Fprintf(f, "%s %s %s %s\n", dt.Format("2006/01/02 3:04pm"), fhvStr(fhv), license, where)
 
-	reg := getReg()
-	reg.FHV = fhv
+	reg := getReg(fhv)
 
 	fmt.Fprintf(f, "\n%s\n", SelectSample(reg, where))
 	f.Close()

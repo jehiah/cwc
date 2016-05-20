@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 )
 
@@ -20,7 +21,7 @@ var allReg []Reg = []Reg{
 	{Code: "4-08(e)(3)", Description: "no parking on sidewalks", Type: "parking"},
 	{Code: "4-07(b)(2)", Description: "blocking intersection and crosswalks", Type: "parking"},
 	{Code: "4-05(b)(1)", Description: "no u-turns in business district", Type: "moving"},
-	{Code: "54-13(a)(3)(xi)", Description: "improper passing", Type: "moving"},
+	{Code: "54-13(a)(3)(xi)", Description: "improper passing", Type: "-"},
 	{Code: "4-12(i)", Description: "no honking in non-danger situations", Type: "parking"},
 	{Code: "NY VTL 1160(a)", Description: "no right from center lane", Type: "moving"},
 	{Code: "NY VTL 1160(b)", Description: "no left from center lane when both two-way streets", Type: "moving"},
@@ -51,7 +52,7 @@ func (s Sample) Format(location, vehicle, violation string) string {
 	t := s.Description
 	t = strings.Replace(t, "<LOCATION>", location, -1)
 	t = strings.Replace(t, "<VEHICLE>", vehicle, -1)
-	return strings.Replace(t, "<VIOLATION>", violation, -1)
+	return strings.Replace(t, "<VIOLATION>", fmt.Sprintf("in violation of %s", violation), -1)
 }
 
 func SelectSample(reg Reg, location string) string {
@@ -74,19 +75,40 @@ func SelectSample(reg Reg, location string) string {
 	return o[n-1].Format(location, vehicle, reg.String())
 }
 
-func getReg() Reg {
+func getReg(fhv bool) (reg Reg) {
 	for i, r := range allReg {
 		fmt.Printf("%d: %s\n", i+1, r.Description)
 	}
 
 	fmt.Printf("Violation: ")
-	var n int
-	fmt.Scanf("%d\n", &n)
-	if n < 1 || n > len(allReg) {
-		log.Printf("invalid option %d", n)
-		return Reg{}
+	var s string
+	fmt.Scanf("%s\n", &s)
+	var regs []Reg
+	for _, ns := range strings.Split(s, ",") {
+		n, err := strconv.Atoi(ns)
+		if err != nil {
+			log.Printf("%s", err)
+			continue
+		}
+		if n < 1 || n > len(allReg) {
+			log.Printf("invalid option %d", n)
+			continue
+		}
+		regs = append(regs, allReg[n-1])
 	}
-	return allReg[n-1]
+
+	switch {
+	case len(regs) == 0:
+	case len(regs) == 1:
+		reg = regs[0]
+	default:
+		// join 2 together
+		regs[0].FHV = fhv
+		regs[1].FHV = fhv
+		reg = Reg{Type: ".", Description: fmt.Sprintf("%s and %s", regs[0], regs[1])}
+	}
+	reg.FHV = fhv
+	return
 }
 
 func (reg Reg) String() string {
@@ -105,9 +127,11 @@ func (reg Reg) String() string {
 			tlcReg = "Commission Rule 54-13(a)(1)"
 		}
 	case "-":
+	case ".":
+		return reg.Code + reg.Description
 	default:
 		log.Printf("unknown reg type %v", reg.Type)
-		return ""
+		return reg.Code + reg.Description
 	}
 
 	code := reg.Code
@@ -119,5 +143,5 @@ func (reg Reg) String() string {
 		tlcReg = fmt.Sprintf(" & %s", tlcReg)
 	}
 
-	return fmt.Sprintf("in violation of %s (%s)%s", code, reg.Description, tlcReg)
+	return fmt.Sprintf("%s (%s)%s", code, reg.Description, tlcReg)
 }
