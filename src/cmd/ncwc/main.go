@@ -40,7 +40,7 @@ func main() {
 		log.Fatalf("err %s", err)
 	}
 
-	fhv := isFHV(license)
+	vehicle := detectLicenseType(license)
 
 	fmt.Printf("Where? ")
 	reader := bufio.NewReader(os.Stdin)
@@ -55,9 +55,9 @@ func main() {
 		log.Fatalf("err %s", err)
 	}
 
-	fmt.Fprintf(f, "%s %s %s %s\n", dt.Format("2006/01/02 3:04pm"), fhvStr(fhv), license, where)
+	fmt.Fprintf(f, "%s %s %s %s\n", dt.Format("2006/01/02 3:04pm"), vehicle, license, where)
 
-	reg := getReg(fhv)
+	reg := getReg(vehicle)
 
 	fmt.Fprintf(f, "\n%s\n", SelectSample(reg, where))
 	f.Close()
@@ -65,7 +65,7 @@ func main() {
 	fmt.Printf("done\n")
 
 	var url string
-	if fhv {
+	if vehicle == FHV {
 		url = "https://www1.nyc.gov/apps/311universalintake/form.htm?serviceName=TLC+FHV+Driver+Unsafe+Driving"
 	} else {
 		url = "https://www1.nyc.gov/apps/311universalintake/form.htm?serviceName=TLC+Taxi+Driver+Unsafe+Driving+Non-Passenger"
@@ -76,22 +76,6 @@ func main() {
 	}
 	exec.Command("/Users/jehiah/bin/mate", baseDir).Run()
 	exec.Command("/usr/bin/open", baseDir).Run()
-}
-
-func fhvStr(fhv bool) string {
-	if fhv {
-		return "FHV"
-	}
-	return "Taxi"
-}
-
-func isFHV(license string) bool {
-	if len(license) > 4 {
-		return true
-	}
-	fmt.Printf("Taxi? y/n: ")
-	taxi := confirm()
-	return !taxi
 }
 
 func confirm() bool {
