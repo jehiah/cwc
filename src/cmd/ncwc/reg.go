@@ -114,10 +114,11 @@ func getReg(v Vehicle) (reg Reg) {
 	for {
 		switch {
 		case len(selected) == 0:
-			break
+			reg.Vehicle = v
+			return
 		case len(selected) == 1:
-			reg = selected[0]
-			break
+			selected[0].Vehicle = v
+			return selected[0]
 		default:
 			// join 2 together
 			selected[0].Vehicle = v
@@ -127,7 +128,6 @@ func getReg(v Vehicle) (reg Reg) {
 			selected[0] = reg
 		}
 	}
-	reg.Vehicle = v
 	return
 }
 
@@ -139,7 +139,7 @@ func (reg Reg) String() string {
 	case strings.HasPrefix(code, "54-13"):
 		fallthrough
 	case strings.HasPrefix(code, "55-13"):
-		code = "Commision Rule " + code
+		code = "Commission Rule " + code
 	}
 
 	var suffix string
