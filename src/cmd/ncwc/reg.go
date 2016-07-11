@@ -36,6 +36,12 @@ var allReg []Reg = []Reg{
 	{Code: "NY VTL 1160(b)", Description: "no left from center lane when both two-way streets", Type: "moving", Vehicle: Taxi | FHV},
 	{Code: "NY VTL 1160(c)", Description: "no left from center lane at one-way street", Type: "moving", Vehicle: Taxi | FHV},
 	{Code: "NY VTL 1126", Description: "no passing zone", Type: "moving", Vehicle: Taxi | FHV},
+	{Code: "NY VTL 402(b)", Description: "license plate must not be obstructed", Type: "parking", Vehicle: Taxi | FHV},
+	{Code: "NY VTL 375(12-a)(b)(2)", Description: "no side window tint below 70%", Type: "parking", Vehicle: Taxi | FHV},
+	{Code: "54-12(f)", Description: "threats, harassment, abuse", Type: "-", Vehicle: Taxi},
+	{Code: "55-12(e)", Description: "threats, harassment, abuse", Type: "-", Vehicle: FHV},
+	{Code: "54-12(g)", Description: "use or threat of physical force", Type: "-", Vehicle: Taxi},
+	{Code: "55-12(f)", Description: "use or threat of physical force", Type: "-", Vehicle: FHV},
 }
 
 type Sample struct {

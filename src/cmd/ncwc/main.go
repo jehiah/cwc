@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -12,6 +13,16 @@ import (
 )
 
 func main() {
+	listReg := flag.Bool("list-regulations", false, "list all regulations")
+	flag.Parse()
+
+	if *listReg {
+		for _, r := range allReg {
+			fmt.Printf("%s,%s\n", r.Code, r.Description)
+		}
+		os.Exit(1)
+	}
+
 	var yyyymmdd, hhmm, license string
 	fmt.Printf("Date (YYYYMMDD): ")
 	fmt.Scanln(&yyyymmdd)
