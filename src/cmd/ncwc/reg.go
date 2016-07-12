@@ -58,8 +58,8 @@ var Samples []Sample = []Sample{
 	{"4-08(e)(9)", "<VEHICLE> stopped in bike lane, dangerously forcing bikers (including myself) into traffic lane <VIOLATION>. Pictures included."},
 	{"4-08(e)(9)", "<VEHICLE> stopped in bike lane, obstructing my use of bike lane <VIOLATION>. Pictures included."},
 	{"4-08(e)(9)", "While near <LOCATION> I observed <VEHICLE> stopped in bike lane <VIOLATION>. Pictures included."},
-	{"4-12(p)(2)", "<VEHICLE> was driving in bike lane to avoid waiting in single lane obstructing my use of bike lane <VIOLATION>. Pictures included."},
-	{"4-12(p)(2)", "While near <LOCATION> I observed <VEHICLE> driving in bike lane to avoid waiting in lane for other vehicles <VIOLATION>. Pictures included."},
+	{"4-12(p)(2)", "<VEHICLE> was driving in bike lane to avoid waiting in through lane obstructing my use of bike lane <VIOLATION>. Pictures included."},
+	{"4-12(p)(2)", "While near <LOCATION> I observed <VEHICLE> driving in bike lane to avoid waiting in through lane for other vehicles <VIOLATION>. Pictures included."},
 	{"55-13(a)(3)(vi)", "At <LOCATION>, <VEHICLE> cut me off in the bike lane failing to yield right of way <VIOLATION>. Pictures included."},
 }
 
@@ -93,7 +93,7 @@ func SelectSample(reg Reg, location string) string {
 func getReg(v Vehicle) (reg Reg) {
 	var choices []Reg
 	for _, r := range allReg {
-		if r.Vehicle&v != 0 {
+		if r.Vehicle&v == 0 {
 			continue
 		}
 		choices = append(choices, r)
