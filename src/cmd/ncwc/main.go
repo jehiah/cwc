@@ -8,11 +8,15 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/rwcarlsen/goexif/exif"
 )
 
 func main() {
+	var err error
 	listReg := flag.Bool("list-regulations", false, "list all regulations")
 	flag.Parse()
 
@@ -24,27 +28,45 @@ func main() {
 	}
 
 	var yyyymmdd, hhmm, license string
-	fmt.Printf("Date (YYYYMMDD): ")
+	fmt.Printf("Date (YYYYMMDD) or Filename: ")
 	fmt.Scanln(&yyyymmdd)
 
-	if yyyymmdd == "" {
+	var dt time.Time
+	switch {
+	case strings.HasPrefix(yyyymmdd, "/"):
+		f, err := os.Open(yyyymmdd)
+		if err != nil {
+			log.Fatal(err)
+		}
+		x, err := exif.Decode(f)
+		if err != nil {
+			log.Fatalf("failed parsing exif from %s %s", yyyymmdd, err)
+		}
+		dt, err = x.DateTime()
+		if err != nil {
+			log.Fatalf("no EXIF date time %s", err)
+		}
+		fmt.Printf("> using EXIF time %s\n", dt.Format("2006/01/02 3:04pm"))
+	case yyyymmdd == "":
 		yyyymmdd = time.Now().Format("20060102")
 		fmt.Printf(" > using %s\n", yyyymmdd)
-	}
+		fallthrough
+	default:
+		fmt.Printf("Time (HHMM): ")
+		fmt.Scanln(&hhmm)
 
-	fmt.Printf("Time (HHMM): ")
-	fmt.Scanln(&hhmm)
-
-	dt, err := time.Parse("20060102 1504", fmt.Sprintf("%s %s", yyyymmdd, hhmm))
-	if err != nil {
-		log.Fatalf("err %s", err)
+		dt, err = time.Parse("20060102 1504", fmt.Sprintf("%s %s", yyyymmdd, hhmm))
+		if err != nil {
+			log.Fatalf("err %s", err)
+		}
 	}
 
 	fmt.Printf("License Plate: ")
 	fmt.Scanln(&license)
 
-	baseDir := fmt.Sprintf("/Users/jehiah/Documents/cyclists_with_cameras/%s_%s_%s", yyyymmdd, hhmm, license)
-	fmt.Printf("\tcreating ~/Documents/cyclists_with_cameras/%s_%s_%s\n", yyyymmdd, hhmm, license)
+	dirname := fmt.Sprintf("%s_%s", dt.Format("20060102_1504"), license)
+	baseDir := filepath.Join("/Users/jehiah/Documents/cyclists_with_cameras", dirname)
+	fmt.Printf("\tcreating %s\n", baseDir)
 
 	err = os.MkdirAll(baseDir, os.ModePerm)
 	if err != nil {

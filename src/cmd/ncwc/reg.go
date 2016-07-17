@@ -21,7 +21,7 @@ var allReg []Reg = []Reg{
 	{Code: "4-08(e)(3)", Description: "no parking on sidewalks", Type: "parking", Vehicle: Taxi | FHV},
 	{Code: "4-07(b)(2)", Description: "blocking intersection and crosswalks", Type: "parking", Vehicle: Taxi | FHV},
 	{Code: "4-05(b)(1)", Description: "no u-turns in business district", Type: "moving", Vehicle: Taxi | FHV},
-	{Code: "4-12(i)", Description: "no honking in non-danger situations", Type: "parking"},
+	{Code: "4-12(i)", Description: "no honking in non-danger situations", Type: "parking", Vehicle: Taxi | FHV},
 	{Code: "54-13(a)(3)(ix)", Description: "yield sign violation", Type: "-", Vehicle: Taxi},
 	{Code: "55-13(a)(3)(ix)", Description: "yield sign violation", Type: "-", Vehicle: FHV},
 	{Code: "54-13(a)(3)(vi)", Description: "failing to yield right of way", Type: "-", Vehicle: Taxi},
