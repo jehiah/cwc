@@ -61,6 +61,9 @@ var Samples []Sample = []Sample{
 	{"4-12(p)(2)", "<VEHICLE> was driving in bike lane to avoid waiting in through lane obstructing my use of bike lane <VIOLATION>. Pictures included."},
 	{"4-12(p)(2)", "While near <LOCATION> I observed <VEHICLE> driving in bike lane to avoid waiting in through lane for other vehicles <VIOLATION>. Pictures included."},
 	{"55-13(a)(3)(vi)", "At <LOCATION>, <VEHICLE> cut me off in the bike lane failing to yield right of way <VIOLATION>. Pictures included."},
+	{"54-13(a)(3)(vii)", "At <LOCATION> I observed <VEHICLE> run red light <VIOLATION>. Pictures included. Pictures show light red and vehicle before intersection, and then vehicle proceeding through intersection on red."},
+	{"55-13(a)(3)(vii)", "At <LOCATION> I observed <VEHICLE> run red light <VIOLATION>. Pictures included. Pictures show light red and vehicle before intersection, and then vehicle proceeding through intersection on red."},
+	{"NY VTL 402(b)", "At <LOCATION> I observed <VEHICLE> with license plate cover obstructing view of front license plate from an angle <VIOLATION>. Pictured included."},
 }
 
 func (s Sample) Format(location, vehicle, violation string) string {
