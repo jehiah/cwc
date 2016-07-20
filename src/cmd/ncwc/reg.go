@@ -22,26 +22,26 @@ var allReg []Reg = []Reg{
 	{Code: "4-07(b)(2)", Description: "blocking intersection and crosswalks", Type: "parking", Vehicle: Taxi | FHV},
 	{Code: "4-05(b)(1)", Description: "no u-turns in business district", Type: "moving", Vehicle: Taxi | FHV},
 	{Code: "4-12(i)", Description: "no honking in non-danger situations", Type: "parking", Vehicle: Taxi | FHV},
-	{Code: "54-13(a)(3)(ix)", Description: "yield sign violation", Type: "-", Vehicle: Taxi},
-	{Code: "55-13(a)(3)(ix)", Description: "yield sign violation", Type: "-", Vehicle: FHV},
-	{Code: "54-13(a)(3)(vi)", Description: "failing to yield right of way", Type: "-", Vehicle: Taxi},
-	{Code: "55-13(a)(3)(vi)", Description: "failing to yield right of way", Type: "-", Vehicle: FHV},
-	{Code: "54-13(a)(3)(vii)", Description: "traffic signal violation", Type: "-", Vehicle: Taxi},
-	{Code: "55-13(a)(3)(vii)", Description: "traffic signal violation", Type: "-", Vehicle: FHV},
-	{Code: "54-13(a)(3)(xi)", Description: "improper passing", Type: "-", Vehicle: Taxi},
-	{Code: "55-13(a)(3)(xi)", Description: "improper passing", Type: "-", Vehicle: FHV},
-	{Code: "54-13(a)(3)(xii)", Description: "unsafe lane change", Type: "-", Vehicle: Taxi},
-	{Code: "55-13(a)(3)(xii)", Description: "unsafe lane change", Type: "-", Vehicle: FHV},
+	{Code: "54-13(a)(3)(ix)", Description: "yield sign violation", Vehicle: Taxi},
+	{Code: "55-13(a)(3)(ix)", Description: "yield sign violation", Vehicle: FHV},
+	{Code: "54-13(a)(3)(vi)", Description: "failing to yield right of way", Vehicle: Taxi},
+	{Code: "55-13(a)(3)(vi)", Description: "failing to yield right of way", Vehicle: FHV},
+	{Code: "54-13(a)(3)(vii)", Description: "traffic signal violation", Vehicle: Taxi},
+	{Code: "55-13(a)(3)(vii)", Description: "traffic signal violation", Vehicle: FHV},
+	{Code: "54-13(a)(3)(xi)", Description: "improper passing", Vehicle: Taxi},
+	{Code: "55-13(a)(3)(xi)", Description: "improper passing", Vehicle: FHV},
+	{Code: "54-13(a)(3)(xii)", Description: "unsafe lane change", Vehicle: Taxi},
+	{Code: "55-13(a)(3)(xii)", Description: "unsafe lane change", Vehicle: FHV},
 	{Code: "NY VTL 1160(a)", Description: "no right from center lane", Type: "moving", Vehicle: Taxi | FHV},
 	{Code: "NY VTL 1160(b)", Description: "no left from center lane when both two-way streets", Type: "moving", Vehicle: Taxi | FHV},
 	{Code: "NY VTL 1160(c)", Description: "no left from center lane at one-way street", Type: "moving", Vehicle: Taxi | FHV},
 	{Code: "NY VTL 1126", Description: "no passing zone", Type: "moving", Vehicle: Taxi | FHV},
 	{Code: "NY VTL 402(b)", Description: "license plate must not be obstructed", Type: "parking", Vehicle: Taxi | FHV},
 	{Code: "NY VTL 375(12-a)(b)(2)", Description: "no side window tint below 70%", Type: "parking", Vehicle: Taxi | FHV},
-	{Code: "54-12(f)", Description: "threats, harassment, abuse", Type: "-", Vehicle: Taxi},
-	{Code: "55-12(e)", Description: "threats, harassment, abuse", Type: "-", Vehicle: FHV},
-	{Code: "54-12(g)", Description: "use or threat of physical force", Type: "-", Vehicle: Taxi},
-	{Code: "55-12(f)", Description: "use or threat of physical force", Type: "-", Vehicle: FHV},
+	{Code: "54-12(f)", Description: "threats, harassment, abuse", Vehicle: Taxi},
+	{Code: "55-12(e)", Description: "threats, harassment, abuse", Vehicle: FHV},
+	{Code: "54-12(g)", Description: "use or threat of physical force", Vehicle: Taxi},
+	{Code: "55-12(f)", Description: "use or threat of physical force", Vehicle: FHV},
 }
 
 type Sample struct {
@@ -167,7 +167,7 @@ func (reg Reg) String() string {
 	}
 
 	switch reg.Type {
-	case "-", "parking", "moving":
+	case "", "parking", "moving":
 	case ".":
 		return code + reg.Description
 	default:
