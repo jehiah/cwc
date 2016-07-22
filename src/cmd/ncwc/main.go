@@ -18,11 +18,16 @@ import (
 func main() {
 	var err error
 	listReg := flag.Bool("list-regulations", false, "list all regulations")
+	short := flag.Bool("short", false, "short format")
 	flag.Parse()
 
 	if *listReg {
 		for _, r := range allReg {
-			fmt.Printf("%s,%s\n", r.Code, r.Description)
+			desc := r.Description
+			if *short && r.Short != "" {
+				desc = r.Short
+			}
+			fmt.Printf("%s,%s\n", r.Code, desc)
 		}
 		os.Exit(1)
 	}

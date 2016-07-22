@@ -10,38 +10,41 @@ import (
 type Reg struct {
 	Code        string
 	Description string
+	Short       string
 	Type        string
 	Vehicle     Vehicle
 }
 
+var either Vehicle = Taxi | FHV
+
 var allReg []Reg = []Reg{
-	{Code: "4-12(p)(2)", Description: "no driving in bike lane", Type: "moving", Vehicle: Taxi | FHV},
-	{Code: "4-08(e)(9)", Description: "no stopping in bike lane", Type: "parking", Vehicle: Taxi | FHV},
-	{Code: "4-11(c)(6)", Description: "no pickup or discharge of passengers in bike lane", Type: "parking", Vehicle: Taxi | FHV},
-	{Code: "4-08(e)(3)", Description: "no parking on sidewalks", Type: "parking", Vehicle: Taxi | FHV},
-	{Code: "4-07(b)(2)", Description: "blocking intersection and crosswalks", Type: "parking", Vehicle: Taxi | FHV},
-	{Code: "4-05(b)(1)", Description: "no u-turns in business district", Type: "moving", Vehicle: Taxi | FHV},
-	{Code: "4-12(i)", Description: "no honking in non-danger situations", Type: "parking", Vehicle: Taxi | FHV},
+	{Code: "4-12(p)(2)", Description: "no driving in bike lane", Type: "moving", Vehicle: either},
+	{Code: "4-08(e)(9)", Description: "no stopping in bike lane", Type: "parking", Vehicle: either},
+	{Code: "4-11(c)(6)", Description: "no pickup or discharge of passengers in bike lane", Type: "parking", Vehicle: either, Short: "pickup/discharge in bike lane"},
+	{Code: "4-08(e)(3)", Description: "no parking on sidewalks", Type: "parking", Vehicle: either},
+	{Code: "4-07(b)(2)", Description: "blocking intersection and crosswalks", Type: "parking", Vehicle: either, Short: "blocking intersection/xwalk"},
+	{Code: "4-05(b)(1)", Description: "no u-turns in business district", Type: "moving", Vehicle: either, Short: "no u-turns"},
+	{Code: "4-12(i)", Description: "no honking in non-danger situations", Type: "parking", Vehicle: either, Short: "no honking"},
 	{Code: "54-13(a)(3)(ix)", Description: "yield sign violation", Vehicle: Taxi},
 	{Code: "55-13(a)(3)(ix)", Description: "yield sign violation", Vehicle: FHV},
-	{Code: "54-13(a)(3)(vi)", Description: "failing to yield right of way", Vehicle: Taxi},
-	{Code: "55-13(a)(3)(vi)", Description: "failing to yield right of way", Vehicle: FHV},
+	{Code: "54-13(a)(3)(vi)", Description: "failing to yield right of way", Vehicle: Taxi, Short: "failing to yield ROW"},
+	{Code: "55-13(a)(3)(vi)", Description: "failing to yield right of way", Vehicle: FHV, Short: "failing to yield ROW"},
 	{Code: "54-13(a)(3)(vii)", Description: "traffic signal violation", Vehicle: Taxi},
 	{Code: "55-13(a)(3)(vii)", Description: "traffic signal violation", Vehicle: FHV},
 	{Code: "54-13(a)(3)(xi)", Description: "improper passing", Vehicle: Taxi},
 	{Code: "55-13(a)(3)(xi)", Description: "improper passing", Vehicle: FHV},
 	{Code: "54-13(a)(3)(xii)", Description: "unsafe lane change", Vehicle: Taxi},
 	{Code: "55-13(a)(3)(xii)", Description: "unsafe lane change", Vehicle: FHV},
-	{Code: "NY VTL 1160(a)", Description: "no right from center lane", Type: "moving", Vehicle: Taxi | FHV},
-	{Code: "NY VTL 1160(b)", Description: "no left from center lane when both two-way streets", Type: "moving", Vehicle: Taxi | FHV},
-	{Code: "NY VTL 1160(c)", Description: "no left from center lane at one-way street", Type: "moving", Vehicle: Taxi | FHV},
-	{Code: "NY VTL 1126", Description: "no passing zone", Type: "moving", Vehicle: Taxi | FHV},
-	{Code: "NY VTL 402(b)", Description: "license plate must not be obstructed", Type: "parking", Vehicle: Taxi | FHV},
-	{Code: "NY VTL 375(12-a)(b)(2)", Description: "no side window tint below 70%", Type: "parking", Vehicle: Taxi | FHV},
+	{Code: "NY VTL 1160(a)", Description: "no right from center lane", Type: "moving", Vehicle: either, Short: "no R from center lane"},
+	{Code: "NY VTL 1160(b)", Description: "no left from center lane when both two-way streets", Type: "moving", Vehicle: either, Short: "no L from center (@ 2-way)"},
+	{Code: "NY VTL 1160(c)", Description: "no left from center lane at one-way street", Type: "moving", Vehicle: either, Short: "no L from center (@ 1-way)"},
+	{Code: "NY VTL 1126", Description: "no passing zone", Type: "moving", Vehicle: either},
+	{Code: "NY VTL 402(b)", Description: "license plate must not be obstructed", Type: "parking", Vehicle: either, Short: "obstructed license plate"},
+	{Code: "NY VTL 375(12-a)(b)(2)", Description: "no side window tint below 70%", Type: "parking", Vehicle: either, Short: "no tint below 70%"},
 	{Code: "54-12(f)", Description: "threats, harassment, abuse", Vehicle: Taxi},
 	{Code: "55-12(e)", Description: "threats, harassment, abuse", Vehicle: FHV},
-	{Code: "54-12(g)", Description: "use or threat of physical force", Vehicle: Taxi},
-	{Code: "55-12(f)", Description: "use or threat of physical force", Vehicle: FHV},
+	{Code: "54-12(g)", Description: "use or threat of physical force", Vehicle: Taxi, Short: "use/threat of physical force"},
+	{Code: "55-12(f)", Description: "use or threat of physical force", Vehicle: FHV, Short: "use/threat of physical force"},
 }
 
 type Sample struct {
