@@ -7,10 +7,10 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"path"
-	"path/filepath"
 	"strings"
 	"time"
+
+	"db"
 
 	"github.com/rwcarlsen/goexif/exif"
 )
@@ -69,15 +69,6 @@ func main() {
 	fmt.Printf("License Plate: ")
 	fmt.Scanln(&license)
 
-	dirname := fmt.Sprintf("%s_%s", dt.Format("20060102_1504"), license)
-	baseDir := filepath.Join("/Users/jehiah/Documents/cyclists_with_cameras", dirname)
-	fmt.Printf("\tcreating %s\n", baseDir)
-
-	err = os.MkdirAll(baseDir, os.ModePerm)
-	if err != nil {
-		log.Fatalf("err %s", err)
-	}
-
 	vehicle := detectLicenseType(license)
 
 	fmt.Printf("Where? ")
@@ -88,7 +79,11 @@ func main() {
 	}
 	where = strings.TrimSpace(where)
 
-	f, err := os.Create(path.Join(baseDir, "notes.txt"))
+	complaint, err := db.Default.New(dt, license)
+	if err != nil {
+		log.Fatalf("err %s", err)
+	}
+	f, err := db.Default.Create(complaint)
 	if err != nil {
 		log.Fatalf("err %s", err)
 	}
@@ -112,8 +107,8 @@ func main() {
 	if err != nil {
 		log.Printf("%s", err)
 	}
-	exec.Command("/Users/jehiah/bin/mate", baseDir).Run()
-	exec.Command("/usr/bin/open", baseDir).Run()
+	db.Default.Edit(complaint)
+	db.Default.ShowInFinder(complaint)
 }
 
 func confirm() bool {
