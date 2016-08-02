@@ -86,6 +86,7 @@ func SelectSample(reg Reg, location string) string {
 	}
 
 	var n int
+	fmt.Printf("Template: ")
 	fmt.Scanf("%d\n", &n)
 	if n < 1 || n > len(o) {
 		log.Printf("invalid option %d", n)

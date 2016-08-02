@@ -83,6 +83,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("err %s", err)
 	}
+	fmt.Printf("> creating %s\n", db.Default.FullPath(complaint))
 	f, err := db.Default.Create(complaint)
 	if err != nil {
 		log.Fatalf("err %s", err)
@@ -95,8 +96,6 @@ func main() {
 	fmt.Fprintf(f, "\n%s\n", SelectSample(reg, where))
 	f.Close()
 
-	fmt.Printf("done\n")
-
 	var url string
 	if vehicle == FHV {
 		url = "https://www1.nyc.gov/apps/311universalintake/form.htm?serviceName=TLC+FHV+Driver+Unsafe+Driving"
@@ -107,8 +106,10 @@ func main() {
 	if err != nil {
 		log.Printf("%s", err)
 	}
+	fmt.Printf("> opening %s\n", url)
 	db.Default.Edit(complaint)
 	db.Default.ShowInFinder(complaint)
+	fmt.Printf("> done\n")
 }
 
 func confirm() bool {
