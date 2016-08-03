@@ -69,3 +69,13 @@ Template: **2**
 > opening https://www1.nyc.gov/apps/311universalintake/form.htm?serviceName=TLC+FHV+Driver+Unsafe+Driving
 > done
 ```
+
+## Building from Source
+
+This project uses [getgb.io](https://getgb.io/). The following commands will build the binaries and place them in a `bin` directory. Use `vendor.sh` to load dependencies into a `vendor` directory.
+
+```
+go get github.com/constabulary/gb/...
+./vendor.sh
+gb build
+```
