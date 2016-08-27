@@ -18,6 +18,8 @@ func run(action string, args ...string) {
 		} else {
 			search("")
 		}
+	case "report":
+		report()
 	case "help":
 		fmt.Printf(`cwc -> Cyclists With Cameras
 

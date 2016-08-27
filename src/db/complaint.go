@@ -14,6 +14,9 @@ func (c Complaint) String() string {
 }
 
 func (c Complaint) Time() time.Time {
+	if len(c) < 13 {
+		log.Panicf("invalid format %s", string(c))
+	}
 	t, err := time.Parse("20060102_1504", string(c)[:13])
 	if err != nil {
 		log.Printf("err parsing time %s", err)
