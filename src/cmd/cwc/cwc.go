@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"db"
+	"cwc/db"
 
 	input "github.com/tcnksm/go-input"
 )
@@ -20,6 +20,15 @@ func run(action string, args ...string) {
 		}
 	case "report":
 		report()
+	case "new":
+		err := newComplaint()
+		if err != nil {
+			log.Fatalf("%s", err)
+		}
+	case "short-reg", "short-regulations":
+		listRegulations(true)
+	case "reg", "regulations":
+		listRegulations(false)
 	case "help":
 		fmt.Printf(`cwc -> Cyclists With Cameras
 
@@ -38,7 +47,7 @@ func main() {
 	if len(os.Args) > 1 {
 		run(os.Args[1], os.Args[2:]...)
 	} else {
-		action, _ := ui.Select("", []string{"help", "search", "new", "report"}, &input.Options{
+		action, _ := ui.Select("", []string{"help", "search", "new", "report", "regulations", "short-regulations"}, &input.Options{
 			Default: "new",
 		})
 		run(action)

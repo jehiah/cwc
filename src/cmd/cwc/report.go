@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"db"
+	"cwc/db"
 
 	"github.com/olekukonko/tablewriter"
 )
