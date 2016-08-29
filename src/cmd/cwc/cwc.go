@@ -6,11 +6,13 @@ import (
 	"os"
 
 	"cwc/db"
+	"cwc/reporter"
 
 	input "github.com/tcnksm/go-input"
 )
 
 func run(action string, args ...string) {
+	var err error
 	switch action {
 	case "search":
 		if len(args) >= 1 {
@@ -19,12 +21,9 @@ func run(action string, args ...string) {
 			search("")
 		}
 	case "report":
-		report()
+		err = reporter.Run(db.Default, os.Stdout)
 	case "new":
-		err := newComplaint()
-		if err != nil {
-			log.Fatalf("%s", err)
-		}
+		err = newComplaint()
 	case "short-reg", "short-regulations":
 		listRegulations(true)
 	case "reg", "regulations":
@@ -36,6 +35,9 @@ For more information see https://github.com/jehiah/cwc
 `)
 	default:
 		log.Fatalf("not implemented")
+	}
+	if err != nil {
+		log.Fatalf("%s", err)
 	}
 }
 

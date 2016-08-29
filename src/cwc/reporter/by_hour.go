@@ -1,9 +1,8 @@
-package main
+package reporter
 
 import (
 	"fmt"
-	"log"
-	"os"
+	"io"
 	"strings"
 	"time"
 
@@ -12,16 +11,12 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-func report() {
-	reportByHour()
-}
-
-func reportByHour() {
+func ByHour(d db.DB, w io.Writer) error {
 	var hours [24]int
 	var total int64
-	complaints, err := db.Default.All()
+	complaints, err := d.All()
 	if err != nil {
-		log.Fatalf("%s", err)
+		return err
 	}
 	for _, c := range complaints {
 		total += 1
@@ -40,7 +35,7 @@ func reportByHour() {
 		}
 	}
 
-	table := tablewriter.NewWriter(os.Stdout)
+	table := tablewriter.NewWriter(w)
 	table.SetBorder(false)
 	table.SetHeader([]string{"Hour", "Complaints", ""})
 	for h, v := range hours[start+1 : stop] {
@@ -49,4 +44,6 @@ func reportByHour() {
 	}
 	table.SetFooter([]string{"Total:", fmt.Sprintf("%d", total), ""})
 	table.Render()
+	fmt.Fprint(w, "\n")
+	return nil
 }
