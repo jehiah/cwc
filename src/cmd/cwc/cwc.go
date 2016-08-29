@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"testing/iotest"
 
 	"cwc/db"
 	"cwc/reporter"
@@ -44,7 +45,9 @@ For more information see https://github.com/jehiah/cwc
 var ui *input.UI
 
 func main() {
-	ui = &input.UI{}
+	ui = &input.UI{
+		Reader: iotest.NewReadLogger("stdin:", os.Stdin),
+	}
 
 	if len(os.Args) > 1 {
 		run(os.Args[1], os.Args[2:]...)

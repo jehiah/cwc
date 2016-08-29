@@ -32,7 +32,7 @@ func isYes(s string) bool {
 
 func newComplaint() error {
 
-	yyyymmdd, err := ui.Ask("Date (YYYYMMDD) or Filename:", &input.Options{Required: true, Loop: true, HideOrder: true})
+	yyyymmdd, err := ui.Ask("Date (YYYYMMDD) or Filename", &input.Options{Required: true, Loop: true, HideOrder: true})
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func newComplaint() error {
 		fmt.Printf(" > using %s\n", yyyymmdd)
 		fallthrough
 	default:
-		hhmm, err := ui.Ask("Time (HHMM): ", &input.Options{Required: true, Loop: true, HideOrder: true})
+		hhmm, err := ui.Ask("Time (HHMM)", &input.Options{Required: true, Loop: true, HideOrder: true})
 		if err != nil {
 			return err
 		}
@@ -60,7 +60,7 @@ func newComplaint() error {
 		}
 	}
 
-	license, err := ui.Ask("License Plate: ", &input.Options{Required: true, Loop: true, HideOrder: true})
+	license, err := ui.Ask("License Plate", &input.Options{Required: true, Loop: true, HideOrder: true})
 	if err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ func newComplaint() error {
 		if err != nil {
 			return err
 		}
-		yn, err := ui.Ask("Taxi: ", &input.Options{Required: true, Loop: true, HideOrder: true, ValidateFunc: yesNoValidator})
+		yn, err := ui.Ask("Taxi", &input.Options{Required: true, Loop: true, HideOrder: true, ValidateFunc: yesNoValidator})
 		if err != nil {
 			return err
 		}
@@ -79,7 +79,7 @@ func newComplaint() error {
 		}
 	}
 
-	where, err := ui.Ask("Where? ", &input.Options{Required: true, Loop: true, HideOrder: true})
+	where, err := ui.Ask("Where", &input.Options{Required: true, Loop: true, HideOrder: true})
 	if err != nil {
 		return err
 	}
