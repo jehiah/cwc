@@ -13,23 +13,6 @@ import (
 	"lib/input"
 )
 
-func yesNoValidator(s string) error {
-	switch s {
-	case "", "Y", "y", "N", "n":
-		return nil
-	default:
-		return fmt.Errorf("input must be Y or n")
-	}
-}
-
-func isYes(s string) bool {
-	switch s {
-	case "Y", "y":
-		return true
-	}
-	return false
-}
-
 func newComplaint() error {
 
 	yyyymmdd, err := input.Ask("Date (YYYYMMDD) or Filename", "")
@@ -70,11 +53,11 @@ func newComplaint() error {
 		if err != nil {
 			return err
 		}
-		yn, err := input.AskValidate("Taxi", "y", yesNoValidator)
+		yn, err := YesNo("Taxi", true)
 		if err != nil {
 			return err
 		}
-		if isYes(yn) {
+		if yn {
 			vehicle = reg.Taxi
 		}
 	}
@@ -106,10 +89,16 @@ func newComplaint() error {
 			return errors.New("no regulation selected")
 		}
 		if r == nil {
-			break
-		}
-		if n == nil {
 			r = n
+			yn, err := YesNo("Another Violation", false)
+			if err != nil {
+				return err
+			}
+			if yn {
+				continue
+			} else {
+				break
+			}
 		} else {
 			rr := CombineReg(*r, *n)
 			r = &rr

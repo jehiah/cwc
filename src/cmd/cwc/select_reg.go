@@ -22,10 +22,11 @@ func getReg(v reg.Vehicle) (*reg.Reg, error) {
 		if r.Vehicle&v == 0 {
 			continue
 		}
-		choices = append(choices, &choice{&r})
+		var rr reg.Reg = r
+		choices = append(choices, &choice{&rr})
 	}
 
-	selection, err := input.Select("Violation", nil, choices...)
+	selection, err := input.Select("Violation: ", nil, choices...)
 	if err != nil {
 		return nil, err
 	}
@@ -33,6 +34,7 @@ func getReg(v reg.Vehicle) (*reg.Reg, error) {
 		return nil, nil
 	}
 	r := selection.(*choice).Reg
+	r.Vehicle = v
 	return r, nil
 }
 

@@ -44,8 +44,8 @@ func (i *UI) AskValidate(query, defaultVal string, v ValidateFunc) (string, erro
 			err = v(l)
 			if err != nil {
 				fmt.Fprintf(i.Writer, "Failed to validate input string: %s\n\n", err)
+				continue
 			}
-			continue
 		}
 		return l, err
 	}
