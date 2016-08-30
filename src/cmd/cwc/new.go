@@ -10,7 +10,7 @@ import (
 	"cwc/db"
 	"cwc/reg"
 
-	input "github.com/tcnksm/go-input"
+	"lib/input"
 )
 
 func yesNoValidator(s string) error {
@@ -32,7 +32,7 @@ func isYes(s string) bool {
 
 func newComplaint() error {
 
-	yyyymmdd, err := ui.Ask("Date (YYYYMMDD) or Filename", &input.Options{Required: true, Loop: true, HideOrder: true})
+	yyyymmdd, err := input.Ask("Date (YYYYMMDD) or Filename", "")
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func newComplaint() error {
 		fmt.Printf(" > using %s\n", yyyymmdd)
 		fallthrough
 	default:
-		hhmm, err := ui.Ask("Time (HHMM)", &input.Options{Required: true, Loop: true, HideOrder: true})
+		hhmm, err := input.Ask("Time (HHMM)", "")
 		if err != nil {
 			return err
 		}
@@ -60,7 +60,7 @@ func newComplaint() error {
 		}
 	}
 
-	license, err := ui.Ask("License Plate", &input.Options{Required: true, Loop: true, HideOrder: true})
+	license, err := input.Ask("License Plate", "")
 	if err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ func newComplaint() error {
 		if err != nil {
 			return err
 		}
-		yn, err := ui.Ask("Taxi", &input.Options{Required: true, Loop: true, HideOrder: true, ValidateFunc: yesNoValidator})
+		yn, err := input.AskValidate("Taxi", "y", yesNoValidator)
 		if err != nil {
 			return err
 		}
@@ -79,11 +79,10 @@ func newComplaint() error {
 		}
 	}
 
-	where, err := ui.Ask("Where", &input.Options{Required: true, Loop: true, HideOrder: true})
+	where, err := input.Ask("Where", "")
 	if err != nil {
 		return err
 	}
-	where = strings.TrimSpace(where)
 
 	complaint, err := db.Default.New(dt, license)
 	if err != nil {

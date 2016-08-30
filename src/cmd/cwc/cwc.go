@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"testing/iotest"
 
 	"cwc/db"
 	"cwc/reporter"
 
-	input "github.com/tcnksm/go-input"
+	"lib/input"
 )
 
 func run(action string, args ...string) {
@@ -42,19 +41,19 @@ For more information see https://github.com/jehiah/cwc
 	}
 }
 
-var ui *input.UI
+type stringer string
+
+func (s stringer) String() string { return string(s) }
 
 func main() {
-	ui = &input.UI{
-		Reader: iotest.NewReadLogger("stdin:", os.Stdin),
-	}
-
 	if len(os.Args) > 1 {
 		run(os.Args[1], os.Args[2:]...)
 	} else {
-		action, _ := ui.Select("", []string{"help", "search", "new", "report", "regulations", "short-regulations"}, &input.Options{
-			Default: "new",
-		})
+		choices := []string{"help", "search", "new", "report", "regulations", "short-regulations"}
+		action, err := input.SelectString("", "new", choices...)
+		if err != nil {
+			log.Fatalf("%s", err)
+		}
 		run(action)
 	}
 }
@@ -62,9 +61,9 @@ func main() {
 func search(query string) {
 	var err error
 	if query == "" {
-		query, err = ui.Ask("Search for?", &input.Options{Required: true, Loop: true, HideOrder: true})
+		query, err = input.Ask("Search for?", "")
 		if err != nil {
-			os.Exit(1)
+			log.Fatalf("%s", err)
 		}
 		if query == "" {
 			log.Fatalf("missing query")

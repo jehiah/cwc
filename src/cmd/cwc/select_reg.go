@@ -5,30 +5,35 @@ import (
 
 	"cwc/reg"
 
-	input "github.com/tcnksm/go-input"
+	"lib/input"
 )
 
+type choice struct {
+	*reg.Reg
+}
+
+func (c *choice) String() string {
+	return c.Description
+}
+
 func getReg(v reg.Vehicle) (*reg.Reg, error) {
-	var choices []string
-	lookup := make(map[string]reg.Reg)
+	var choices []interface{}
 	for _, r := range reg.All {
 		if r.Vehicle&v == 0 {
 			continue
 		}
-		choices = append(choices, r.Description)
-		lookup[r.Description] = r
+		choices = append(choices, &choice{&r})
 	}
 
-	selection, err := ui.Select("Violation: ", choices, &input.Options{Required: false, HideOrder: true})
+	selection, err := input.Select("Violation", nil, choices...)
 	if err != nil {
 		return nil, err
 	}
-	if selection == "" {
+	if selection == nil {
 		return nil, nil
 	}
-	reg := lookup[selection]
-	reg.Vehicle = v
-	return &reg, nil
+	r := selection.(*choice).Reg
+	return r, nil
 }
 
 func CombineReg(a, b reg.Reg) reg.Reg {

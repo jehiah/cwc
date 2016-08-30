@@ -3,7 +3,7 @@ package main
 import (
 	"cwc/reg"
 
-	input "github.com/tcnksm/go-input"
+	"lib/input"
 )
 
 func SelectTemplate(r reg.Reg, location string) (string, error) {
@@ -14,7 +14,7 @@ func SelectTemplate(r reg.Reg, location string) (string, error) {
 		}
 	}
 
-	selection, err := ui.Select("Violation: ", choices, &input.Options{Required: true, HideOrder: true, Default: choices[0]})
+	selection, err := input.SelectString("Violation", choices[0], choices...)
 	if err != nil {
 		return "", err
 	}
