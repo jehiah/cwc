@@ -41,6 +41,7 @@ var All []Reg = []Reg{
 	{Code: "NY VTL 1126", Description: "no passing zone", Type: "moving", Vehicle: either},
 	{Code: "NY VTL 402(b)", Description: "license plate must not be obstructed", Type: "parking", Vehicle: either, Short: "obstructed license plate"},
 	{Code: "NY VTL 375(12-a)(b)(2)", Description: "no side window tint below 70%", Type: "parking", Vehicle: either, Short: "no tint below 70%"},
+	{Code: "NY VTL 1225-c(2)", Description: "cell-phone use while driving", Vehicle: either},
 	{Code: "54-12(f)", Description: "threats, harassment, abuse", Vehicle: Taxi},
 	{Code: "55-12(e)", Description: "threats, harassment, abuse", Vehicle: FHV},
 	{Code: "54-12(g)", Description: "use or threat of physical force", Vehicle: Taxi, Short: "use/threat of physical force"},

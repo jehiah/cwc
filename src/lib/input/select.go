@@ -61,7 +61,7 @@ func (i *UI) Select(query string, dflt interface{}, list ...interface{}) (interf
 	}
 
 	buf.WriteString("\n")
-	fmt.Fprintf(i.Writer, buf.String())
+	i.Writer.Write(buf.Bytes())
 
 	// resultStr and resultErr are return val of this function
 	var result interface{}

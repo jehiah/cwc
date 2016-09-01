@@ -28,7 +28,7 @@ func YesNo(prompt string, dflt bool) (bool, error) {
 	if dflt == false {
 		d = "n"
 	}
-	yn, err := input.AskValidate(prompt + " [y/n]", d, yesNoValidator)
+	yn, err := input.AskValidate(prompt+" [y/n]", d, yesNoValidator)
 	if err != nil {
 		return false, err
 	}
