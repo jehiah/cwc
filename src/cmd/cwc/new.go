@@ -88,20 +88,18 @@ func newComplaint() error {
 		if r == nil && n == nil {
 			return errors.New("no regulation selected")
 		}
-		if r == nil {
-			r = n
-			yn, err := YesNo("Another Violation", false)
-			if err != nil {
-				return err
-			}
-			if yn {
-				continue
-			} else {
-				break
-			}
-		} else {
+		if r != nil {
 			rr := CombineReg(*r, *n)
 			r = &rr
+		} else {
+			r = n
+		}
+		yn, err := YesNo("Another Violation", false)
+		if err != nil {
+			return err
+		}
+		if !yn {
+			break
 		}
 	}
 

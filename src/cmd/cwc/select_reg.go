@@ -39,5 +39,5 @@ func getReg(v reg.Vehicle) (*reg.Reg, error) {
 }
 
 func CombineReg(a, b reg.Reg) reg.Reg {
-	return reg.Reg{Type: ".", Description: fmt.Sprintf("%s and %s", a, b)}
+	return reg.Reg{Type: ".", Description: fmt.Sprintf("%s and %s", a, b), Vehicle: a.Vehicle}
 }
