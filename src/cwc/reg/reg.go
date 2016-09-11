@@ -7,11 +7,11 @@ import (
 )
 
 type Reg struct {
-	Code        string
-	Description string
-	Short       string
-	Type        string
-	Vehicle     Vehicle
+	Code        string  `json:"code"`
+	Description string  `json:"description"`
+	Short       string  `json:"short_description,omitempty"`
+	Type        string  `json:"violation_type,omitempty"`
+	Vehicle     Vehicle `json:"-"`
 }
 
 var either Vehicle = Taxi | FHV

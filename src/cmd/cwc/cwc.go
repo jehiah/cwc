@@ -20,6 +20,11 @@ func run(action string, args ...string) {
 		} else {
 			search("")
 		}
+	case "json":
+		body, err := reporter.JSON(db.Default)
+		if err == nil {
+			os.Stdout.Write(body)
+		}
 	case "report":
 		err = reporter.Run(db.Default, os.Stdout)
 	case "new":
@@ -49,7 +54,7 @@ func main() {
 	if len(os.Args) > 1 {
 		run(os.Args[1], os.Args[2:]...)
 	} else {
-		choices := []string{"help", "search", "new", "report", "regulations", "short-regulations"}
+		choices := []string{"help", "search", "new", "report", "regulations", "short-regulations", "json"}
 		action, err := input.SelectString("", "new", choices...)
 		if err != nil {
 			log.Fatalf("%s", err)

@@ -1,8 +1,6 @@
 package db
 
 import (
-	"bytes"
-	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -30,12 +28,11 @@ func (d DB) Find(pattern string) ([]Complaint, error) {
 	}
 	var found []Complaint
 	for _, f := range matches {
-		body, err := ioutil.ReadFile(f)
-		if err != nil {
+		complaint := Complaint(filepath.Base(filepath.Dir(f)))
+		if ok, err := d.ComplaintContains(complaint, pattern); err != nil {
 			return nil, err
-		}
-		if bytes.Contains(body, []byte(pattern)) {
-			found = append(found, Complaint(filepath.Base(filepath.Dir(f))))
+		} else if ok {
+			found = append(found, complaint)
 		}
 	}
 	sort.Sort(sort.Reverse(complaintsByAge(found)))
