@@ -8,6 +8,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dc/2.0.0-beta.32/dc.min.css" integrity="sha256-vhoUR1mPIIBUT33DIysRCsX+OCdZmNArccsNDR3s2MQ=" crossorigin="anonymous" />
 
+  <style>
+  .dc-chart g.row text {
+    fill:#999;
+  }
+  </style>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -35,21 +40,36 @@
       </div>
 
     </div>
+    <div class="row">
+      <div id="violations-by-code">
+        <strong>Violations Cited</strong>
+        <a class="reset" href="javascript:violationsByCodeChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <div class="clearfix"></div>
+      </div>
+      
+    </div>
     <div id="version"></div>
     
     <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script> -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js" integrity="sha256-dsOXGNHAo/syFnazt+KTBsCQeRmlcW1XKL0bCK4Baec=" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min.js" integrity="sha256-T9tvV3x+/vCnCoFciKNZwbaJ46q9lh6iZjD0ZjD95lE=" crossorigin="anonymous"></script>
+<!--    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min.js" integrity="sha256-T9tvV3x+/vCnCoFciKNZwbaJ46q9lh6iZjD0ZjD95lE=" crossorigin="anonymous"></script> -->
+<script src="http://crossfilter.github.io/crossfilter/crossfilter.v1.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dc/2.0.0-beta.32/dc.min.js"  integrity="sha256-aASvdO5geFLJ4Ht0Od5L63JG7LESIYpcciY4E48czP8=" crossorigin="anonymous"></script>
     
     <script>
     var dayOfWeekChart = dc.rowChart('#day-of-week-chart');
     var reportsByMonthChart = dc.barChart("#reports-by-month-chart");
+    var violationsByCodeChart = dc.rowChart('#violations-by-code')
     
     d3.json('cwc.json', function (data) {
+      var violationLookup = {};
       data.forEach(function (d) {
         d.dd = new Date(d.timestamp * 1000)
         d.month = d3.time.month.utc(d.dd); // pre-calculate month for better performance
+        d.violations.forEach(function(dd) {
+          violationLookup[dd.code] = dd;
+        })
+        d.codes = d.violations.map(function(dd){return dd.code})
       });      
       
       var ndx = crossfilter(data);
@@ -72,6 +92,10 @@
     });
     var monthOfYearGroup = monthOfYear.group();
     
+
+    var violationCodes = ndx.dimension(function(d) { return d.codes }, true)
+    var violationCodesGroup = violationCodes.group() //.reduceCount();
+
     
     dayOfWeekChart /* dc.rowChart('#day-of-week-chart', 'chartGroup') */
       .width(180)
@@ -116,6 +140,42 @@
       .xUnits(d3.time.months)
       .renderHorizontalGridLines(true)
 
+
+
+    violationsByCodeChart
+      .width(450)
+      .height(450)
+      .margins({top: 20, left: 10, right: 10, bottom: 20})
+      .dimension(violationCodes)
+      .group(violationCodesGroup)
+      .data(function(group){
+        // key would be the unique aray of violations, but we want to flatten the chart
+        var counts = {}
+        group.all().forEach(function(d){
+          d.key.forEach(function(dd){
+            counts[dd] = counts[dd] ? counts[dd] + d.value : d.value
+            console.log(dd, counts[dd])
+          })
+        })
+        var values = d3.entries(counts)
+        values.sort(function(a,b){return d3.descending(a.value, b.value)})
+        return values
+      })
+      // .ordinalColors(['#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#dadaeb'])
+      .gap(3)
+
+      .label(function (d) {
+          return violationLookup[d.key].description + " (" + d.key + ")"
+      })
+      
+      // .title(function (d) {
+      //     // console.log(d);
+      //     return violationLookup[d.value].description;
+      // })
+      // .elasticX(true)
+      .xAxis().ticks(4);
+  
+  
       dc.renderAll();
       d3.selectAll('#version').text(dc.version);
         
