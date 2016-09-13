@@ -9,8 +9,15 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dc/2.0.0-beta.32/dc.min.css" integrity="sha256-vhoUR1mPIIBUT33DIysRCsX+OCdZmNArccsNDR3s2MQ=" crossorigin="anonymous" />
 
   <style>
-  .dc-chart g.row text {
+  g.row text {
     fill:#999;
+  }
+  #violations-by-code-chart g.row text {
+    fill:#333;
+  }
+  #day-of-week-chart g.row text {
+    stroke:2px solid #fff;
+    fill:#333;
   }
   </style>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -24,12 +31,25 @@
     <div class="container">
     
     <div class="row">
-    <h1>Hello, world!</h1>
+    <h1>Cyclists With Cameras</h1>
     </div>
     <div class="row">
+      <div id="violations-by-code-chart">
+        <strong>Violations Cited</strong>
+        <a class="reset" href="javascript:violationsByCodeChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <div class="clearfix"></div>
+      </div>
+
       <div id="day-of-week-chart">
-        <strong>Days of Week</strong>
+        <strong>Day of Week</strong>
         <a class="reset" href="javascript:dayOfWeekChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <div class="clearfix"></div>
+      </div>
+      
+      
+      <div id="vehicle-type-chart">
+        <strong>Vehicle Type</strong>
+        <a class="reset" href="javascript:vehicleTypeChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
         <div class="clearfix"></div>
       </div>
 
@@ -39,14 +59,6 @@
         <div class="clearfix"></div>
       </div>
 
-    </div>
-    <div class="row">
-      <div id="violations-by-code">
-        <strong>Violations Cited</strong>
-        <a class="reset" href="javascript:violationsByCodeChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-        <div class="clearfix"></div>
-      </div>
-      
     </div>
     <div id="version"></div>
     
@@ -59,7 +71,8 @@
     <script>
     var dayOfWeekChart = dc.rowChart('#day-of-week-chart');
     var reportsByMonthChart = dc.barChart("#reports-by-month-chart");
-    var violationsByCodeChart = dc.rowChart('#violations-by-code')
+    var violationsByCodeChart = dc.rowChart('#violations-by-code-chart')
+    var vehicleTypeChart = dc.pieChart("#vehicle-type-chart")
     
     d3.json('cwc.json', function (data) {
       var violationLookup = {};
@@ -96,6 +109,8 @@
     var violationCodes = ndx.dimension(function(d) { return d.codes }, true)
     var violationCodesGroup = violationCodes.group() //.reduceCount();
 
+    var vehicleTypes = ndx.dimension(function(d){ return d.vehicle_type})
+    var vehicleTypeGroup = vehicleTypes.group()
     
     dayOfWeekChart /* dc.rowChart('#day-of-week-chart', 'chartGroup') */
       .width(180)
@@ -121,7 +136,7 @@
     reportsByMonthChart // dc.barChart("#reports-by-month-chart");
       .width(640)
       .height(190)
-      .margins({top:20, left:30, right: 40, bottom:40})
+      .margins({top:0, left:25, right: 20, bottom:25})
       .group(monthOfYearGroup)
       .dimension(monthOfYear)
       // .label(function(d){
@@ -143,9 +158,9 @@
 
 
     violationsByCodeChart
-      .width(450)
-      .height(450)
-      .margins({top: 20, left: 10, right: 10, bottom: 20})
+      .width(350)
+      .height(600)
+      .margins({top: 0, left: 5, right: 10, bottom: 20})
       .dimension(violationCodes)
       .group(violationCodesGroup)
       .data(function(group){
@@ -174,6 +189,12 @@
       // })
       // .elasticX(true)
       .xAxis().ticks(4);
+  
+    vehicleTypeChart
+      .width(150)
+      .height(150)
+      .dimension(vehicleTypes)
+      .group(vehicleTypeGroup)
   
   
       dc.renderAll();
