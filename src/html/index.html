@@ -136,7 +136,7 @@
     reportsByMonthChart // dc.barChart("#reports-by-month-chart");
       .width(640)
       .height(190)
-      .margins({top:0, left:25, right: 20, bottom:25})
+      .margins({top:10, left:25, right: 20, bottom:25})
       .group(monthOfYearGroup)
       .dimension(monthOfYear)
       // .label(function(d){
@@ -173,6 +173,7 @@
           })
         })
         var values = d3.entries(counts)
+        console.log(values)
         values.sort(function(a,b){return d3.descending(a.value, b.value)})
         return values
       })
