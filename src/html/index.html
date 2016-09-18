@@ -74,6 +74,10 @@
     var violationsByCodeChart = dc.rowChart('#violations-by-code-chart')
     var vehicleTypeChart = dc.pieChart("#vehicle-type-chart")
     
+    function isTaxi(v) {
+      return v.vehicle_type === "TAXI"
+    }
+    
     d3.json('cwc.json', function (data) {
       var violationLookup = {};
       data.forEach(function (d) {
@@ -103,7 +107,27 @@
     var monthOfYear = ndx.dimension(function (d) {
       return d.month;
     });
-    var monthOfYearGroup = monthOfYear.group();
+    var monthOfYearGroup = monthOfYear.group().reduce(
+      function(p, v) {
+        if (isTaxi(v)) {
+          p.taxi ++;
+        } else {
+          p.fhv ++;
+        }
+        p.total++
+        return p
+      },
+      function(p, v) {
+        if (isTaxi(v)) {
+          p.taxi --;
+        } else {
+          p.fhv --;
+        }
+        p.total--
+        return p
+      },
+      function(){ return {taxi:0, fhv:0, total:0}}
+      );
     
 
     var violationCodes = ndx.dimension(function(d) { return d.codes }, true)
@@ -131,20 +155,18 @@
       .xAxis().ticks(4);
   
   
-    var monthExtent = d3.extent(monthOfYearGroup.all(), function(d){return d.key});
+    var monthExtent = d3.extent(data, function(d){return d.month});
     monthExtent[1] = d3.time.month.utc.offset(monthExtent[1], 1)
+    
     reportsByMonthChart // dc.barChart("#reports-by-month-chart");
       .width(640)
       .height(190)
       .margins({top:10, left:25, right: 20, bottom:25})
-      .group(monthOfYearGroup)
       .dimension(monthOfYear)
-      // .label(function(d){
-      //   return d.key.split('.')[1];
-      // })
-      // .title(function(d){
-      //   return d.value
-      // })
+      .group(monthOfYearGroup, "Taxi")
+      .valueAccessor(function(d){return d.value.taxi})
+      .stack(monthOfYearGroup, "For Hire", function(d){return d.value.fhv;})
+      .legend(dc.legend().x(540).y(10))
       .elasticY(true)
       // .centerBar(true)
       .gap(3)
