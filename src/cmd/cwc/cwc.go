@@ -26,7 +26,8 @@ func run(action string, args ...string) {
 			os.Stdout.Write(body)
 		}
 	case "report":
-		err = reporter.Run(db.Default, os.Stdout)
+		// err = reporter.Run(db.Default, os.Stdout)
+		err = reporter.ReportServer(db.Default)
 	case "new":
 		err = newComplaint()
 	case "short-reg", "short-regulations":
