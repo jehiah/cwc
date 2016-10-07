@@ -35,6 +35,8 @@ var All []Reg = []Reg{
 	{Code: "55-13(a)(3)(xi)", Description: "improper passing", Vehicle: FHV},
 	{Code: "54-13(a)(3)(xii)", Description: "unsafe lane change", Vehicle: Taxi},
 	{Code: "55-13(a)(3)(xii)", Description: "unsafe lane change", Vehicle: FHV},
+	{Code: "54-15(c)", Description: "no smoking", Vehicle: Taxi},
+	{Code: "55-15(c)", Description: "no smoking", Vehicle: FHV},
 	{Code: "NY VTL 1160(a)", Description: "no right from center lane", Type: "moving", Vehicle: either, Short: "no R from center lane"},
 	{Code: "NY VTL 1160(b)", Description: "no left from center lane when both two-way streets", Type: "moving", Vehicle: either, Short: "no L from center (@ 2-way)"},
 	{Code: "NY VTL 1160(c)", Description: "no left from center lane at one-way street", Type: "moving", Vehicle: either, Short: "no L from center (@ 1-way)"},
