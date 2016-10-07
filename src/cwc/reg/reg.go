@@ -60,7 +60,7 @@ var Templates []Template = []Template{
 	{"4-12(i)", "While riding bike at <LOCATION>, <VEHICLE> tried to intimidate me by honking at me <VIOLATION>. Pictures included."},
 	{"4-07(b)(2)", "While biking at <LOCATION>, I observed <VEHICLE> blocking crosswalk obstructing pedestrian ROW <VIOLATION>. Pictures included."},
 	{"4-07(b)(2)", "While biking at <LOCATION>, I observed <VEHICLE> blocking intersection and causing gridlock including obstructing bike lane <VIOLATION>. Pictures included."},
-	{"4-07(b)(2)", "While trying to cross the street at <LOCATION>, observed <VEHICLE> blocking crosswalk obstructing pedestrian ROW <VIOLATION>. Pictures included."},
+	{"4-07(b)(2)", "While trying to cross the street at <LOCATION>, I observed <VEHICLE> blocking crosswalk obstructing pedestrian ROW <VIOLATION>. Pictures included."},
 	{"4-07(b)(2)", "While at <LOCATION>, I observed <VEHICLE> blocking intersection and causing gridlock <VIOLATION>. Pictures included."},
 	{"4-08(e)(9)", "<VEHICLE> stopped in bike lane, dangerously forcing bikers (including myself) into traffic lane <VIOLATION>. Pictures included."},
 	{"4-08(e)(9)", "<VEHICLE> stopped in bike lane, obstructing my use of bike lane <VIOLATION>. Pictures included."},
