@@ -79,21 +79,19 @@ func newComplaint() error {
 
 	fmt.Fprintf(f, "%s %s %s %s\n", dt.Format("2006/01/02 3:04pm"), vehicle, license, where)
 
-	var r *reg.Reg
 	for {
-		n, err := getReg(vehicle)
+		r, err := getReg(vehicle)
 		if err != nil {
 			return err
 		}
-		if r == nil && n == nil {
+		if r == nil {
 			return errors.New("no regulation selected")
 		}
-		if r != nil {
-			rr := CombineReg(*r, *n)
-			r = &rr
-		} else {
-			r = n
+		body, err := SelectTemplate(*r, where)
+		if err != nil {
+			return err
 		}
+		fmt.Fprintf(f, "\n%s\n", body)
 		yn, err := YesNo("Another Violation", false)
 		if err != nil {
 			return err
@@ -103,11 +101,6 @@ func newComplaint() error {
 		}
 	}
 
-	body, err := SelectTemplate(*r, where)
-	if err != nil {
-		return err
-	}
-	fmt.Fprintf(f, "\n%s\n", body)
 	f.Close()
 
 	var url string
