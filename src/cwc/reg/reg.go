@@ -48,6 +48,7 @@ var All []Reg = []Reg{
 	{Code: "55-12(e)", Description: "threats, harassment, abuse", Vehicle: FHV},
 	{Code: "54-12(g)", Description: "use or threat of physical force", Vehicle: Taxi, Short: "use/threat of physical force"},
 	{Code: "55-12(f)", Description: "use or threat of physical force", Vehicle: FHV, Short: "use/threat of physical force"},
+	{Code: "54-22(f)", Description: "device must not obstruct view of road", Vehicle: Taxi},
 }
 
 type Template struct {
