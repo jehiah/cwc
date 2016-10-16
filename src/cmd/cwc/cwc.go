@@ -7,6 +7,7 @@ import (
 
 	"cwc/db"
 	"cwc/reporter"
+	"cwc/server"
 
 	"lib/input"
 )
@@ -26,14 +27,16 @@ func run(action string, args ...string) {
 			os.Stdout.Write(body)
 		}
 	case "report":
-		// err = reporter.Run(db.Default, os.Stdout)
-		err = reporter.ReportServer(db.Default)
+		err = reporter.Run(db.Default, os.Stdout)
 	case "new":
 		err = newComplaint()
 	case "short-reg", "short-regulations":
 		listRegulations(true)
 	case "reg", "regulations":
 		listRegulations(false)
+	case "server":
+		s := server.New(db.Default, "src/templates")
+		err = s.Serve("")
 	case "help":
 		fmt.Printf(`cwc -> Cyclists With Cameras
 
