@@ -87,16 +87,21 @@ func FormatTemplate(template, location, vehicle, violation string) string {
 	return strings.Replace(template, "<VIOLATION>", fmt.Sprintf("in violation of %s", violation), -1)
 }
 
-func (reg Reg) String() string {
+func (reg Reg) LongCode() string {
 	code := reg.Code
 	switch {
 	case strings.HasPrefix(code, "4-"):
 		code = "NYC Traffic Rule " + code
-	case strings.HasPrefix(code, "54-13"):
+	case strings.HasPrefix(code, "54-"):
 		fallthrough
-	case strings.HasPrefix(code, "55-13"):
+	case strings.HasPrefix(code, "55-"):
 		code = "Commission Rule " + code
 	}
+	return code
+}
+
+func (reg Reg) String() string {
+	code := reg.LongCode()
 
 	var suffix string
 	if !strings.Contains(code, "Commission Rule") {

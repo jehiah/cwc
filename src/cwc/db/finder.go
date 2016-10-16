@@ -57,5 +57,6 @@ func (d DB) All() ([]Complaint, error) {
 		}
 		o = append(o, Complaint(fi.Name()))
 	}
+	sort.Sort(sort.Reverse(complaintsByAge(o)))
 	return o, nil
 }

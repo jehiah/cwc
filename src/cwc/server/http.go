@@ -13,6 +13,7 @@ import (
 
 	"cwc/db"
 	"cwc/reporter"
+	"cwc/reg"
 )
 
 type Server struct {
@@ -64,7 +65,21 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var err error
 	switch r.URL.Path {
 	case "/":
-		err = s.Template.ExecuteTemplate(w, "index.html", nil)
+		type payload struct {
+			Complaints []db.Complaint
+		}
+		var p payload
+		p.Complaints, err = s.DB.All()
+		if err != nil {
+			break
+		}
+		err = s.Template.ExecuteTemplate(w, "index.html", p)
+	case "/reg":
+		type payload struct {
+			Regulations []reg.Reg
+		}
+		p := payload{Regulations:reg.All}
+		err = s.Template.ExecuteTemplate(w, "reg.html", p)
 	case "/report":
 		err = s.Template.ExecuteTemplate(w, "report.html", nil)
 	case "/data/report":
