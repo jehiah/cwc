@@ -65,15 +65,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var err error
 	switch r.URL.Path {
 	case "/":
-		type payload struct {
-			Complaints []db.Complaint
-		}
-		var p payload
-		p.Complaints, err = s.DB.All()
-		if err != nil {
-			break
-		}
-		err = s.Template.ExecuteTemplate(w, "index.html", p)
+		err = s.Complaints(w, r)
 	case "/reg":
 		type payload struct {
 			Regulations []reg.Reg
@@ -99,4 +91,24 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unknown Error", 500)
 		return
 	}
+}
+
+func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) error {
+	type payload struct {
+		FullComplaints []*db.FullComplaint
+	}
+	var p payload
+	complaints, err := s.DB.All()
+	if err != nil {
+		return err
+	}
+	for _, c := range complaints {
+		f, err := s.DB.FullComplaint(c)
+		if err != nil {
+			log.Printf("error parsing %s, %s", c, err)
+			continue
+		}
+		p.FullComplaints = append(p.FullComplaints, f)
+	}
+	return s.Template.ExecuteTemplate(w, "complaints.html", p)
 }

@@ -17,9 +17,15 @@ func run(action string, args ...string) {
 	switch action {
 	case "search":
 		if len(args) >= 1 {
-			search(args[0])
+			search(args[0], "search")
 		} else {
-			search("")
+			search("", "search")
+		}
+	case "edit":
+		if len(args) >= 1 {
+			search(args[0], "edit")
+		} else {
+			search("", "edit")
 		}
 	case "json":
 		body, err := reporter.JSON(db.Default)
@@ -58,7 +64,7 @@ func main() {
 	if len(os.Args) > 1 {
 		run(os.Args[1], os.Args[2:]...)
 	} else {
-		choices := []string{"help", "search", "new", "report", "regulations", "short-regulations", "json"}
+		choices := []string{"help", "search", "new", "report", "regulations", "short-regulations", "json", "edit", "server"}
 		action, err := input.SelectString("", "new", choices...)
 		if err != nil {
 			log.Fatalf("%s", err)
@@ -67,7 +73,7 @@ func main() {
 	}
 }
 
-func search(query string) {
+func search(query, action string) {
 	var err error
 	if query == "" {
 		query, err = input.Ask("Search for?", "")
@@ -89,9 +95,12 @@ func search(query string) {
 	for i, c := range files {
 		if i == 0 {
 			fmt.Printf("opening: %s %s\n", c, db.Default.FullPath(c))
-			err = db.Default.ShowInFinder(c)
-			if err != nil {
-				fmt.Printf("%s\n", err)
+			switch action {
+			case "search":
+				err = db.Default.ShowInFinder(c)
+				if err != nil {
+					fmt.Printf("%s\n", err)
+				}
 			}
 			err = db.Default.Edit(c)
 			if err != nil {

@@ -10,6 +10,7 @@ func (d DB) ComplaintContains(c Complaint, pattern string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	defer f.Close()
 	body, err := ioutil.ReadAll(f)
 	if err != nil {
 		return false, err

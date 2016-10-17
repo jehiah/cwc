@@ -29,6 +29,7 @@
   </head>
   <body>
     <div class="container">
+    {{template "nav.html"}}
     
     <div class="row">
     <h1>Cyclists With Cameras</h1>
@@ -78,7 +79,7 @@
       return v.vehicle_type === "TAXI"
     }
     
-    d3.json('cwc.json', function (data) {
+    d3.json('/data/report', function (data) {
       var violationLookup = {};
       data.forEach(function (d) {
         d.dd = new Date(d.timestamp * 1000)

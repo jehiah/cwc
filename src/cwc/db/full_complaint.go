@@ -31,6 +31,7 @@ func (d DB) FullComplaint(c Complaint) (*FullComplaint, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer f.Close()
 	body, err := ioutil.ReadAll(f)
 	if err != nil {
 		return nil, err
@@ -62,8 +63,10 @@ func ParseComplaint(c Complaint, body []byte) (*FullComplaint, error) {
 	}
 	lines := splitLines(f.Body)
 	if len(lines) >= 1 {
-		location := strings.SplitN(lines[0], " ", 3)
-		f.Location = location[len(location)-1]
+		location := strings.SplitN(lines[0], " ", 5)
+		if len(location) == 5 {
+			f.Location = location[4]
+		}
 	}
 	if len(lines) >= 2 {
 		f.Description = lines[1]
@@ -78,6 +81,8 @@ func findServiceRequestID(lines []string) string {
 		switch {
 		case strings.HasPrefix(line, "1-1-1") && len(line) == 14:
 			return "C" + line
+		case strings.HasPrefix(line, "C1-1-1") && len(line) == 15:
+			return line
 		case strings.HasPrefix(line, "Service Request #: C1-1-1") && len(line) == 34:
 			return line[19:34]
 		}
