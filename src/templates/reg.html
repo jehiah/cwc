@@ -24,6 +24,14 @@
           <tr>
             <td>{{.LongCode}}</td>
             <td>{{.Description}}</td>
+            <td>
+              {{if .Vehicle.IncludesTaxi }}
+              <span class="label label-info">Taxi</span>
+              {{ end }}
+              {{if .Vehicle.IncludesFHV }}
+              <span class="label label-info">FHV</span>
+              {{ end }}
+            </td>
           </tr>
         {{ end }}
       </table>

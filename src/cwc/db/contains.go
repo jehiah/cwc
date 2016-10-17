@@ -3,12 +3,14 @@ package db
 import (
 	"bytes"
 	"io/ioutil"
-	"path/filepath"
 )
 
 func (d DB) ComplaintContains(c Complaint, pattern string) (bool, error) {
-	f := filepath.Join(string(d), string(c), "notes.txt")
-	body, err := ioutil.ReadFile(f)
+	f, err := d.Open(c)
+	if err != nil {
+		return false, err
+	}
+	body, err := ioutil.ReadAll(f)
 	if err != nil {
 		return false, err
 	}

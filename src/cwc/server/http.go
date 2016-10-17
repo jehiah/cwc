@@ -1,19 +1,19 @@
 package server
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net"
 	"net/http"
 	"net/url"
-	"path/filepath"
 	"os/exec"
-	"fmt"
+	"path/filepath"
 	"time"
 
 	"cwc/db"
-	"cwc/reporter"
 	"cwc/reg"
+	"cwc/reporter"
 )
 
 type Server struct {
@@ -78,7 +78,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		type payload struct {
 			Regulations []reg.Reg
 		}
-		p := payload{Regulations:reg.All}
+		p := payload{Regulations: reg.All}
 		err = s.Template.ExecuteTemplate(w, "reg.html", p)
 	case "/report":
 		err = s.Template.ExecuteTemplate(w, "report.html", nil)
