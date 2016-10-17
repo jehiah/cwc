@@ -94,11 +94,21 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) error {
+	r.ParseForm()
 	type payload struct {
 		FullComplaints []*db.FullComplaint
+		Query string
 	}
-	var p payload
-	complaints, err := s.DB.All()
+	p := payload{
+		Query: r.Form.Get("q"),
+	}
+	var complaints []db.Complaint
+	var err error
+	if p.Query == "" {
+		complaints, err = s.DB.All()
+	} else {
+		complaints, err = s.DB.Find(p.Query)
+	}
 	if err != nil {
 		return err
 	}
