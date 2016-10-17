@@ -24,7 +24,18 @@ type Server struct {
 }
 
 func New(d db.DB, templatePath string) *Server {
-	t, err := template.ParseGlob(filepath.Join(templatePath, "*.html"))
+	t, err := template.New("").Funcs(template.FuncMap{"ComplaintClass": func(c *db.FullComplaint) string {
+		switch c.Status {
+		case db.ClosedPenalty, db.ClosedInspection:
+			return "success"
+		case db.HearingScheduled:
+			return "warning"
+		case db.Fined:
+			return "info"
+		}
+		return ""
+	}}).ParseGlob(filepath.Join(templatePath, "*.html"))
+	
 	if err != nil {
 		log.Fatalf("%s", err)
 	}

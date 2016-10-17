@@ -21,14 +21,16 @@
     <div class="row">
       <table class="table">
         {{ range .FullComplaints }}
-          <tr>
-            <td>{{.ServiceRequestID}}</td>
+          <tr class="{{. | ComplaintClass}}">
+            <td><code><small>{{.ServiceRequestID}}</small></code> {{if ne .Status "Unknown"}}<span class="label label-default">{{.Status}}</span>{{end}}</td>
             <td>{{.Time.Format "2006/01/02 03:04pm"}}</td>
             <td>{{.VehicleType}}</td>
             <td>{{.License}}</td>
             <td>{{.Location}}</td>
             <td>{{range .Violations}}<small>{{.Code}} - {{.Description}}</small><br/>{{end}}</td>
-            <td>{{range .Tweets}}<a href="{{.}}"><img src="https://abs.twimg.com/favicons/favicon.ico" width="16" height="16"></a>{{end}}</td>
+            <td>{{range .Tweets}}<a href="{{.}}"><img src="https://abs.twimg.com/favicons/favicon.ico" width="16" height="16"></a>{{end}}
+              {{if .Hearing}}<span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>{{end}}
+              </td>
           </tr>
         {{ end }}
       </table>

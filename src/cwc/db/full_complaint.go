@@ -17,9 +17,10 @@ type FullComplaint struct {
 	Location    string    `json:"location"`
 	Description string    `json:"description"`
 
-	Status           string `json:"status"`
+	Status           State `json:"status"`
 	ServiceRequestID string `json:"311_service_request_id"`
 	TLCID            string `json:"tlc_id,omitempty"`
+	Hearing          bool `json:"hearing"`
 
 	Body       string    `json:"body"`
 	Violations []reg.Reg `json:"violations"`
@@ -42,16 +43,19 @@ func (d DB) FullComplaint(c Complaint) (*FullComplaint, error) {
 var tweetPattern = regexp.MustCompile(`https?://[^\s]+`)
 
 func ParseComplaint(c Complaint, body []byte) (*FullComplaint, error) {
+	b := string(body)
+	contains := func(pattern string) bool {
+		return bytes.Contains(body, []byte(pattern))
+	}
 	f := &FullComplaint{
 		Timestamp:   c.Time().Unix(),
 		Time:        c.Time(),
 		License:     c.License(),
 		VehicleType: reg.Taxi.String(),
 
-		Body: string(body),
-	}
-	contains := func(pattern string) bool {
-		return bytes.Contains(body, []byte(pattern))
+		Body: b,
+		Hearing: contains("scheduled"),
+		Status: DetectState(b),
 	}
 	if contains("FHV") {
 		f.VehicleType = reg.FHV.String()
@@ -101,3 +105,5 @@ func splitLines(s string) []string {
 	}
 	return o
 }
+
+
