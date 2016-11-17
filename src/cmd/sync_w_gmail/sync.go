@@ -1,21 +1,19 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
-	"log"
-	"strings"
-	"time"
 	"fmt"
+	"log"
+	"time"
 
 	"cwc/db"
 	"cwc/gmailutils"
+	"golang.org/x/net/context"
 	gmail "google.golang.org/api/gmail/v1"
 )
 
 func main() {
-	var err error
 	srv := gmailutils.GmailService("cwc.json")
+	bg := context.Background()
 
 	user := "me"
 	// labels, err := gmailutils.Labels(srv, user)
@@ -26,139 +24,39 @@ func main() {
 
 	// subject:"311 Service Request Closed"
 	// https://godoc.org/google.golang.org/api/gmail/v1#UsersMessagesListCall
-	if err != nil {
-		log.Fatalf("Unable to retrieve messages. %v", err)
+	// if err != nil {
+	// 	log.Fatalf("Unable to retrieve messages. %v", err)
+	// }
+	handlers := []EmailHandler{
+		&ServiceReqeustUpdate{db.Default},
 	}
-	limit := 500
-	var r *gmail.ListMessagesResponse
-	for {
-		// .LabelIds(labels["safe_streets/fined"])
-		// .LabelIds("INBOX")
-		// .Q(pattern)
-		// req := srv.Users.Messages.List(user).Q("subject:\"311 Service Request Closed\"").MaxResults(50)
-		req := srv.Users.Messages.List(user).LabelIds("INBOX").Q("subject:\"311 Service Request Update\" OR subject:\"311 Service Request Closed\"").MaxResults(50)
-		if r != nil {
-			if r.NextPageToken != "" {
-				log.Printf("getting next page %s", r.NextPageToken)
-				req = req.PageToken(r.NextPageToken)
-			} else {
-				break
+	for _, h := range handlers {
+		max := 500
+		q := h.BuildQuery(srv.Users.Messages.List(user)).MaxResults(50)
+		var c int
+		err := q.Pages(bg, func(r *gmail.ListMessagesResponse) error {
+			for _, m := range r.Messages {
+				c++
+				if c > max {
+					return fmt.Errorf("handled %d (over max %d)", c, max)
+				}
+				time.Sleep(100 * time.Millisecond)
+				var err error
+				m, err = srv.Users.Messages.Get(user, m.Id).Do()
+				if err != nil {
+					return err
+				}
+				err = h.Handle(m)
+				if err != nil {
+					log.Printf("%s", err)
+					return err
+				}
+				return nil
 			}
-		}
-		r, err = req.Do()
+			return nil
+		})
 		if err != nil {
-			log.Fatalf("err getting results %s", err)
-		}
-		for i, m := range r.Messages {
-			time.Sleep(100 * time.Millisecond)
-
-			m, err := srv.Users.Messages.Get(user, m.Id).Do()
-			if err != nil {
-				log.Printf("err %s", err)
-				continue
-			}
-
-			subject := gmailutils.Subject(m)
-			srn := SRNFromSubject(subject)
-
-			log.Printf("[%d] %s Subject:%s", i, srn, subject)
-
-			if srn == "" {
-				log.Printf("no 311 number found")
-				continue
-			}
-
-			body, err := gmailutils.MessageTextBody(m)
-			if err != nil {
-				log.Printf("err %s", err)
-				continue
-			}
-			lines := getLines(body)
-
-			if v := SRNFromBody(lines); v != srn {
-				log.Printf("missmatched SRN %q vs %q", srn, v)
-				continue
-			}
-
-			complaints, err := db.Default.Find(srn[1:])
-			if err != nil {
-				log.Printf("%s", err)
-				continue
-			}
-			if len(complaints) != 1 {
-				log.Printf("found unexpected number of complaints %d", len(complaints))
-				continue
-			}
-			complaint := complaints[0]
-
-
-			// if we already wrote this message in... continue
-			if ok, err := db.Default.ComplaintContains(complaint, m.Id); ok {
-				log.Printf("already wrote message")
-				continue
-			} else if err != nil {
-				log.Printf("%s", err)
-				continue
-			}
-
-			log.Printf("** message related to %s ***", complaint)
-			ts := time.Unix(m.InternalDate / 1000, 0)
-			line := interestingLine(lines)
-			if strings.HasSuffix(line, "Referred to S") {
-				// fix a 311 bug where text emails are truncated at '&'
-				line += "&E"
-			}
-
-			if strings.HasSuffix(line, "will contact you if further information is needed.") {
-				log.Printf("skipping %q", line)
-				continue
-			}
-						
-			logMsg := fmt.Sprintf("\n[email:%s %s] %s\n", m.Id, ts.Format("2006/01/02 15:04"), line)
-			err = db.Default.Append(complaint, logMsg)
-			if err != nil {
-				log.Printf("%s", err)
-			} else {
-				log.Printf("%s", logMsg)
-			}
-			
-			limit--
-			if limit <= 0 {
-				log.Printf("at limit. ending")
-				return
-			}
-			// if i == 0 {
-			// 	log.Printf("body %s", body)
-			// }
-		}
-
-	}
-}
-
-func getLines(b []byte) []string {
-	scanner := bufio.NewScanner(bytes.NewBuffer(b))
-	var lines []string
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line != "" {
-			lines = append(lines, line)
+			log.Fatalf("%s", err)
 		}
 	}
-	if err := scanner.Err(); err != nil {
-		log.Printf("%s", err)
-	}
-	return lines
-}
-
-// the last "useful" line is the one before 'Get Service Request Details'
-func interestingLine(lines []string) string {
-	for i := 0; i < len(lines); i++ {
-		if strings.HasPrefix(lines[i], "The TLC is investigating") {
-			return lines[i]
-		}
-		if lines[i] == "Get Service Request Details" && i > 0 {
-			return lines[i-1]
-		}
-	}
-	return ""
 }
