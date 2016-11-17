@@ -1,15 +1,13 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
 	"fmt"
 	"log"
 	"strings"
-	"time"
 
 	"cwc/db"
 	"cwc/gmailutils"
+
 	gmail "google.golang.org/api/gmail/v1"
 )
 
@@ -22,8 +20,7 @@ func (s *ServiceReqeustUpdate) BuildQuery(u *gmail.UsersMessagesListCall) *gmail
 }
 
 func (s *ServiceReqeustUpdate) Handle(m *gmail.Message) error {
-	ts := time.Unix(m.InternalDate/1000, 0)
-	prettyID := fmt.Sprintf("[email:%s %s]", m.Id, ts.Format("2006/01/02 15:04"))
+	prettyID := prettyMessageID(m)
 
 	subject := gmailutils.Subject(m)
 	srn := SRNFromSubject(subject)
@@ -31,7 +28,7 @@ func (s *ServiceReqeustUpdate) Handle(m *gmail.Message) error {
 	log.Printf("%s %s Subject:%s", prettyID, srn, subject)
 
 	if srn == "" {
-		log.Printf("no 311 number found")
+		log.Printf("no 311 service request number found")
 		return nil
 	}
 
@@ -82,21 +79,6 @@ func (s *ServiceReqeustUpdate) Handle(m *gmail.Message) error {
 	log.Print(line)
 	err = s.DB.Append(complaint, fmt.Sprintf("\n%s %s\n", prettyID, line))
 	return err
-}
-
-func getLines(b []byte) []string {
-	scanner := bufio.NewScanner(bytes.NewBuffer(b))
-	var lines []string
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line != "" {
-			lines = append(lines, line)
-		}
-	}
-	if err := scanner.Err(); err != nil {
-		log.Printf("%s", err)
-	}
-	return lines
 }
 
 // the last "useful" line is the one before 'Get Service Request Details'

@@ -7,13 +7,14 @@ import (
 
 	"cwc/db"
 	"cwc/gmailutils"
+
 	"golang.org/x/net/context"
 	gmail "google.golang.org/api/gmail/v1"
 )
 
 func main() {
 	srv := gmailutils.GmailService("cwc.json")
-	bg := context.Background()
+	bg := context.TODO()
 
 	user := "me"
 	// labels, err := gmailutils.Labels(srv, user)
@@ -28,7 +29,8 @@ func main() {
 	// 	log.Fatalf("Unable to retrieve messages. %v", err)
 	// }
 	handlers := []EmailHandler{
-		&ServiceReqeustUpdate{db.Default},
+		&PassengerSettlementNotification{db.Default},
+		// &ServiceReqeustUpdate{db.Default},
 	}
 	for _, h := range handlers {
 		max := 500
@@ -38,12 +40,14 @@ func main() {
 			for _, m := range r.Messages {
 				c++
 				if c > max {
+					log.Printf("over max %d", max)
 					return fmt.Errorf("handled %d (over max %d)", c, max)
 				}
 				time.Sleep(100 * time.Millisecond)
 				var err error
 				m, err = srv.Users.Messages.Get(user, m.Id).Do()
 				if err != nil {
+					log.Printf("%s", err)
 					return err
 				}
 				err = h.Handle(m)
@@ -51,7 +55,6 @@ func main() {
 					log.Printf("%s", err)
 					return err
 				}
-				return nil
 			}
 			return nil
 		})

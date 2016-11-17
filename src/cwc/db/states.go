@@ -24,7 +24,7 @@ func (s State) String() string {
 
 func DetectState(s string) State {
 	switch {
-	case strings.Contains(s, "pled guilty") || strings.Contains(s, "STIP violation"):
+	case strings.Contains(s, "pled guilty") || strings.Contains(s, "STIP violation") || strings.Contains(s, "has paid a penalty"):
 		return ClosedPenalty
 	case strings.Contains(s, "Referred to S&E"):
 		return ClosedInspection

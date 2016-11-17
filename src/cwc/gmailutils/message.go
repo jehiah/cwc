@@ -4,33 +4,36 @@ import (
 	"encoding/base64"
 	"errors"
 	"log"
+	"strings"
 
 	"google.golang.org/api/gmail/v1"
 )
 
+func recurse(part *gmail.MessagePart) ([]byte, error) {
+	if part == nil || part.Body == nil {
+		return nil, nil
+	}
+	for _, p := range part.Parts {
+		b, err := recurse(p)
+		if err != nil || b != nil {
+			return b, err
+		}
+	}
+	log.Printf("%s", part.MimeType)
+	switch {
+	case strings.HasPrefix(part.MimeType, "text/plain"):
+		 return base64.StdEncoding.DecodeString(part.Body.Data)
+	}
+	return nil, nil
+}
+
 // given a message ID, return it's text/body (if any)
 func MessageTextBody(m *gmail.Message) ([]byte, error) {
-	if m.Payload == nil {
+	body, err := recurse(m.Payload)
+	if body == nil {
 		return nil, errors.New("no message payload")
 	}
-	for _, p := range m.Payload.Parts {
-		if p.MimeType != "text/plain" {
-			// log.Printf("skipping mime %s", p.MimeType)
-			continue
-		}
-		decoded, err := base64.StdEncoding.DecodeString(p.Body.Data)
-		return decoded, err
-	}
-	if len(m.Payload.Parts) == 0 && m.Payload.Body != nil {
-		// m.Payload is it
-		if m.Payload.MimeType != "text/plain" {
-			log.Printf("skipping only mime %s", m.Payload.MimeType)
-			return nil, errors.New("no text/plain found")
-		}
-		decoded, err := base64.StdEncoding.DecodeString(m.Payload.Body.Data)
-		return decoded, err
-	}
-	return nil, errors.New("no text/plain found")
+	return body, err
 }
 
 func Subject(m *gmail.Message) string {
