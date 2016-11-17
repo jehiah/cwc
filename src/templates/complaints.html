@@ -7,6 +7,12 @@
     <title>CWC</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
   <style>
+  .table-small>tbody>tr>td {
+    font-size:85%;
+  }
+  .table-condensed>tbody>tr>td {
+    padding: 2px 5px;
+  }
   </style>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -19,10 +25,10 @@
     <div class="container">
     {{template "nav.html"}}
     <div class="row">
-      <table class="table">
+      <table class="table table-small table-condensed">
         {{ range .FullComplaints }}
           <tr class="{{. | ComplaintClass}}">
-            <td><code><small>{{.ServiceRequestID}}</small></code> {{if ne .Status "Unknown"}}<span class="label label-default">{{.Status}}</span>{{end}}</td>
+            <td><code>{{.ServiceRequestID}}</code> {{if ne .Status "Unknown"}}<span class="label label-default">{{.Status}}</span>{{end}}</td>
             <td>{{.Time.Format "2006/01/02 03:04pm"}}</td>
             <td>{{.VehicleType}}</td>
             <td>{{.License}}</td>

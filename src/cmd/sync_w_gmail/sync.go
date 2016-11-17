@@ -29,13 +29,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("Unable to retrieve messages. %v", err)
 	}
-	limit := 310
+	limit := 500
 	var r *gmail.ListMessagesResponse
 	for {
 		// .LabelIds(labels["safe_streets/fined"])
 		// .LabelIds("INBOX")
 		// .Q(pattern)
-		req := srv.Users.Messages.List(user).Q("subject:\"311 Service Request Closed\"").MaxResults(50)
+		// req := srv.Users.Messages.List(user).Q("subject:\"311 Service Request Closed\"").MaxResults(50)
+		req := srv.Users.Messages.List(user).LabelIds("INBOX").Q("subject:\"311 Service Request Update\" OR subject:\"311 Service Request Closed\"").MaxResults(50)
 		if r != nil {
 			if r.NextPageToken != "" {
 				log.Printf("getting next page %s", r.NextPageToken)
@@ -90,6 +91,7 @@ func main() {
 			}
 			complaint := complaints[0]
 
+
 			// if we already wrote this message in... continue
 			if ok, err := db.Default.ComplaintContains(complaint, m.Id); ok {
 				log.Printf("already wrote message")
@@ -99,18 +101,25 @@ func main() {
 				continue
 			}
 
-			log.Printf("** appending message to %s ***", complaint)
+			log.Printf("** message related to %s ***", complaint)
 			ts := time.Unix(m.InternalDate / 1000, 0)
 			line := interestingLine(lines)
 			if strings.HasSuffix(line, "Referred to S") {
 				// fix a 311 bug where text emails are truncated at '&'
 				line += "&E"
 			}
-			
+
+			if strings.HasSuffix(line, "will contact you if further information is needed.") {
+				log.Printf("skipping %q", line)
+				continue
+			}
+						
 			logMsg := fmt.Sprintf("\n[email:%s %s] %s\n", m.Id, ts.Format("2006/01/02 15:04"), line)
 			err = db.Default.Append(complaint, logMsg)
 			if err != nil {
 				log.Printf("%s", err)
+			} else {
+				log.Printf("%s", logMsg)
 			}
 			
 			limit--
