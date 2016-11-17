@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"cwc/db"
 	"cwc/gmailutils"
@@ -10,23 +11,19 @@ import (
 	gmail "google.golang.org/api/gmail/v1"
 )
 
-type PassengerSettlementNotification struct {
-	DB db.DB
+type SettlementNotification struct {
+	DB        db.DB
+	alternate bool
 }
 
-func (s *PassengerSettlementNotification) findSRN(lines []string) string {
-	l := FirstLineWithPrefix("Subject: TLC Complaint # 1-1", lines, false)
-	if l != "" {
-		return l[len("Subject: TLC Complaint # "):][:14]
+func (s *SettlementNotification) BuildQuery(u *gmail.UsersMessagesListCall) *gmail.UsersMessagesListCall {
+	if s.alternate {
+		return u.LabelIds("INBOX").Q("from:@tlc.nyc.gov to:tlccomplaintunit@tlc.nyc.gov \"No hearing will be necessary as the driver has plead guilty to an appropriate charge and paid a penalty.\"")
 	}
-	return l
-}
-
-func (s *PassengerSettlementNotification) BuildQuery(u *gmail.UsersMessagesListCall) *gmail.UsersMessagesListCall {
 	return u.LabelIds("INBOX").Q("subject:\"Passenger Settlement Notification\"")
 }
 
-func (s *PassengerSettlementNotification) Handle(m *gmail.Message) error {
+func (s *SettlementNotification) Handle(m *gmail.Message) error {
 	prettyID := prettyMessageID(m)
 
 	body, err := gmailutils.MessageTextBody(m)
@@ -35,11 +32,20 @@ func (s *PassengerSettlementNotification) Handle(m *gmail.Message) error {
 		return nil
 	}
 	lines := getLines(body)
-	srn := s.findSRN(lines)
+	srn := SRNFromTLCComplaintBody(lines)
+	var TLCComplaintNumber string
+	if srn != "" {
+		if srn != "" && strings.Contains(srn, "/") {
+			v := strings.SplitN(srn, "/", 2)
+			srn, TLCComplaintNumber = v[0], v[1]
+		}
+	}
+
 	log.Printf("%s %s Subject:%s", prettyID, srn, gmailutils.Subject(m))
 
 	if srn == "" {
 		log.Printf("no 311 service request number found")
+		// fmt.Printf("%s", body)
 		return nil
 	}
 
@@ -66,6 +72,9 @@ func (s *PassengerSettlementNotification) Handle(m *gmail.Message) error {
 	log.Printf("** message related to %s ***", complaint)
 
 	line := "The driver has pleaded guilty to a rule violation and has paid a penalty."
+	if TLCComplaintNumber != "" {
+		line = fmt.Sprintf("complaint %s. %s", TLCComplaintNumber, line)
+	}
 	log.Print(line)
 	err = s.DB.Append(complaint, fmt.Sprintf("\n%s %s\n", prettyID, line))
 	return err

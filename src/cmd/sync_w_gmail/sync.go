@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"time"
@@ -13,6 +14,9 @@ import (
 )
 
 func main() {
+	limit := flag.Int("limit", 500, "max number to process")
+	flag.Parse()
+
 	srv := gmailutils.GmailService("cwc.json")
 	bg := context.TODO()
 
@@ -29,19 +33,19 @@ func main() {
 	// 	log.Fatalf("Unable to retrieve messages. %v", err)
 	// }
 	handlers := []EmailHandler{
-		&PassengerSettlementNotification{db.Default},
+		&SettlementNotification{DB: db.Default, alternate: true},
+		&SettlementNotification{DB: db.Default},
 		// &ServiceReqeustUpdate{db.Default},
 	}
 	for _, h := range handlers {
-		max := 500
 		q := h.BuildQuery(srv.Users.Messages.List(user)).MaxResults(50)
 		var c int
 		err := q.Pages(bg, func(r *gmail.ListMessagesResponse) error {
 			for _, m := range r.Messages {
 				c++
-				if c > max {
-					log.Printf("over max %d", max)
-					return fmt.Errorf("handled %d (over max %d)", c, max)
+				if c > *limit {
+					log.Printf("over max %d", *limit)
+					return fmt.Errorf("handled %d (over max %d)", c, *limit)
 				}
 				time.Sleep(100 * time.Millisecond)
 				var err error

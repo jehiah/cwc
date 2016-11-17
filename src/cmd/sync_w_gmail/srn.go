@@ -26,6 +26,23 @@ func SRNFromBody(lines []string) string {
 	return ""
 }
 
+func SRNFromTLCComplaintBody(lines []string) string {
+	type matcher struct{
+		pattern string
+		prefix string
+	}
+	for _, m := range []matcher{
+		{"Subject: TLC Complaint # 1-1", "Subject: TLC Complaint # "},
+		{"Subject: TLC Complaint #1-1", "Subject: TLC Complaint #"},
+		{"Subject: TLC Complaint 1-1", "Subject: TLC Complaint "},
+	} {
+		if line := FirstLineWithPrefix(m.pattern, lines, false); line != "" {
+			return line[len(m.prefix):]
+		}
+	}
+	return ""
+}
+
 func FirstLineWithPrefix(needle string, lines []string, strip bool) string {
 	for _, line := range lines {
 		if strings.HasPrefix(line, needle) {

@@ -13,18 +13,26 @@ func recurse(part *gmail.MessagePart) ([]byte, error) {
 	if part == nil || part.Body == nil {
 		return nil, nil
 	}
+	var gotError error
 	for _, p := range part.Parts {
 		b, err := recurse(p)
-		if err != nil || b != nil {
+		if b != nil {
 			return b, err
+		}
+		if err != nil {
+			gotError = err
 		}
 	}
 	log.Printf("%s", part.MimeType)
 	switch {
 	case strings.HasPrefix(part.MimeType, "text/plain"):
-		 return base64.StdEncoding.DecodeString(part.Body.Data)
+		b, err := base64.StdEncoding.DecodeString(part.Body.Data)
+		if err != nil {
+			return base64.URLEncoding.DecodeString(part.Body.Data)
+		}
+		return b, err
 	}
-	return nil, nil
+	return nil, gotError
 }
 
 // given a message ID, return it's text/body (if any)
