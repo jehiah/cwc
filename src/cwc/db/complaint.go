@@ -12,6 +12,9 @@ type Complaint string
 func (c Complaint) String() string {
 	return fmt.Sprintf("%s - %s", c.License(), c.Time().Format("Mon Jan 2 2006 3:04pm"))
 }
+func (c Complaint) ID() string {
+	return string(c)
+}
 
 func (c Complaint) Time() time.Time {
 	if len(c) < 13 {

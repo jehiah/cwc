@@ -4,15 +4,9 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CWC</title>
+    <title>Error</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
   <style>
-  .table-small>tbody>tr>td {
-    font-size:85%;
-  }
-  .table-condensed>tbody>tr>td {
-    padding: 2px 5px;
-  }
   </style>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -25,21 +19,9 @@
     <div class="container">
     {{template "nav.html"}}
     <div class="row">
-      <table class="table table-small table-condensed">
-        {{ range .FullComplaints }}
-          <tr class="{{. | ComplaintClass}}">
-            <td><code><a href="/complaint?id={{.Complaint.ID}}">{{.ServiceRequestID}}</a></code> {{if ne .Status "Unknown"}}<span class="label label-default">{{.Status}}</span>{{end}}</td>
-            <td>{{.Time.Format "2006/01/02 03:04pm"}}</td>
-            <td>{{.VehicleType}}</td>
-            <td>{{.License}}</td>
-            <td>{{.Location}}</td>
-            <td>{{range .Violations}}<small>{{.Code}} - {{.Description}}</small><br/>{{end}}</td>
-            <td>{{range .Tweets}}<a href="{{.}}"><img src="https://abs.twimg.com/favicons/favicon.ico" width="16" height="16"></a>{{end}}
-              {{if .Hearing}}<span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>{{end}}
-              </td>
-          </tr>
-        {{ end }}
-      </table>
+      <div class="alert">
+        {{.Error}}
+      </div>
     </div>
     
     <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script> -->

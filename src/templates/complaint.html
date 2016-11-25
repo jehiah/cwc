@@ -1,10 +1,11 @@
+{{ $complaint := .FullComplaint.Complaint }}
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CWC</title>
+    <title>Complaint {{$complaint.License}} {{$complaint.Time.Format "2006/01/02 03:04pm"}}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
   <style>
   .table-small>tbody>tr>td {
@@ -24,23 +25,51 @@
   <body>
     <div class="container">
     {{template "nav.html"}}
+    {{ with .FullComplaint }}
     <div class="row">
       <table class="table table-small table-condensed">
-        {{ range .FullComplaints }}
           <tr class="{{. | ComplaintClass}}">
-            <td><code><a href="/complaint?id={{.Complaint.ID}}">{{.ServiceRequestID}}</a></code> {{if ne .Status "Unknown"}}<span class="label label-default">{{.Status}}</span>{{end}}</td>
+            <td><code>{{.ServiceRequestID}}</code> {{if ne .Status "Unknown"}}<span class="label label-default">{{.Status}}</span>{{end}}</td>
             <td>{{.Time.Format "2006/01/02 03:04pm"}}</td>
             <td>{{.VehicleType}}</td>
             <td>{{.License}}</td>
             <td>{{.Location}}</td>
-            <td>{{range .Violations}}<small>{{.Code}} - {{.Description}}</small><br/>{{end}}</td>
             <td>{{range .Tweets}}<a href="{{.}}"><img src="https://abs.twimg.com/favicons/favicon.ico" width="16" height="16"></a>{{end}}
               {{if .Hearing}}<span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>{{end}}
               </td>
           </tr>
-        {{ end }}
       </table>
     </div>
+    
+    {{ if .Violations }}
+    <div class="row">
+      <table>
+        {{range .Violations}}
+          <th>{{.Code}}</th><td>{{.Description}}</td>
+        {{end}}
+      </table>
+    </div>
+    {{ end }}
+
+    <div class="row">
+      <div class="well well-sm">
+      {{ range .Lines }}
+      <p>{{.}}</p>
+      {{ end }}
+      </div>
+    </div>
+    
+    {{ if .Photos }}
+    <div class="row">
+      {{ range .Photos }}
+      <div class="col-md-4 col-lg-3 col-xs-6">
+        <img src="/complaint/{{$complaint.ID}}/{{.}}" class="img-responsive img-rounded" title="{{.}}" />
+      </div>
+      {{ end }}
+    </div>
+    {{ end }}
+
+    {{ end }}
     
     <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script> -->
     

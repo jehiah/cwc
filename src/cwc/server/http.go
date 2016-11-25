@@ -77,6 +77,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/":
 		err = s.Complaints(w, r)
+	case "/complaint":
+		err = s.Complaint(w, r)
 	case "/reg":
 		type payload struct {
 			Regulations []reg.Reg
@@ -98,8 +100,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
+		s.Error(w, err)
 		log.Printf("%s", err)
-		http.Error(w, "Unknown Error", 500)
 		return
 	}
 }
@@ -132,4 +134,30 @@ func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) error {
 		p.FullComplaints = append(p.FullComplaints, f)
 	}
 	return s.Template.ExecuteTemplate(w, "complaints.html", p)
+}
+
+func (s *Server) Error(w http.ResponseWriter, err error) {
+	w.WriteHeader(500)
+	err = s.Template.ExecuteTemplate(w, "error.html", struct{Error string}{err.Error()})
+	if err != nil {
+		log.Printf("error rendering %s", err)
+	}
+}
+
+func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) error {
+	r.ParseForm()
+	c := db.Complaint(r.Form.Get("id"))
+	f, err := s.DB.FullComplaint(c)
+	if err != nil {
+		return err
+	}
+
+	
+	type payload struct {
+		FullComplaint *db.FullComplaint
+	}
+	p := payload{
+		FullComplaint: f,
+	}
+	return s.Template.ExecuteTemplate(w, "complaint.html", p)
 }
