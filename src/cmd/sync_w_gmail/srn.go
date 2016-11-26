@@ -27,9 +27,9 @@ func SRNFromBody(lines []string) string {
 }
 
 func SRNFromTLCComplaintBody(lines []string) string {
-	type matcher struct{
+	type matcher struct {
 		pattern string
-		prefix string
+		prefix  string
 	}
 	for _, m := range []matcher{
 		{"Subject: TLC Complaint # 1-1", "Subject: TLC Complaint # "},

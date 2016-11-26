@@ -1,11 +1,11 @@
 package db
 
 import (
-	"os"
-	"path/filepath"
 	"bytes"
 	"cwc/reg"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -20,18 +20,18 @@ type FullComplaint struct {
 	Location    string    `json:"location"`
 	Description string    `json:"description"`
 
-	Status           State  `json:"status"`
-	ServiceRequestID string `json:"311_service_request_id"`
-	TLCID            string `json:"tlc_id,omitempty"`
-	Hearing          bool   `json:"hearing"`
-	Violations []reg.Reg `json:"violations"`
-	Tweets     []string  `json:"tweets,omitempty"`
+	Status           State     `json:"status"`
+	ServiceRequestID string    `json:"311_service_request_id"`
+	TLCID            string    `json:"tlc_id,omitempty"`
+	Hearing          bool      `json:"hearing"`
+	Violations       []reg.Reg `json:"violations"`
+	Tweets           []string  `json:"tweets,omitempty"`
 
-	Body       string    `json:"body"`
-	Lines      []string  `json:"lines"` // the non-empty lines of text
-	Photos     []string  `json:"photos"`
-	Videos     []string  `json:"videos"`
-	Files      []string  `json:"files"`
+	Body   string   `json:"body"`
+	Lines  []string `json:"lines"` // the non-empty lines of text
+	Photos []string `json:"photos"`
+	Videos []string `json:"videos"`
+	Files  []string `json:"files"`
 }
 
 func (d DB) FullComplaint(c Complaint) (*FullComplaint, error) {
@@ -94,21 +94,23 @@ func ParseComplaint(c Complaint, body []byte, files []string) (*FullComplaint, e
 	}
 	f.Tweets = tweetPattern.FindAllString(f.Body, -1)
 	f.ServiceRequestID = findServiceRequestID(f.Lines)
-	
+
 	for _, filename := range files {
-		if filename == "notes.txt" {
+		switch filename {
+		case "notes.txt", ".DS_Store":
 			continue
 		}
-		switch strings.ToLower(filepath.Ext(filename)) {
-		case "mov", "m4v":
+		ext := strings.ToLower(filepath.Ext(filename))
+		switch ext {
+		case ".mov", ".m4v":
 			f.Videos = append(f.Videos, filename)
-		case "bmp", "png", "jpg", "jpeg", "tif", "gif":
+		case ".bmp", ".png", ".jpg", ".jpeg", ".tif", ".gif":
 			f.Photos = append(f.Photos, filename)
 		default:
 			f.Files = append(f.Files, filename)
 		}
 	}
-	
+
 	return f, nil
 }
 
