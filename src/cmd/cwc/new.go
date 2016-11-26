@@ -10,6 +10,7 @@ import (
 	"cwc/db"
 	"cwc/reg"
 
+	"lib/exif"
 	"lib/input"
 )
 
@@ -23,10 +24,14 @@ func newComplaint() error {
 	var dt time.Time
 	switch {
 	case strings.HasPrefix(yyyymmdd, "/"):
-		dt, err = getExifDateTime(yyyymmdd)
+		x, err := exif.Parse(yyyymmdd)
 		if err != nil {
 			return err
 		}
+		if x.Created.IsZero() {
+			return fmt.Errorf("no timestamp found in %q", yyyymmdd)
+		}
+		dt = x.Created
 		fmt.Printf("> using EXIF time %s\n", dt.Format("2006/01/02 3:04pm"))
 	case yyyymmdd == "":
 		yyyymmdd = time.Now().Format("20060102")

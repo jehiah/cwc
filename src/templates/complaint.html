@@ -32,12 +32,13 @@
     
     <div class="row">
       <div class="well well-sm">
-        <div class="pull-right"><samp>{{.Complaint.ID}}</samp></div>
+        <div class="pull-right text-center"><samp>{{.Complaint.ID}}</samp>{{if .HasGPSInfo }}<br/><img src="/complaint/{{$complaint.ID}}/map?s=200x150&z=15" width="200" height="150" />{{end}}</div>
         <p>When: <code>{{.Time.Format "2006/01/02 03:04pm (Mon Jan 2)"}}</code></p>
         <p>Vehicle: <code>{{.VehicleType}} <span class="license">{{.License}}</span></code></p>
         <p>Location: <code>{{.Location}}</code></p>
         <p>Service Request ID: <code>{{.ServiceRequestID}}</code></p>
         <p>Status: <code>{{.Status}}</code></p>
+        <div class="clearfix"></div>
       </div>
     </div>
 
@@ -84,14 +85,14 @@
     </div>
     {{ end }}
     
-    {{ if .Photos }}
+    {{ if .PhotoDetails }}
     <div class="row">
       <h3>Photos</h3>
-      {{ range .Photos }}
+      {{ range .PhotoDetails }}
       <div class="col-md-4 col-lg-3 col-xs-6">
-        <div class="panel panel-info"> 
-          <div class="panel-heading">{{.}}</div>
-          <a href="/complaint/{{$complaint.ID}}/{{.}}"><img src="/complaint/{{$complaint.ID}}/{{.}}" class="img-responsive complaint-photo" title="{{.}}" /></a>
+        <div class="panel {{. | PhotoClass }}"> 
+          <div class="panel-heading">{{.Name}}</div>
+          <a href="/complaint/{{$complaint.ID}}/{{.Name}}"><img src="/complaint/{{$complaint.ID}}/{{.Name}}" class="img-responsive complaint-photo" title="{{.Name}}" /></a>
         </div>
       </div>
       {{ end }}

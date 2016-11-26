@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"os"
 
 	"cwc/db"
 	"cwc/reg"
@@ -24,18 +25,30 @@ type Server struct {
 	listener net.Listener
 }
 
+func ComplaintClass(c *db.FullComplaint) string {
+	switch c.Status {
+	case db.ClosedPenalty, db.ClosedInspection:
+		return "success"
+	case db.HearingScheduled:
+		return "warning"
+	case db.Fined:
+		return "info"
+	}
+	return ""
+}
+
+func PhotoClass(p *db.Photo) string {
+	switch p.Submitted {
+	case true:
+		return "panel-primary"
+	case false:
+		return "panel-info"
+	}
+	panic("here")
+}
+
 func New(d db.DB, templatePath string) *Server {
-	t, err := template.New("").Funcs(template.FuncMap{"ComplaintClass": func(c *db.FullComplaint) string {
-		switch c.Status {
-		case db.ClosedPenalty, db.ClosedInspection:
-			return "success"
-		case db.HearingScheduled:
-			return "warning"
-		case db.Fined:
-			return "info"
-		}
-		return ""
-	}}).ParseGlob(filepath.Join(templatePath, "*.html"))
+	t, err := template.New("").Funcs(template.FuncMap{"ComplaintClass": ComplaintClass, "PhotoClass":PhotoClass}).ParseGlob(filepath.Join(templatePath, "*.html"))
 
 	if err != nil {
 		log.Fatalf("%s", err)
@@ -163,6 +176,39 @@ func (s *Server) Error(w http.ResponseWriter, err error) {
 	}
 }
 
+func (s *Server) Map(w http.ResponseWriter, r *http.Request, f *db.FullComplaint) {
+	// https://api.mapbox.com/styles/v1/mapbox/streets-v8/static/-122.4241,37.78,14.25,-10,0/600x600?access_token=
+	// env.Get("MAPBOX_TOKEN")
+	f.ParsePhotos()
+	var lat, long float64
+	for _, p := range f.PhotoDetails {
+		if p.Lat != 0 && p.Long != 0 {
+			lat, long = p.Lat, p.Long
+			break
+		}
+	}
+	r.ParseForm()
+	size := r.Form.Get("s")
+	if size == "" {
+		size = "600x600"
+	}
+	zoom := r.Form.Get("z")
+	if zoom == "" {
+		zoom = "15"
+	}
+	
+	rotation := 28 // the manhattan street grid offset
+	tile := fmt.Sprintf("%0.4f,%0.4f,%s,%d,0", long, lat, zoom, rotation)
+	params := url.Values{"access_token":{os.Getenv("MAPBOX_TOKEN")}}
+	url := &url.URL{
+		Scheme: "https",
+		Host: "api.mapbox.com",
+		Path: fmt.Sprintf("/styles/v1/mapbox/streets-v8/static/%s/%s@2x", tile, size),
+		RawQuery: params.Encode(),
+	}
+	http.Redirect(w, r, url.String(), 302)
+}
+
 func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 	patterns := strings.SplitN(r.URL.Path[1:], "/", 3)
 
@@ -173,9 +219,14 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 		log.Printf("%s", err)
 		return
 	}
+	f.ParsePhotos()
 
 	if len(patterns) == 3 {
 		file := patterns[2]
+		if file == "map" {
+			s.Map(w, r, f)
+			return
+		}
 		var found bool
 		for _, f := range f.Photos {
 			if f == file {

@@ -9,6 +9,9 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"log"
+	
+	"lib/exif"
 )
 
 type FullComplaint struct {
@@ -29,9 +32,12 @@ type FullComplaint struct {
 
 	Body   string   `json:"body"`
 	Lines  []string `json:"lines"` // the non-empty lines of text
+	BasePath   string `json:"-"`
 	Photos []string `json:"photos"`
 	Videos []string `json:"videos"`
 	Files  []string `json:"files"`
+	
+	PhotoDetails []*Photo `json:"photo_details"`
 }
 
 func (d DB) FullComplaint(c Complaint) (*FullComplaint, error) {
@@ -44,7 +50,8 @@ func (d DB) FullComplaint(c Complaint) (*FullComplaint, error) {
 	if err != nil {
 		return nil, err
 	}
-	dir, err := os.Open(d.FullPath(c))
+	path := d.FullPath(c)
+	dir, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
@@ -53,12 +60,12 @@ func (d DB) FullComplaint(c Complaint) (*FullComplaint, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ParseComplaint(c, body, files)
+	return ParseComplaint(c, body, path, files)
 }
 
 var tweetPattern = regexp.MustCompile(`https?://[^\s]+`)
 
-func ParseComplaint(c Complaint, body []byte, files []string) (*FullComplaint, error) {
+func ParseComplaint(c Complaint, body []byte, path string, files []string) (*FullComplaint, error) {
 	b := string(body)
 	contains := func(pattern string) bool {
 		return bytes.Contains(body, []byte(pattern))
@@ -73,6 +80,7 @@ func ParseComplaint(c Complaint, body []byte, files []string) (*FullComplaint, e
 		Body:    b,
 		Hearing: contains("scheduled"),
 		Status:  DetectState(b),
+		BasePath: path,
 	}
 	if contains("FHV") {
 		f.VehicleType = reg.FHV.String()
@@ -138,4 +146,47 @@ func splitLines(s string) []string {
 		}
 	}
 	return o
+}
+
+type Photo struct {
+	Name string
+	Filename string
+	Submitted bool
+	Created time.Time
+	Lat, Long float64
+	// Orientation
+}
+
+func (f *FullComplaint) ParsePhotos() {
+	if len(f.PhotoDetails) == len(f.Photos) {
+		// idempotent
+		return
+	}
+	for _, file := range f.Photos {
+		p := Photo{
+			Name: file,
+			Filename: filepath.Join(f.BasePath, file),
+			Submitted: strings.Contains(file, " copy."), // side effect of workflow for resized entries
+		}
+		x, err := exif.Parse(p.Filename)
+		if err != nil {
+			// TODO: use file created timestamp
+			log.Printf("%s", err)
+		} else {
+			p.Created = x.Created
+			p.Lat, p.Long = x.Lat, x.Long
+		}
+		f.PhotoDetails = append(f.PhotoDetails, &p)
+	}
+	return
+}
+
+func (f *FullComplaint) HasGPSInfo() bool {
+	f.ParsePhotos()
+	for _, p := range f.PhotoDetails {
+		if p.Lat != 0 && p.Long != 0 {
+			return true
+		}
+	}
+	return false
 }
