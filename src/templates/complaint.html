@@ -14,6 +14,9 @@
   .table-condensed>tbody>tr>td {
     padding: 2px 5px;
   }
+  .complaint-photo {
+    image-orientation: from-image; /* Use EXIF data from the image */
+  }
   </style>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -26,51 +29,53 @@
     <div class="container">
     {{template "nav.html"}}
     {{ with .FullComplaint }}
-    <div class="row">
-      <table class="table table-small table-condensed">
-          <tr class="{{. | ComplaintClass}}">
-            <td><code>{{.ServiceRequestID}}</code> {{if ne .Status "Unknown"}}<span class="label label-default">{{.Status}}</span>{{end}}</td>
-            <td>{{.Time.Format "2006/01/02 03:04pm"}}</td>
-            <td>{{.VehicleType}}</td>
-            <td>{{.License}}</td>
-            <td>{{.Location}}</td>
-            <td>{{range .Tweets}}<a href="{{.}}"><img src="https://abs.twimg.com/favicons/favicon.ico" width="16" height="16"></a>{{end}}
-              {{if .Hearing}}<span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>{{end}}
-              </td>
-          </tr>
-      </table>
-    </div>
     
-    {{ if .Violations }}
     <div class="row">
-      <table>
-        {{range .Violations}}
-          <th>{{.Code}}</th><td>{{.Description}}</td>
-        {{end}}
-      </table>
+      <div class="well well-sm">
+        <div class="pull-right"><samp>{{.Complaint.ID}}</samp></div>
+        <p>When: <code>{{.Time.Format "2006/01/02 03:04pm (Mon Jan 2)"}}</code></p>
+        <p>Vehicle: <code>{{.VehicleType}} <span class="license">{{.License}}</span></code></p>
+        <p>Location: <code>{{.Location}}</code></p>
+        <p>Service Request ID: <code>{{.ServiceRequestID}}</code></p>
+        <p>Status: <code>{{.Status}}</code></p>
+      </div>
     </div>
-    {{ end }}
 
     <div class="row">
+      <h3>Complaint</h3>
       <div class="well well-sm">
       {{ range .Lines }}
       <p>{{.}}</p>
       {{ end }}
       </div>
+      <form action="" method="POST">
+        <textarea class="form-control" rows="3" name="append_text"></textarea>
+        <button type="submit" class="btn btn-primary">Add Notes</button>
+      </form>
     </div>
-    
-    {{ if .Photos }}
+
+    {{ if .Violations }}
     <div class="row">
-      {{ range .Photos }}
-      <div class="col-md-4 col-lg-3 col-xs-6">
-        <img src="/complaint/{{$complaint.ID}}/{{.}}" class="img-responsive img-rounded" title="{{.}}" />
-      </div>
-      {{ end }}
+      <h3>Violations</h3>
+      <dl class="dl-horizontal">
+        {{range .Violations}}
+          <dt>{{.Code}}</dt><dd>{{.Description}}</dd>
+        {{end}}
+      </dl>
+    </div>
+    {{ end }}
+
+    {{ if .Tweets }}
+    <div class="row">
+        {{range .Tweets}}
+          <p><a href="{{.}}"><img src="https://abs.twimg.com/favicons/favicon.ico" width="16" height="16"> {{.}}</a></p>
+        {{end}}
     </div>
     {{ end }}
 
     {{ if .Files }}
     <div class="row">
+      <h3>Attachments</h3>
       <ul>
       {{ range .Files }}
         <li><a href="/complaint/{{$complaint.ID}}/{{.}}">{{.}}</a></li>
@@ -78,7 +83,21 @@
       </ul>    
     </div>
     {{ end }}
-
+    
+    {{ if .Photos }}
+    <div class="row">
+      <h3>Photos</h3>
+      {{ range .Photos }}
+      <div class="col-md-4 col-lg-3 col-xs-6">
+        <div class="panel panel-info"> 
+          <div class="panel-heading">{{.}}</div>
+          <a href="/complaint/{{$complaint.ID}}/{{.}}"><img src="/complaint/{{$complaint.ID}}/{{.}}" class="img-responsive complaint-photo" title="{{.}}" /></a>
+        </div>
+      </div>
+      {{ end }}
+    </div>
+    {{ end }}
+    
     {{ end }}
     
     <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script> -->
