@@ -72,7 +72,7 @@ func (f *FullComplaint) ParsePhotos() {
 		f.PhotoDetails = append(f.PhotoDetails, &p)
 	}
 	
-	// TODO: sort by timestamps
+	// TODO: sort by timestamps ?
 	return
 }
 
