@@ -100,6 +100,7 @@ func ParseComplaint(c Complaint, body []byte, path string, files []string) (*Ful
 	}
 	f.Tweets = tweetPattern.FindAllString(f.Body, -1)
 	f.ServiceRequestID = findServiceRequestID(f.Lines)
+	f.TLCID = findTLCID(f.Lines)
 
 	for _, filename := range files {
 		switch filename {
@@ -118,20 +119,6 @@ func ParseComplaint(c Complaint, body []byte, path string, files []string) (*Ful
 	}
 
 	return f, nil
-}
-
-func findServiceRequestID(lines []string) string {
-	for _, line := range lines {
-		switch {
-		case strings.HasPrefix(line, "1-1-1") && len(line) == 14:
-			return "C" + line
-		case strings.HasPrefix(line, "C1-1-1") && len(line) == 15:
-			return line
-		case strings.HasPrefix(line, "Service Request #: C1-1-1") && len(line) == 34:
-			return line[19:34]
-		}
-	}
-	return ""
 }
 
 // splitLines returns the non-empty trimmed lines

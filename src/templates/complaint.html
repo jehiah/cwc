@@ -37,6 +37,9 @@
         <p>Vehicle: <code>{{.VehicleType}} <span class="license">{{.License}}</span></code></p>
         <p>Location: <code>{{.Location}}</code></p>
         <p>Service Request ID: <code>{{.ServiceRequestID}}</code></p>
+        {{ if .TLCID }}
+        <p>TLC Complaint ID: <code>{{.TLCID}}</code></p>
+        {{end}}
         <p>Status: <code>{{.Status}}</code></p>
         <div class="clearfix"></div>
       </div>

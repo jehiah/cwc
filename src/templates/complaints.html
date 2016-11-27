@@ -28,7 +28,9 @@
       <table class="table table-small table-condensed">
         {{ range .FullComplaints }}
           <tr class="{{. | ComplaintClass}}">
-            <td><code><a href="/complaint/{{.Complaint.ID}}">{{.ServiceRequestID}}</a></code> {{if ne .Status "Unknown"}}<span class="label label-default">{{.Status}}</span>{{end}}</td>
+            <td><code><a href="/complaint/{{.Complaint.ID}}">{{.ServiceRequestID}}</a></code>
+            {{if .TLCID}}<code>{{.TLCID}}</code>{{end}}
+            {{if ne .Status "Unknown"}}<span class="label label-default">{{.Status}}</span>{{end}}</td>
             <td>{{.Time.Format "2006/01/02 03:04pm"}}</td>
             <td>{{.VehicleType}}</td>
             <td>{{.License}}</td>
