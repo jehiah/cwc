@@ -33,6 +33,8 @@ func ComplaintClass(c *db.FullComplaint) string {
 		return "warning"
 	case db.Fined:
 		return "info"
+	case db.ClosedUnableToID:
+		return "active"
 	}
 	return ""
 }
@@ -219,7 +221,6 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 		log.Printf("%s", err)
 		return
 	}
-	f.ParsePhotos()
 
 	if len(patterns) == 3 {
 		file := patterns[2]
@@ -244,6 +245,7 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		if found {
+			// render the file directly
 			path := s.DB.FullPath(c)
 			staticServer := http.StripPrefix(fmt.Sprintf("/complaint/%s/", patterns[1]), http.FileServer(http.Dir(path)))
 			staticServer.ServeHTTP(w, r)
@@ -254,6 +256,7 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	f.ParsePhotos()
 	r.ParseForm()
 
 	type payload struct {

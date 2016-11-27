@@ -16,6 +16,7 @@ const (
 	ClosedGuilty           = "FINED (guilty)"
 	ClosedNotGuilty        = "CLOSED (not guilty)"
 	ClosedInspection       = "CLOSED (Referred to S&E)"
+	ClosedUnableToID       = "CLOSED (Uanble to ID)"
 )
 
 func (s State) String() string {
@@ -30,8 +31,10 @@ func DetectState(s string) State {
 		return ClosedInspection
 	case strings.Contains(s, "scheduled"):
 		return HearingScheduled
-	case strings.Contains(s, "mailed to driver"):
+	case strings.Contains(s, "mailed to driver") || strings.Contains(s, "sent to driver"):
 		return Fined
+	case strings.Contains(s, "unable to identify"):
+		return ClosedUnableToID
 	}
 	return Unknown
 }

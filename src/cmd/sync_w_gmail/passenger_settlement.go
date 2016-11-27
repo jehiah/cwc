@@ -59,23 +59,23 @@ func (s *SettlementNotification) Handle(m *gmail.Message) error {
 		return nil
 	}
 	complaint := complaints[0]
+	log.Printf("\tfound related complaint %s", complaint)
 
 	// if we already wrote this message in... continue
 	if ok, err := db.Default.ComplaintContains(complaint, m.Id); ok {
-		log.Printf("already recorded - %s", complaint)
+		log.Printf("\talready recorded")
 		return nil
 	} else if err != nil {
 		log.Printf("%s", err)
 		return nil
 	}
 
-	log.Printf("** message related to %s ***", complaint)
 
 	line := "The driver has pleaded guilty to a rule violation and has paid a penalty."
 	if TLCComplaintNumber != "" {
 		line = fmt.Sprintf("complaint %s. %s", TLCComplaintNumber, line)
 	}
-	log.Print(line)
+	log.Printf("\t> %s", line)
 	err = s.DB.Append(complaint, fmt.Sprintf("\n%s %s\n", prettyID, line))
 	return err
 }

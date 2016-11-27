@@ -3,7 +3,6 @@ package gmailutils
 import (
 	"encoding/base64"
 	"errors"
-	"log"
 	"strings"
 
 	"google.golang.org/api/gmail/v1"
@@ -23,7 +22,6 @@ func recurse(part *gmail.MessagePart) ([]byte, error) {
 			gotError = err
 		}
 	}
-	log.Printf("%s", part.MimeType)
 	switch {
 	case strings.HasPrefix(part.MimeType, "text/plain"):
 		b, err := base64.StdEncoding.DecodeString(part.Body.Data)

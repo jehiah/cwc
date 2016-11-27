@@ -19,6 +19,7 @@ func Parse(filename string) (*Exif, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer f.Close()
 	x, err := exif.Decode(f)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing time from %s %s", filename, err)

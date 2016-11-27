@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	limit := flag.Int("limit", 500, "max number to process")
+	limit := flag.Int("limit", 100, "max number to process")
 	flag.Parse()
 
 	srv := gmailutils.GmailService("cwc.json")
@@ -33,9 +33,9 @@ func main() {
 	// 	log.Fatalf("Unable to retrieve messages. %v", err)
 	// }
 	handlers := []EmailHandler{
-		&SettlementNotification{DB: db.Default, alternate: true},
-		&SettlementNotification{DB: db.Default},
-		// &ServiceReqeustUpdate{db.Default},
+		// &SettlementNotification{DB: db.Default, alternate: true},
+		// &SettlementNotification{DB: db.Default},
+		&ServiceReqeustUpdate{DB: db.Default},
 	}
 	for _, h := range handlers {
 		q := h.BuildQuery(srv.Users.Messages.List(user)).MaxResults(50)
