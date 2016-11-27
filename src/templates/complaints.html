@@ -13,6 +13,9 @@
   .table-condensed>tbody>tr>td {
     padding: 2px 5px;
   }
+  tbody>tr>td.date {
+    font-size:11px;
+  }
   </style>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -23,26 +26,40 @@
   </head>
   <body>
     <div class="container">
-    {{template "nav.html"}}
+    {{template "nav.html" .}}
+    {{ if .PendingHearings }}
+      <h3>{{.PendingHearings | len}} Pending Hearings</h3>
+      <ul>
+        {{ range .PendingHearings }}
+        <li>{{.Hearing.Format "Mon Jan 2 3:04pm"}} <code><a href="/complaint/{{.Complaint.ID}}">{{.ServiceRequestID}}</a></code> {{ if .TLCID}}<code>{{.TLCID}}</code>{{end}} - {{.VehicleType}} {{.License}} {{.Location}} {{ range .Violations }} {{.Description}} {{ end }}</li>
+        {{ end }}
+      </ul>
+    {{ end }}
+    
+    {{ if .Query }}
+      <h3>{{.FullComplaints | len}} Complaints</h3>
+    {{ end }}
     <div class="row">
+      <div class="col-xs-12">
       <table class="table table-small table-condensed">
         {{ range .FullComplaints }}
           <tr class="{{. | ComplaintClass}}">
             <td><code><a href="/complaint/{{.Complaint.ID}}">{{.ServiceRequestID}}</a></code>
             {{if .TLCID}}<code>{{.TLCID}}</code>{{end}}
             {{if ne .Status "Unknown"}}<span class="label label-default">{{.Status}}</span>{{end}}</td>
-            <td>{{.Time.Format "2006/01/02 03:04pm"}}</td>
+            <td class="date">{{.Time.Format "2006/01/02 03:04pm"}}</td>
             <td>{{.VehicleType}}</td>
             <td>{{.License}}</td>
             <td>{{.Location}}</td>
             <td>{{range .Violations}}<small>{{.Code}} - {{.Description}}</small><br/>{{end}}</td>
             <td>{{range .Tweets}}<a href="{{.}}"><img src="https://abs.twimg.com/favicons/favicon.ico" width="16" height="16"></a>{{end}}
-              {{if .Hearing}}<span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>{{end}}
+              {{if not .Hearing.IsZero}}<span class="glyphicon glyphicon-calendar" aria-hidden="true"></span>{{end}}
               {{if .Files}}<span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span>{{end}}
               </td>
           </tr>
         {{ end }}
       </table>
+      </div>
     </div>
     
     <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script> -->

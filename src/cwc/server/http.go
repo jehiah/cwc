@@ -69,7 +69,10 @@ func New(d db.DB, templatePath string) *Server {
 }
 
 func (s *Server) Report(w http.ResponseWriter, r *http.Request) {
-	err := s.Template.ExecuteTemplate(w, "report.html", nil)
+	type payload struct {
+		Query string
+	}
+	err := s.Template.ExecuteTemplate(w, "report.html", payload{})
 	if err != nil {
 		log.Printf("%s", err)
 		s.Error(w, err)
@@ -91,6 +94,7 @@ func (s *Server) DataReport(w http.ResponseWriter, r *http.Request) {
 func (s *Server) Regulations(w http.ResponseWriter, r *http.Request) {
 	type payload struct {
 		Regulations []reg.Reg
+		Query       string
 	}
 	p := payload{Regulations: reg.All}
 	err := s.Template.ExecuteTemplate(w, "reg.html", p)
@@ -137,8 +141,9 @@ func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) {
 
 	r.ParseForm()
 	type payload struct {
-		FullComplaints []*db.FullComplaint
-		Query          string
+		FullComplaints  []*db.FullComplaint
+		PendingHearings []*db.FullComplaint
+		Query           string
 	}
 	p := payload{
 		Query: r.Form.Get("q"),
@@ -163,6 +168,17 @@ func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) {
 		}
 		p.FullComplaints = append(p.FullComplaints, f)
 	}
+
+	if p.Query == "" {
+		nyc, _ := time.LoadLocation("America/New_York")
+		dayStart := time.Now().In(nyc).Truncate(time.Hour * 24)
+		for _, f := range p.FullComplaints {
+			if !f.Hearing.IsZero() && f.Hearing.After(dayStart) {
+				p.PendingHearings = append(p.PendingHearings, f)
+			}
+		}
+	}
+
 	err = s.Template.ExecuteTemplate(w, "complaints.html", p)
 	if err != nil {
 		s.Error(w, err)
@@ -172,7 +188,11 @@ func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) Error(w http.ResponseWriter, err error) {
 	w.WriteHeader(500)
-	err = s.Template.ExecuteTemplate(w, "error.html", struct{ Error string }{err.Error()})
+	type payload struct {
+		Error string
+		Query string
+	}
+	err = s.Template.ExecuteTemplate(w, "error.html", payload{Error: err.Error()})
 	if err != nil {
 		log.Printf("error rendering %s", err)
 	}
@@ -261,6 +281,7 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 
 	type payload struct {
 		FullComplaint *db.FullComplaint
+		Query         string
 	}
 	p := payload{
 		FullComplaint: f,

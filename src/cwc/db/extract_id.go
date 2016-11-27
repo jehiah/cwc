@@ -1,8 +1,8 @@
 package db
 
 import (
-	"strings"
 	"regexp"
+	"strings"
 )
 
 func findServiceRequestID(lines []string) string {
@@ -20,10 +20,11 @@ func findServiceRequestID(lines []string) string {
 }
 
 var tlcIDPattern = regexp.MustCompile("(stip|Stip) #? ?(10[01][0-9]{5})(s|S)?")
+
 func findTLCID(lines []string) string {
 	for _, line := range lines {
 		matches := tlcIDPattern.FindAllStringSubmatch(line, -1)
-		if len(matches) >= 1 && len(matches[0]) >= 2{
+		if len(matches) >= 1 && len(matches[0]) >= 2 {
 			return matches[0][2]
 		}
 	}

@@ -1,38 +1,39 @@
 package db
 
 import (
-	"regexp"
-	"time"
-	"log"
-	"strings"
 	"fmt"
+	"regexp"
+	"strings"
+	"time"
 )
 
-var ny *time.Location
+var nyc *time.Location
+
 func init() {
-	ny, _ = time.LoadLocation("America/New_York")
+	nyc, _ = time.LoadLocation("America/New_York")
 }
-var hearingPattern = regexp.MustCompile("(s|S)cheduled ([0-9]{1,2}/[0-9]{1,2}/2?0?1[0-9]) (at )?([0-9]{1,2}:?[0-9]{0,2}) ?(am|AM|pm|PM)")
+
+var hearingPattern = regexp.MustCompile("(Scheduled|scheduled|hearing sch) ([0-9]{1,2}/[0-9]{1,2}/2?0?1[0-9]) (at |- )?([0-9]{1,2}:?[0-9]{0,2}) ?(am|AM|pm|PM)")
 var hearingLayouts = []string{
 	"1/2/06 3:04pm",
 	"1/2/2006 3:04pm",
 }
+
 func extractHearingDate(lines []string) time.Time {
-	for _, line := range lines {
+	// iterate backwards start with last log line
+	for i := len(lines); i > 0; i-- {
+		line := lines[i-1]
 		matches := hearingPattern.FindAllStringSubmatch(line, -1)
-		if len(matches) >= 1 && len(matches[0]) >= 6{
+		if len(matches) >= 1 && len(matches[0]) >= 6 {
 			s := fmt.Sprintf("%s %s%s", matches[0][2], matches[0][4], strings.ToLower(matches[0][5]))
-			log.Printf("match %#v = %q", matches[0], s)
 			for _, layout := range hearingLayouts {
-				t, err := time.ParseInLocation(layout, s, ny)
+				t, err := time.ParseInLocation(layout, s, nyc)
 				if err == nil {
 					return t
-				} else {
-					log.Printf("%q error %s", s, err)
 				}
 			}
 		}
 	}
-	
+
 	return time.Time{}
 }

@@ -24,7 +24,7 @@ type FullComplaint struct {
 	Status           State     `json:"status"`
 	ServiceRequestID string    `json:"311_service_request_id"`
 	TLCID            string    `json:"tlc_id,omitempty"`
-	Hearing          bool      `json:"hearing"`
+	Hearing          time.Time `json:"hearing"`
 	Violations       []reg.Reg `json:"violations"`
 	Tweets           []string  `json:"tweets,omitempty"`
 
@@ -68,6 +68,7 @@ func ParseComplaint(c Complaint, body []byte, path string, files []string) (*Ful
 	contains := func(pattern string) bool {
 		return bytes.Contains(body, []byte(pattern))
 	}
+	lines := splitLines(b)
 	f := &FullComplaint{
 		Complaint:   c,
 		Timestamp:   c.Time().Unix(),
@@ -75,10 +76,14 @@ func ParseComplaint(c Complaint, body []byte, path string, files []string) (*Ful
 		License:     c.License(),
 		VehicleType: reg.Taxi.String(),
 
-		Body:     b,
-		Hearing:  contains("scheduled"),
-		Status:   DetectState(b),
-		BasePath: path,
+		Body:             b,
+		Lines:            lines,
+		Hearing:          extractHearingDate(lines),
+		Status:           DetectState(b),
+		BasePath:         path,
+		TLCID:            findTLCID(lines),
+		ServiceRequestID: findServiceRequestID(lines),
+		Tweets:           tweetPattern.FindAllString(b, -1),
 	}
 	if contains("FHV") {
 		f.VehicleType = reg.FHV.String()
@@ -88,7 +93,6 @@ func ParseComplaint(c Complaint, body []byte, path string, files []string) (*Ful
 			f.Violations = append(f.Violations, r)
 		}
 	}
-	f.Lines = splitLines(f.Body)
 	if len(f.Lines) >= 1 {
 		location := strings.SplitN(f.Lines[0], " ", 5)
 		if len(location) == 5 {
@@ -98,9 +102,6 @@ func ParseComplaint(c Complaint, body []byte, path string, files []string) (*Ful
 	if len(f.Lines) >= 2 {
 		f.Description = f.Lines[1]
 	}
-	f.Tweets = tweetPattern.FindAllString(f.Body, -1)
-	f.ServiceRequestID = findServiceRequestID(f.Lines)
-	f.TLCID = findTLCID(f.Lines)
 
 	for _, filename := range files {
 		switch filename {

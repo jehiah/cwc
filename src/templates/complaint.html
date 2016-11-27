@@ -27,7 +27,7 @@
   </head>
   <body>
     <div class="container">
-    {{template "nav.html"}}
+    {{template "nav.html" .}}
     {{ with .FullComplaint }}
     
     <div class="row">
@@ -39,6 +39,9 @@
         <p>Service Request ID: <code>{{.ServiceRequestID}}</code></p>
         {{ if .TLCID }}
         <p>TLC Complaint ID: <code>{{.TLCID}}</code></p>
+        {{end}}
+        {{ if not .Hearing.IsZero}}
+        <p>Hearing Scheduled: <code>{{.Hearing.Format "2006/01/02 03:04pm (Mon Jan 2)"}}</code></p>
         {{end}}
         <p>Status: <code>{{.Status}}</code></p>
         <div class="clearfix"></div>
