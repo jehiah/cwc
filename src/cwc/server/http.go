@@ -7,11 +7,11 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
-	"os"
 
 	"cwc/db"
 	"cwc/reg"
@@ -50,7 +50,7 @@ func PhotoClass(p *db.Photo) string {
 }
 
 func New(d db.DB, templatePath string) *Server {
-	t, err := template.New("").Funcs(template.FuncMap{"ComplaintClass": ComplaintClass, "PhotoClass":PhotoClass}).ParseGlob(filepath.Join(templatePath, "*.html"))
+	t, err := template.New("").Funcs(template.FuncMap{"ComplaintClass": ComplaintClass, "PhotoClass": PhotoClass}).ParseGlob(filepath.Join(templatePath, "*.html"))
 
 	if err != nil {
 		log.Fatalf("%s", err)
@@ -198,14 +198,14 @@ func (s *Server) Map(w http.ResponseWriter, r *http.Request, f *db.FullComplaint
 	if zoom == "" {
 		zoom = "15"
 	}
-	
+
 	rotation := 28 // the manhattan street grid offset
 	tile := fmt.Sprintf("%0.4f,%0.4f,%s,%d,0", long, lat, zoom, rotation)
-	params := url.Values{"access_token":{os.Getenv("MAPBOX_TOKEN")}}
+	params := url.Values{"access_token": {os.Getenv("MAPBOX_TOKEN")}}
 	url := &url.URL{
-		Scheme: "https",
-		Host: "api.mapbox.com",
-		Path: fmt.Sprintf("/styles/v1/mapbox/streets-v8/static/%s/%s@2x", tile, size),
+		Scheme:   "https",
+		Host:     "api.mapbox.com",
+		Path:     fmt.Sprintf("/styles/v1/mapbox/streets-v8/static/%s/%s@2x", tile, size),
 		RawQuery: params.Encode(),
 	}
 	http.Redirect(w, r, url.String(), 302)

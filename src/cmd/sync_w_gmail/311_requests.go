@@ -12,8 +12,8 @@ import (
 )
 
 type ServiceReqeustUpdate struct {
-	DB db.DB
-	force bool
+	DB     db.DB
+	force  bool
 	dryrun bool
 }
 

@@ -29,7 +29,7 @@ func Parse(filename string) (*Exif, error) {
 		e.Created = dt
 	}
 	e.Lat, e.Long, _ = x.LatLong()
-	
+
 	// Orientation
 	return e, nil
 

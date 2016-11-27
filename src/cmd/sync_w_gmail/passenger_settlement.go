@@ -70,7 +70,6 @@ func (s *SettlementNotification) Handle(m *gmail.Message) error {
 		return nil
 	}
 
-
 	line := "The driver has pleaded guilty to a rule violation and has paid a penalty."
 	if TLCComplaintNumber != "" {
 		line = fmt.Sprintf("complaint %s. %s", TLCComplaintNumber, line)

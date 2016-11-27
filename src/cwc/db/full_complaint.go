@@ -2,16 +2,14 @@ package db
 
 import (
 	"bytes"
-	"cwc/reg"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
-	"log"
-	
-	"lib/exif"
+
+	"cwc/reg"
 )
 
 type FullComplaint struct {
@@ -30,13 +28,13 @@ type FullComplaint struct {
 	Violations       []reg.Reg `json:"violations"`
 	Tweets           []string  `json:"tweets,omitempty"`
 
-	Body   string   `json:"body"`
-	Lines  []string `json:"lines"` // the non-empty lines of text
-	BasePath   string `json:"-"`
-	Photos []string `json:"photos"`
-	Videos []string `json:"videos"`
-	Files  []string `json:"files"`
-	
+	Body     string   `json:"body"`
+	Lines    []string `json:"lines"` // the non-empty lines of text
+	BasePath string   `json:"-"`
+	Photos   []string `json:"photos"`
+	Videos   []string `json:"videos"`
+	Files    []string `json:"files"`
+
 	PhotoDetails []*Photo `json:"photo_details"`
 }
 
@@ -77,9 +75,9 @@ func ParseComplaint(c Complaint, body []byte, path string, files []string) (*Ful
 		License:     c.License(),
 		VehicleType: reg.Taxi.String(),
 
-		Body:    b,
-		Hearing: contains("scheduled"),
-		Status:  DetectState(b),
+		Body:     b,
+		Hearing:  contains("scheduled"),
+		Status:   DetectState(b),
 		BasePath: path,
 	}
 	if contains("FHV") {
@@ -146,47 +144,4 @@ func splitLines(s string) []string {
 		}
 	}
 	return o
-}
-
-type Photo struct {
-	Name string
-	Filename string
-	Submitted bool
-	Created time.Time
-	Lat, Long float64
-	// Orientation
-}
-
-func (f *FullComplaint) ParsePhotos() {
-	if len(f.PhotoDetails) == len(f.Photos) {
-		// idempotent
-		return
-	}
-	for _, file := range f.Photos {
-		p := Photo{
-			Name: file,
-			Filename: filepath.Join(f.BasePath, file),
-			Submitted: strings.Contains(file, " copy."), // side effect of workflow for resized entries
-		}
-		x, err := exif.Parse(p.Filename)
-		if err != nil {
-			// TODO: use file created timestamp
-			log.Printf("%s", err)
-		} else {
-			p.Created = x.Created
-			p.Lat, p.Long = x.Lat, x.Long
-		}
-		f.PhotoDetails = append(f.PhotoDetails, &p)
-	}
-	return
-}
-
-func (f *FullComplaint) HasGPSInfo() bool {
-	f.ParsePhotos()
-	for _, p := range f.PhotoDetails {
-		if p.Lat != 0 && p.Long != 0 {
-			return true
-		}
-	}
-	return false
 }
