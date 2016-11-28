@@ -133,3 +133,30 @@ func splitLines(s string) []string {
 	}
 	return o
 }
+
+// // fullComplaintsByAge implements sort.Interface for []Complaint based on
+// // the complaint Time.
+// type FullComplaintsByAge []*FullComplaint
+// func (a FullComplaintsByAge) Len() int           { return len(a) }
+// func (a FullComplaintsByAge) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+// func (a FullComplaintsByAge) Less(i, j int) bool { return a[i].Time.Before(a[j].Time) }
+
+// FullComplaintsByHearing implements sort.Interface for []Complaint based on
+// the complaint Hearing if exists otherwise Time. Hearing always sorts before those without a hearing
+type FullComplaintsByHearing []*FullComplaint
+
+func (a FullComplaintsByHearing) Len() int      { return len(a) }
+func (a FullComplaintsByHearing) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a FullComplaintsByHearing) Less(i, j int) bool {
+	switch {
+	case !a[i].Hearing.IsZero() && !a[j].Hearing.IsZero():
+		return a[i].Hearing.Before(a[j].Hearing)
+	case a[i].Hearing.IsZero() && a[j].Hearing.IsZero():
+		return a[i].Time.Before(a[j].Time)
+	case a[i].Hearing.IsZero():
+		return true
+	case a[j].Hearing.IsZero():
+		return false
+	}
+	panic("unreachable")
+}

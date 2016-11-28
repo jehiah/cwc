@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -33,7 +34,7 @@ func ComplaintClass(c *db.FullComplaint) string {
 		return "warning"
 	case db.Fined:
 		return "info"
-	case db.ClosedUnableToID:
+	case db.ClosedUnableToID, db.Invalid:
 		return "active"
 	}
 	return ""
@@ -177,6 +178,7 @@ func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) {
 				p.PendingHearings = append(p.PendingHearings, f)
 			}
 		}
+		sort.Sort(db.FullComplaintsByHearing(p.PendingHearings))
 	}
 
 	err = s.Template.ExecuteTemplate(w, "complaints.html", p)
@@ -239,6 +241,19 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		s.Error(w, err)
 		log.Printf("%s", err)
+		return
+	}
+
+	// handle POST
+	if r.Method == "POST" {
+		r.ParseForm()
+		txt := strings.TrimSpace(r.Form.Get("append_text"))
+		if txt == "" {
+			s.Error(w, fmt.Errorf("MISSING_ARG_APPEND_TEXT"))
+			return
+		}
+		s.DB.Append(c, fmt.Sprintf("\n[note:%s] %s\n", time.Now().Format("2006/01/02 15:04"), txt))
+		http.Redirect(w, r, (&url.URL{Path: r.URL.Path}).String(), 302)
 		return
 	}
 

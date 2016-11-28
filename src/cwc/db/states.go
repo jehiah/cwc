@@ -35,6 +35,8 @@ func DetectState(s string) State {
 		return Fined
 	case strings.Contains(s, "unable to identify"):
 		return ClosedUnableToID
+	case strings.Contains(s, "Not a TLC violation"):
+		return Invalid
 	}
 	return Unknown
 }
