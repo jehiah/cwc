@@ -72,8 +72,9 @@ func New(d db.DB, templatePath string) *Server {
 func (s *Server) Report(w http.ResponseWriter, r *http.Request) {
 	type payload struct {
 		Query string
+		Page  string
 	}
-	err := s.Template.ExecuteTemplate(w, "report.html", payload{})
+	err := s.Template.ExecuteTemplate(w, "report.html", payload{Page: "Report"})
 	if err != nil {
 		log.Printf("%s", err)
 		s.Error(w, err)
@@ -96,8 +97,9 @@ func (s *Server) Regulations(w http.ResponseWriter, r *http.Request) {
 	type payload struct {
 		Regulations []reg.Reg
 		Query       string
+		Page        string
 	}
-	p := payload{Regulations: reg.All}
+	p := payload{Regulations: reg.All, Page: "Regulations"}
 	err := s.Template.ExecuteTemplate(w, "reg.html", p)
 	if err != nil {
 		log.Printf("%s", err)
@@ -145,9 +147,11 @@ func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) {
 		FullComplaints  []*db.FullComplaint
 		PendingHearings []*db.FullComplaint
 		Query           string
+		Page            string
 	}
 	p := payload{
 		Query: r.Form.Get("q"),
+		Page:  "Complaints",
 	}
 	var complaints []db.Complaint
 	var err error
@@ -193,6 +197,7 @@ func (s *Server) Error(w http.ResponseWriter, err error) {
 	type payload struct {
 		Error string
 		Query string
+		Page  string
 	}
 	err = s.Template.ExecuteTemplate(w, "error.html", payload{Error: err.Error()})
 	if err != nil {
@@ -297,9 +302,11 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 	type payload struct {
 		FullComplaint *db.FullComplaint
 		Query         string
+		Page          string
 	}
 	p := payload{
 		FullComplaint: f,
+		Page:          "Complaints",
 	}
 	err = s.Template.ExecuteTemplate(w, "complaint.html", p)
 	if err != nil {
