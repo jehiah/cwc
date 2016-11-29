@@ -2,6 +2,7 @@ package exif
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -11,7 +12,10 @@ import (
 type Exif struct {
 	Created   time.Time
 	Lat, Long float64
+
 	// Orientation string
+	ExifRotation int
+	ExifFlip     bool
 }
 
 func Parse(filename string) (*Exif, error) {
@@ -31,6 +35,42 @@ func Parse(filename string) (*Exif, error) {
 	e.Lat, e.Long, _ = x.LatLong()
 
 	// Orientation
+	o, err := x.Get(exif.Orientation)
+	if err == nil {
+		n, err := o.Int(0)
+		if err == nil {
+			e.ExifRotation, e.ExifFlip = calculateRotationFilp(n)
+		}
+	}
 	return e, nil
 
+}
+
+func calculateRotationFilp(orientation int) (rotate int, flip bool) {
+	log.Printf("orientation %v", orientation)
+	// from https://github.com/h2non/bimg/blob/master/resize.go#L457
+	switch orientation {
+	case 6:
+		rotate = 90
+	case 3:
+		rotate = 180
+	case 8:
+		rotate = 270
+	case 2:
+		flip = true
+		// flip 1
+	case 7:
+		flip = true
+		rotate = 90
+		// flip 6
+	case 4:
+		flip = true
+		rotate = 180
+		// flip 3
+	case 5:
+		flip = true
+		rotate = 270
+		// flip 8
+	}
+	return
 }
