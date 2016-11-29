@@ -28,19 +28,27 @@
     <div class="container">
     {{template "nav.html" .}}
     {{ if .PendingHearings }}
-      <h3><span class="glyphicon glyphicon-calendar" aria-hidden="true"></span> {{.PendingHearings | len}} Pending Hearings</h3>
-      <ul>
-        {{ range .PendingHearings }}
-        <li>{{.Hearing.Format "Mon Jan 2 3:04pm"}} <code><a href="/complaint/{{.Complaint.ID}}">{{.ServiceRequestID}}</a></code> {{ if .TLCID}}<code>{{.TLCID}}</code>{{end}} - {{.VehicleType}} {{.License}} {{.Location}} {{ range .Violations }} {{.Description}} {{ end }}</li>
-        {{ end }}
-      </ul>
+      <div class="row">
+        <div class="col-xs-12">
+          <h3><span class="glyphicon glyphicon-calendar" aria-hidden="true"></span> {{.PendingHearings | len}} Pending Hearings</h3>
+          <ul>
+            {{ range .PendingHearings }}
+            <li>{{.Hearing.Format "Mon Jan 2 3:04pm"}} <code><a href="/complaint/{{.Complaint.ID}}">{{.ServiceRequestID}}</a></code> {{ if .TLCID}}<code>{{.TLCID}}</code>{{end}} - {{.VehicleType}} {{.License}} {{.Location}} {{ range .Violations }} {{.Description}} {{ end }}</li>
+            {{ end }}
+          </ul>
+        </div>
+      </div>
     {{ end }}
     
-    {{ if .Query }}
-      <h3>{{.FullComplaints | len}} Matching Complaints</h3>
-    {{ else }}
-      <h3>{{.FullComplaints | len}} Complaints</h3>
-    {{ end }}
+    <div class="row">
+      <div class="col-xs-12">
+        {{ if .Query }}
+          <h3>{{.FullComplaints | len}} Matching Complaints</h3>
+        {{ else }}
+          <h3>{{.FullComplaints | len}} Complaints</h3>
+        {{ end }}
+      </div>
+    </div>
     <div class="row">
       <div class="col-xs-12">
       <table class="table table-small table-condensed">

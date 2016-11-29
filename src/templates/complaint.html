@@ -31,6 +31,7 @@
     {{ with .FullComplaint }}
     
     <div class="row">
+      <div class="col-xs-12">
       <div class="well well-sm">
         <div class="pull-right text-center"><samp>{{.Complaint.ID}}</samp>{{if .HasGPSInfo }}<br/><img src="/complaint/{{$complaint.ID}}/map?s=200x150&z=15" width="200" height="150" />{{end}}</div>
         <p>When: <code>{{.Time.Format "2006/01/02 03:04pm (Mon Jan 2)"}}</code></p>
@@ -47,8 +48,10 @@
         <div class="clearfix"></div>
       </div>
     </div>
+    </div>
 
     <div class="row">
+      <div class="col-xs-12">
       <h3>Complaint</h3>
       <div class="well well-sm">
       {{ range .Lines }}
@@ -60,40 +63,49 @@
         <button type="submit" class="btn btn-primary">Add Notes</button>
       </form>
     </div>
+    </div>
 
     {{ if .Violations }}
     <div class="row">
-      <h3>Violations</h3>
-      <dl class="dl-horizontal">
-        {{range .Violations}}
-          <dt>{{.Code}}</dt><dd>{{.Description}}</dd>
-        {{end}}
-      </dl>
+      <div class="col-xs-12">
+        <h3>Violations</h3>
+        <dl class="dl-horizontal">
+          {{range .Violations}}
+            <dt>{{.Code}}</dt><dd>{{.Description}}</dd>
+          {{end}}
+        </dl>
+      </div>
     </div>
     {{ end }}
 
     {{ if .Tweets }}
     <div class="row">
+      <div class="col-xs-12">
         {{range .Tweets}}
           <p><a href="{{.}}"><img src="https://abs.twimg.com/favicons/favicon.ico" width="16" height="16"> {{.}}</a></p>
         {{end}}
+      </div>
     </div>
     {{ end }}
 
     {{ if .Files }}
     <div class="row">
-      <h3>Attachments</h3>
-      <ul>
-      {{ range .Files }}
-        <li><a href="/complaint/{{$complaint.ID}}/{{.}}">{{.}}</a></li>
-      {{ end }}
-      </ul>    
+      <div class="col-xs-12">
+        <h3>Attachments</h3>
+        <ul>
+        {{ range .Files }}
+          <li><a href="/complaint/{{$complaint.ID}}/{{.}}">{{.}}</a></li>
+        {{ end }}
+        </ul>
+      </div>
     </div>
     {{ end }}
     
     {{ if .PhotoDetails }}
     <div class="row">
+      <div class="col-xs-12">
       <h3>Photos</h3>
+      </div>
       {{ range .PhotoDetails }}
       <div class="col-md-4 col-lg-3 col-xs-6">
         <div class="panel {{. | PhotoClass }}"> 
