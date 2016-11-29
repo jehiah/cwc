@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"sort"
@@ -205,47 +204,35 @@ func (s *Server) Error(w http.ResponseWriter, err error) {
 	}
 }
 
-func (s *Server) Map(w http.ResponseWriter, r *http.Request, f *db.FullComplaint) {
-	// https://api.mapbox.com/styles/v1/mapbox/streets-v8/static/-122.4241,37.78,14.25,-10,0/600x600?access_token=
-	// env.Get("MAPBOX_TOKEN")
-	f.ParsePhotos()
-	var lat, long float64
-	for _, p := range f.PhotoDetails {
-		if p.Lat != 0 && p.Long != 0 {
-			lat, long = p.Lat, p.Long
-			break
-		}
-	}
-	r.ParseForm()
-	size := r.Form.Get("s")
-	if size == "" {
-		size = "600x600"
-	}
-	zoom := r.Form.Get("z")
-	if zoom == "" {
-		zoom = "15"
-	}
-
-	rotation := 28 // the manhattan street grid offset
-	tile := fmt.Sprintf("%0.4f,%0.4f,%s,%d,0", long, lat, zoom, rotation)
-	params := url.Values{"access_token": {os.Getenv("MAPBOX_TOKEN")}}
-	url := &url.URL{
-		Scheme:   "https",
-		Host:     "api.mapbox.com",
-		Path:     fmt.Sprintf("/styles/v1/mapbox/streets-v8/static/%s/%s@2x", tile, size),
-		RawQuery: params.Encode(),
-	}
-	http.Redirect(w, r, url.String(), 302)
-}
-
 func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 	patterns := strings.SplitN(r.URL.Path[1:], "/", 3)
-
 	c := db.Complaint(patterns[1])
-	f, err := s.DB.FullComplaint(c)
-	if err != nil {
+
+	if ok, err := s.DB.Exists(c); err != nil {
 		s.Error(w, err)
-		log.Printf("%s", err)
+		return
+	} else if !ok {
+		http.NotFound(w, r)
+		return
+	}
+
+	if len(patterns) == 3 {
+		if r.Method != "GET" {
+			http.Error(w, "Method not supported", 405)
+			return
+		}
+
+		file := patterns[2]
+		if file == "map" {
+			s.Map(w, r, c)
+			return
+		}
+		switch strings.ToLower(filepath.Ext(file)) {
+		case ".png", ".jpg", ".jpeg":
+			s.Image(w, r, c, file)
+		default:
+			s.Download(w, r, c, file)
+		}
 		return
 	}
 
@@ -262,42 +249,14 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(patterns) == 3 {
-		file := patterns[2]
-		if file == "map" {
-			s.Map(w, r, f)
-			return
-		}
-		var found bool
-		for _, f := range f.Photos {
-			if f == file {
-				found = true
-			}
-		}
-		for _, f := range f.Files {
-			if f == file {
-				found = true
-			}
-		}
-		for _, f := range f.Videos {
-			if f == file {
-				found = true
-			}
-		}
-		if found {
-			// render the file directly
-			path := s.DB.FullPath(c)
-			staticServer := http.StripPrefix(fmt.Sprintf("/complaint/%s/", patterns[1]), http.FileServer(http.Dir(path)))
-			staticServer.ServeHTTP(w, r)
-			return
-		}
-		log.Printf("temp 404 %q", r.URL.Path)
-		http.NotFound(w, r)
+	f, err := s.DB.FullComplaint(c)
+	if err != nil {
+		s.Error(w, err)
+		log.Printf("%s", err)
 		return
 	}
 
 	f.ParsePhotos()
-	r.ParseForm()
 
 	type payload struct {
 		FullComplaint *db.FullComplaint
@@ -313,5 +272,4 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 		s.Error(w, err)
 		log.Printf("%s", err)
 	}
-
 }

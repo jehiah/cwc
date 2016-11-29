@@ -50,3 +50,15 @@ func (d DB) Append(c Complaint, s string) error {
 	_, err = io.WriteString(f, s)
 	return err
 }
+
+// Exists checks if the complaint exists in DB
+func (d DB) Exists(c Complaint) (bool, error) {
+	fullPath := filepath.Join(d.FullPath(c), "notes.txt")
+	_, err := os.Stat(fullPath)
+	if err != nil && !os.IsNotExist(err) {
+		return false, err
+	} else if err != nil {
+		return false, nil
+	}
+	return true, nil
+}

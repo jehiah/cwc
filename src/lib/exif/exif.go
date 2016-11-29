@@ -14,7 +14,7 @@ type Exif struct {
 	Lat, Long float64
 
 	// Orientation string
-	ExifRotation int
+	ExifRotation float64
 	ExifFlip     bool
 }
 
@@ -46,8 +46,7 @@ func Parse(filename string) (*Exif, error) {
 
 }
 
-func calculateRotationFilp(orientation int) (rotate int, flip bool) {
-	log.Printf("orientation %v", orientation)
+func calculateRotationFilp(orientation int) (rotate float64, flip bool) {
 	// from https://github.com/h2non/bimg/blob/master/resize.go#L457
 	switch orientation {
 	case 6:
@@ -71,6 +70,9 @@ func calculateRotationFilp(orientation int) (rotate int, flip bool) {
 		flip = true
 		rotate = 270
 		// flip 8
+	case 1:
+	default:
+		log.Printf("orientation %v", orientation)
 	}
 	return
 }

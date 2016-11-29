@@ -13,3 +13,4 @@ gb vendor fetch -no-recurse -revision 3261f00d16e92932f49a39672dfd540896ed30d0 c
 gb vendor fetch -no-recurse -revision 518eda9a0920a55ffe7190db96fe8ed85a62e376 google.golang.org/api/gensupport     # https://code.googlesource.com/google-api-go-client/gensupport 
 gb vendor fetch -no-recurse -revision 518eda9a0920a55ffe7190db96fe8ed85a62e376 google.golang.org/api/gmail/v1       # https://code.googlesource.com/google-api-go-client/gmail/v1   
 gb vendor fetch -no-recurse -revision 518eda9a0920a55ffe7190db96fe8ed85a62e376 google.golang.org/api/googleapi      # https://code.googlesource.com/google-api-go-client/googleapi  
+gb vendor fetch -no-recurse -tag v0.10.0 github.com/anthonynsimon/bild

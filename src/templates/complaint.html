@@ -110,7 +110,7 @@
       <div class="col-md-4 col-lg-3 col-xs-6">
         <div class="panel {{. | PhotoClass }}"> 
           <div class="panel-heading">{{.Name}}</div>
-          <a href="/complaint/{{$complaint.ID}}/{{.Name}}"><img src="/complaint/{{$complaint.ID}}/{{.Name}}" class="img-responsive complaint-photo" title="{{.Name}}" /></a>
+          <a href="/complaint/{{$complaint.ID}}/{{.Name}}"><img src="/complaint/{{$complaint.ID}}/{{.Name}}?w=350" class="img-responsive complaint-photo" title="{{.Name}}" /></a>
         </div>
       </div>
       {{ end }}
