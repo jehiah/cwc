@@ -40,7 +40,7 @@ func GmailService(cacheFile string) *gmail.Service {
 
 	// If modifying these scopes, delete your previously saved credentials
 	// at ~/.credentials/gmail-go-quickstart.json
-	config, err := google.ConfigFromJSON(b, gmail.GmailReadonlyScope)
+	config, err := google.ConfigFromJSON(b, gmail.GmailReadonlyScope, gmail.GmailModifyScope)
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}

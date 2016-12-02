@@ -16,3 +16,5 @@ func prettyMessageID(m *gmail.Message) string {
 	ts := time.Unix(m.InternalDate/1000, 0)
 	return fmt.Sprintf("[email:%s %s]", m.Id, ts.Format("2006/01/02 15:04"))
 }
+
+type MessageArchiver func(id string) error

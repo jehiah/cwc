@@ -12,8 +12,9 @@ import (
 )
 
 type SettlementNotification struct {
-	DB        db.DB
-	alternate bool
+	DB             db.DB
+	alternate      bool
+	ArchiveMessage MessageArchiver
 }
 
 func (s *SettlementNotification) BuildQuery(u *gmail.UsersMessagesListCall) *gmail.UsersMessagesListCall {
@@ -64,7 +65,8 @@ func (s *SettlementNotification) Handle(m *gmail.Message) error {
 	// if we already wrote this message in... continue
 	if ok, err := db.Default.ComplaintContains(complaint, m.Id); ok {
 		log.Printf("\talready recorded")
-		return nil
+		log.Printf("\tarchiving email")
+		return s.ArchiveMessage(m.Id)
 	} else if err != nil {
 		log.Printf("%s", err)
 		return nil
@@ -76,5 +78,9 @@ func (s *SettlementNotification) Handle(m *gmail.Message) error {
 	}
 	log.Printf("\t> %s", line)
 	err = s.DB.Append(complaint, fmt.Sprintf("\n%s %s\n", prettyID, line))
-	return err
+	if err != nil {
+		return err
+	}
+	log.Printf("\tarchiving email")
+	return s.ArchiveMessage(m.Id)
 }

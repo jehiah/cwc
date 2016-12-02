@@ -12,9 +12,10 @@ import (
 )
 
 type ServiceReqeustUpdate struct {
-	DB     db.DB
-	force  bool
-	dryrun bool
+	DB             db.DB
+	force          bool
+	dryrun         bool
+	ArchiveMessage MessageArchiver
 }
 
 func (s *ServiceReqeustUpdate) BuildQuery(u *gmail.UsersMessagesListCall) *gmail.UsersMessagesListCall {
@@ -57,22 +58,29 @@ func (s *ServiceReqeustUpdate) Handle(m *gmail.Message) error {
 	}
 	complaint := complaints[0]
 
+	line := interestingLine(lines)
+	if strings.HasSuffix(line, "Referred to S") {
+		// fix a 311 bug where text emails are truncated at '&'
+		line += "&E"
+	}
+
 	log.Printf("\tfound related complaint %s", complaint)
 	// if we already wrote this message in... continue
 	if ok, err := db.Default.ComplaintContains(complaint, m.Id); ok {
 		log.Printf("\talready recorded")
 		if s.force == false {
+			if !strings.Contains(line, "scheduled") && !s.dryrun {
+				log.Printf("\tarchiving email")
+				err = s.ArchiveMessage(m.Id)
+				if err != nil {
+					log.Printf("%s", err)
+				}
+			}
 			return nil
 		}
 	} else if err != nil {
 		log.Printf("%s", err)
 		return nil
-	}
-
-	line := interestingLine(lines)
-	if strings.HasSuffix(line, "Referred to S") {
-		// fix a 311 bug where text emails are truncated at '&'
-		line += "&E"
 	}
 
 	// strip these prefixes from the line
@@ -105,6 +113,13 @@ func (s *ServiceReqeustUpdate) Handle(m *gmail.Message) error {
 	log.Printf("\t> %s", line)
 	if !s.dryrun {
 		err = s.DB.Append(complaint, fmt.Sprintf("\n%s %s\n", prettyID, line))
+		if !strings.Contains(line, "scheduled") {
+			log.Printf("\tarchiving email")
+			err = s.ArchiveMessage(m.Id)
+			if err != nil {
+				log.Printf("%s", err)
+			}
+		}
 	}
 	return err
 }

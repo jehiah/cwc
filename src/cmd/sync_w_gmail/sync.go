@@ -21,6 +21,12 @@ func main() {
 	bg := context.TODO()
 
 	user := "me"
+
+	var archiveMessage = func(id string) error {
+		call := srv.Users.Messages.Modify(user, id, &gmail.ModifyMessageRequest{RemoveLabelIds: []string{"INBOX"}})
+		_, err := call.Do()
+		return err
+	}
 	// labels, err := gmailutils.Labels(srv, user)
 	// if err != nil {
 	// 	log.Fatalf("unable to fetch labels %v", err)
@@ -33,9 +39,9 @@ func main() {
 	// 	log.Fatalf("Unable to retrieve messages. %v", err)
 	// }
 	handlers := []EmailHandler{
-		// &SettlementNotification{DB: db.Default, alternate: true},
-		// &SettlementNotification{DB: db.Default},
-		&ServiceReqeustUpdate{DB: db.Default},
+		&SettlementNotification{DB: db.Default, alternate: true, ArchiveMessage: archiveMessage},
+		&SettlementNotification{DB: db.Default, ArchiveMessage: archiveMessage},
+		&ServiceReqeustUpdate{DB: db.Default, ArchiveMessage: archiveMessage},
 	}
 	for _, h := range handlers {
 		q := h.BuildQuery(srv.Users.Messages.List(user)).MaxResults(50)
