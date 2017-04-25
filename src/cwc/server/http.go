@@ -27,7 +27,7 @@ type Server struct {
 
 func ComplaintClass(c *db.FullComplaint) string {
 	switch c.Status {
-	case db.ClosedPenalty, db.ClosedInspection:
+	case db.ClosedPenalty, db.ClosedInspection, db.NoticeOfDecision:
 		return "success"
 	case db.HearingScheduled:
 		return "warning"
@@ -154,7 +154,7 @@ func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) {
 	}
 	var complaints []db.Complaint
 	var err error
-	if p.Query == "" {
+	if p.Query == "" || strings.HasPrefix(p.Query, "status:") {
 		complaints, err = s.DB.All()
 	} else {
 		complaints, err = s.DB.Find(p.Query)
@@ -168,6 +168,9 @@ func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) {
 		f, err := s.DB.FullComplaint(c)
 		if err != nil {
 			log.Printf("error parsing %s, %s", c, err)
+			continue
+		}
+		if strings.HasPrefix(p.Query, "status:") && f.Status.String() != p.Query[len("status:"):] {
 			continue
 		}
 		p.FullComplaints = append(p.FullComplaints, f)

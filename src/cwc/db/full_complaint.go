@@ -33,6 +33,7 @@ type FullComplaint struct {
 	BasePath string   `json:"-"`
 	Photos   []string `json:"photos"`
 	Videos   []string `json:"videos"`
+	PDFs     []string `json:"pdfs"`
 	Files    []string `json:"files"`
 
 	PhotoDetails []*Photo `json:"photo_details"`
@@ -114,6 +115,11 @@ func ParseComplaint(c Complaint, body []byte, path string, files []string) (*Ful
 			f.Videos = append(f.Videos, filename)
 		case ".bmp", ".png", ".jpg", ".jpeg", ".tif", ".gif":
 			f.Photos = append(f.Photos, filename)
+		case ".pdf":
+			f.PDFs = append(f.PDFs, filename)
+			if filename == f.TLCID+"c.pdf" {
+				f.Status = NoticeOfDecision
+			}
 		default:
 			f.Files = append(f.Files, filename)
 		}

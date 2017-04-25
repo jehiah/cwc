@@ -88,6 +88,19 @@
     </div>
     {{ end }}
 
+    {{ if .PDFs }}
+    <div class="row">
+      <div class="col-xs-12">
+        <h3>Attachments</h3>
+        <ul>
+        {{ range .PDFs }}
+          <li><a href="/complaint/{{$complaint.ID}}/{{.}}">{{.}}</a></li>
+        {{ end }}
+        </ul>
+      </div>
+    </div>
+    {{ end }}
+
     {{ if .Files }}
     <div class="row">
       <div class="col-xs-12">
