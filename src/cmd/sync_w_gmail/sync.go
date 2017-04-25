@@ -15,6 +15,7 @@ import (
 
 func main() {
 	limit := flag.Int("limit", 100, "max number to process")
+	dryRun := flag.Bool("dry-run", false, "dry run")
 	flag.Parse()
 
 	srv := gmailutils.GmailService("cwc.json")
@@ -23,6 +24,9 @@ func main() {
 	user := "me"
 
 	var archiveMessage = func(id string) error {
+		if *dryRun {
+			return nil
+		}
 		call := srv.Users.Messages.Modify(user, id, &gmail.ModifyMessageRequest{RemoveLabelIds: []string{"INBOX"}})
 		_, err := call.Do()
 		return err
@@ -38,10 +42,12 @@ func main() {
 	// if err != nil {
 	// 	log.Fatalf("Unable to retrieve messages. %v", err)
 	// }
+	attachmentSvc := gmail.NewUsersMessagesAttachmentsService(srv)
 	handlers := []EmailHandler{
 		&SettlementNotification{DB: db.Default, alternate: true, ArchiveMessage: archiveMessage},
 		&SettlementNotification{DB: db.Default, ArchiveMessage: archiveMessage},
 		&ServiceReqeustUpdate{DB: db.Default, ArchiveMessage: archiveMessage},
+		&NoticeOfDecision{DB: db.Default, ArchiveMessage: archiveMessage, UsersMessagesAttachmentsService: attachmentSvc},
 	}
 	for _, h := range handlers {
 		q := h.BuildQuery(srv.Users.Messages.List(user)).MaxResults(50)
