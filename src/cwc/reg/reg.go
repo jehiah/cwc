@@ -43,6 +43,7 @@ var All []Reg = []Reg{
 	{Code: "NY VTL 1126", Description: "no passing zone", Type: "moving", Vehicle: either},
 	{Code: "NY VTL 402(b)", Description: "license plate must not be obstructed", Type: "parking", Vehicle: either, Short: "obstructed license plate"},
 	{Code: "NY VTL 375(12-a)(b)(2)", Description: "no side window tint below 70%", Type: "parking", Vehicle: either, Short: "no tint below 70%"},
+	{Code: "NY VTL 375(30)", Description: "no obstructed view of road", Type: "moving", Vehicle: either},
 	{Code: "NY VTL 1225-c(2)", Description: "cell-phone use while driving", Vehicle: either},
 	{Code: "NY VTL 375(41)", Description: "no blue lights except emergency vehicles", Vehicle: either},
 	{Code: "54-12(f)", Description: "threats, harassment, abuse", Vehicle: Taxi},
@@ -50,6 +51,10 @@ var All []Reg = []Reg{
 	{Code: "54-12(g)", Description: "use or threat of physical force", Vehicle: Taxi, Short: "use/threat of physical force"},
 	{Code: "55-12(f)", Description: "use or threat of physical force", Vehicle: FHV, Short: "use/threat of physical force"},
 	{Code: "54-22(f)", Description: "device must not obstruct view of road", Vehicle: Taxi},
+	{Code: "54-13(a)(3)(i)(A)", Description: "Speeding 1 to 10 miles above posted speed limit", Vehicle: Taxi},
+	{Code: "54-13(a)(3)(i)(B)", Description: "Speeding 11 to 20 miles above posted speed limit", Vehicle: Taxi},
+	{Code: "55-13(a)(3)(i)(A)", Description: "Speeding 1 to 10 miles above posted speed limit", Vehicle: FHV},
+	{Code: "55-13(a)(3)(i)(B)", Description: "Speeding 11 to 20 miles above posted speed limit", Vehicle: FHV},
 }
 
 type Template struct {
