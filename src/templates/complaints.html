@@ -33,7 +33,7 @@
           <h3><span class="glyphicon glyphicon-calendar" aria-hidden="true"></span> {{.PendingHearings | len}} Pending Hearings</h3>
           <ul>
             {{ range .PendingHearings }}
-            <li>{{.Hearing.Format "Mon Jan 2 3:04pm"}} <code><a href="/complaint/{{.Complaint.ID}}">{{.ServiceRequestID}}</a></code> {{ if .TLCID}}<code>{{.TLCID}}</code>{{end}} - {{.VehicleType}} {{.License}} {{.Location}} {{ range .Violations }} {{.Description}} {{ end }}</li>
+            <li>{{.Hearing.Format "Mon Jan 2 3:04pm"}} <code><a href="/complaint/{{.Complaint.ID}}">{{.ServiceRequestID}}</a></code> {{ if .TLCID}}<code>{{.TLCID}}</code>{{end}} - {{.VehicleType}} {{.License}} {{.Location}} {{ range $index, $violation := .Violations }}{{if $index}},{{end}} {{$violation.Description}}{{ end }}</li>
             {{ end }}
           </ul>
         </div>
