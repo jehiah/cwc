@@ -25,6 +25,7 @@ var All []Reg = []Reg{
 	{Code: "4-05(b)(1)", Description: "no u-turns in business district", Type: "moving", Vehicle: either, Short: "no u-turns"},
 	{Code: "4-12(i)", Description: "no honking in non-danger situations", Type: "parking", Vehicle: either, Short: "no honking"},
 	{Code: "4-12(m)", Description: "no driving in bus & right turn only lane", Type: "moving", Vehicle: either, Short: "no driving in bus lane"},
+
 	{Code: "54-13(a)(3)(ix)", Description: "yield sign violation", Vehicle: Taxi},
 	{Code: "55-13(a)(3)(ix)", Description: "yield sign violation", Vehicle: FHV},
 	{Code: "54-13(a)(3)(vi)", Description: "failing to yield right of way", Vehicle: Taxi, Short: "failing to yield ROW"},
@@ -35,6 +36,11 @@ var All []Reg = []Reg{
 	{Code: "55-13(a)(3)(xi)", Description: "improper passing", Vehicle: FHV},
 	{Code: "54-13(a)(3)(xii)", Description: "unsafe lane change", Vehicle: Taxi},
 	{Code: "55-13(a)(3)(xii)", Description: "unsafe lane change", Vehicle: FHV},
+	{Code: "54-13(a)(3)(xiii)", Description: "driving left of center", Vehicle: Taxi},
+	{Code: "55-13(a)(3)(xiii)", Description: "driving left of center", Vehicle: FHV},
+	{Code: "54-13(a)(3)(xiv)", Description: "driving in wrong direction", Vehicle: Taxi},
+	{Code: "55-13(a)(3)(xiv)", Description: "driving in wrong direction", Vehicle: FHV},
+
 	{Code: "54-15(c)", Description: "no smoking", Vehicle: Taxi},
 	{Code: "55-15(c)", Description: "no smoking", Vehicle: FHV},
 	{Code: "NY VTL 1160(a)", Description: "no right from center lane", Type: "moving", Vehicle: either, Short: "no R from center lane"},
