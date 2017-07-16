@@ -23,8 +23,9 @@
       <table class="table">
         {{ range .Regulations }}
           <tr>
-            <td>{{.LongCode}}</td>
+            <td><a href="/?q={{.Code}}">{{.LongCode}}</a>{{if .Outdated}} <span class="label label-danger">outdated</span>{{end}}</td>
             <td>{{.Description}}</td>
+            <td><small>{{.Type}}</small></td>
             <td>
               {{if .Vehicle.IncludesTaxi }}
               <span class="label label-info">Taxi</span>

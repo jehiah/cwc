@@ -19,6 +19,9 @@ func (c *choice) String() string {
 func getReg(v reg.Vehicle) (*reg.Reg, error) {
 	var choices []interface{}
 	for _, r := range reg.All {
+		if r.Outdated {
+			continue
+		}
 		if r.Vehicle&v == 0 {
 			continue
 		}
