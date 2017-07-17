@@ -9,16 +9,18 @@ import (
 )
 
 var editors []string = []string{
-	"/usr/local/bin/mate",
-	"/usr/local/bin/atom",
+	"mate",
+	"atom",
 	"/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl",
 	"/Applications/TextEdit.app",
 }
 
 func (d DB) Edit(c Complaint) error {
 	for _, editor := range editors {
-		if _, err := os.Stat(editor); err != nil {
+		if e, err := exec.LookPath(editor); err != nil {
 			continue
+		} else {
+			editor = e
 		}
 		fullPath := filepath.Join(d.FullPath(c), "notes.txt")
 		return exec.Command(editor, fullPath).Run()
