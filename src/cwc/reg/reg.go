@@ -106,6 +106,7 @@ var Templates []Template = []Template{
 	{"4-12(m)", "At <LOCATION> I observed <VEHICLE> driving in bus only lane (4-7pm M-F) to avoid traffic. Driver did not make a right turn or stop to up/discharging passenger at curb <VIOLATION>. Pictures included."},
 	{"80-13(a)(3)(vi)", "At <LOCATION>, <VEHICLE> cut me off in the bike lane failing to yield right of way <VIOLATION>. Pictures included."},
 	{"80-13(a)(3)(vii)", "At <LOCATION> I observed <VEHICLE> run red light <VIOLATION>. Pictures included. Pictures show light red and vehicle before intersection, and then vehicle proceeding through intersection on red."},
+	{"80-13(a)(3)(xiii)", "At <LOCATION> I observed <VEHICLE> drive left of center yellow line for a block in an effort to avoid traffic <VIOLATION>. Pictures included."},
 	{"NY VTL 402(b)", "At <LOCATION> I observed <VEHICLE> with license plate frame obstructing view of front license plate <VIOLATION>. Pictures included show obstructed view."},
 	{"NY VTL 402(b)", "At <LOCATION> I observed <VEHICLE> with license plate frame obstructing view of front license plate <VIOLATION>. NYC VTL 402(6) indicates this constitues a parking violation subject to Commission Rule 55-13(a)(1). Pictures included show obstructed view."},
 	{"NY VTL 402(b)", "At <LOCATION> I observed <VEHICLE> with license plate frame obstructing view of \"T&LC\" text on rear license plate <VIOLATION>. Pictures included show obstructed view.."},
