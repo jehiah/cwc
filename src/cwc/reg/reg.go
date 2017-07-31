@@ -35,7 +35,10 @@ var All []Reg = []Reg{
 	{Code: "NY VTL 375(12-a)(b)(2)", Description: "no side window tint below 70%", Type: "parking", Vehicle: either, Short: "no tint below 70%"},
 	{Code: "NY VTL 375(30)", Description: "no obstructed view of road", Type: "moving", Vehicle: either},
 	{Code: "NY VTL 1225-c(2)", Description: "cell-phone use while driving", Type: "moving", Vehicle: either},
+	{Code: "NY VTL 1203(a)", Description: "park w/in 12 inches of curb (two way street)", Type: "parking", Vehicle: either, Short: "park w/in 12 inches (@ 2-way)"},
+	{Code: "NY VTL 1203(b)", Description: "park w/in 12 inches of curb (one way street)", Type: "parking", Vehicle: either, Short: "park w/in 12 inches (@ 1-way)"},
 	{Code: "NY VTL 375(41)", Description: "no blue lights except emergency vehicles", Type: "parking", Vehicle: either},
+	{Code: "NY VTL 1202(a)(1)(a)", Description: "no double parking", Type: "parking", Vehicle: either},
 
 	// http://www.nyc.gov/html/tlc/downloads/pdf/rule_book_current_chapter_80.pdf
 	// Valid after 10/26/16
@@ -111,6 +114,7 @@ var Templates []Template = []Template{
 	{"NY VTL 402(b)", "At <LOCATION> I observed <VEHICLE> with license plate frame obstructing view of front license plate <VIOLATION>. NYC VTL 402(6) indicates this constitues a parking violation subject to Commission Rule 55-13(a)(1). Pictures included show obstructed view."},
 	{"NY VTL 402(b)", "At <LOCATION> I observed <VEHICLE> with license plate frame obstructing view of \"T&LC\" text on rear license plate <VIOLATION>. Pictures included show obstructed view.."},
 	{"NY VTL 402(b)", "At <LOCATION> I observed <VEHICLE> with license plate frame obstructing view of \"T&LC\" text on rear license plate <VIOLATION>. NYC VTL 402(6) indicates this constitues a parking violation subject to Commission Rule 55-13(a)(1). Pictures included show obstructed view."},
+	{"NY VTL 1202(a)(1)(a)", "While biking on <LOCATION> I observed <VEHICLE> double parked with no driver in vehicle causing other vehicles to drive in the bike lane <VIOLATION>. Pictures included."},
 }
 
 func FormatTemplate(template, location, vehicle, violation string) string {
