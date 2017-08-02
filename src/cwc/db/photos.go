@@ -29,7 +29,7 @@ func (f *FullComplaint) ParsePhotos() {
 	skip := make(map[string]bool)
 	if len(f.Lines) >= 3 && strings.HasPrefix(f.Lines[2], "photos") {
 		for _, s := range strings.Split(strings.Replace(f.Lines[2], " ", ",", -1), ",") {
-			if s == "photos" {
+			if s == "photos" || s == "" {
 				continue
 			}
 			for _, file := range f.Photos {
