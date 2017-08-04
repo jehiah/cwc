@@ -39,6 +39,7 @@ var All []Reg = []Reg{
 	{Code: "NY VTL 1203(b)", Description: "park w/in 12 inches of curb (one way street)", Type: "parking", Vehicle: either, Short: "park w/in 12 inches (@ 1-way)"},
 	{Code: "NY VTL 375(41)", Description: "no blue lights except emergency vehicles", Type: "parking", Vehicle: either},
 	{Code: "NY VTL 1202(a)(1)(a)", Description: "no double parking", Type: "parking", Vehicle: either},
+	{Code: "NY VTL 1225-a", Description: "no driving on sidewalks", Type: "moving", Vehicle: either},
 
 	// http://www.nyc.gov/html/tlc/downloads/pdf/rule_book_current_chapter_80.pdf
 	// Valid after 10/26/16
