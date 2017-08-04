@@ -85,7 +85,7 @@ func (s *ServiceReqeustUpdate) Handle(m *gmail.Message) error {
 
 	// strip these prefixes from the line
 	// clearly this should be a regex of sorts
-	for _, s := range []string{
+	for _, needle := range []string{
 		"The TLC is investigating your complaint and will contact youif further information is needed.",
 		"The TLC is investigating your complaint and will contact you if further information is needed.",
 		"The TLC is investigating your complaint and will contact youif further information is needed",
@@ -98,12 +98,17 @@ func (s *ServiceReqeustUpdate) Handle(m *gmail.Message) error {
 		"The TLC is investigating your complint and will contact you if further information is needed.",
 		"The TLC is investigating your complint and will contact you if further information is needed.",
 	} {
-		if strings.HasSuffix(line, s) {
-			log.Printf("\tskipping line %q", line)
+		if strings.HasSuffix(line, needle) {
+			log.Printf("\tfound initial update line %q", line)
+			log.Printf("\tarchiving email")
+			err = s.ArchiveMessage(m.Id)
+			if err != nil {
+				log.Printf("%s", err)
+			}
 			return nil
 		}
-		if strings.HasPrefix(line, s) {
-			line = strings.TrimSpace(line[len(s):])
+		if strings.HasPrefix(line, needle) {
+			line = strings.TrimSpace(line[len(needle):])
 		}
 	}
 	if line == "" {
