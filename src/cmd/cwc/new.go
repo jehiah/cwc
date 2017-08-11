@@ -3,18 +3,34 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os/exec"
 	"strings"
 	"time"
 
 	"cwc/db"
 	"cwc/reg"
-
 	"lib/exif"
 	"lib/input"
+
+	"github.com/spf13/cobra"
 )
 
-func newComplaint() error {
+func newComplaint() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "new",
+		Short: "New Complaint",
+		Run: func(cmd *cobra.Command, args []string) {
+			err := runNewComplaint()
+			if err != nil {
+				log.Fatal(err.Error())
+			}
+		},
+	}
+	return cmd
+}
+
+func runNewComplaint() error {
 
 	yyyymmdd, err := input.Ask("Date (YYYYMMDD) or Filename", "")
 	if err != nil {

@@ -14,3 +14,8 @@ gb vendor fetch -no-recurse -revision 518eda9a0920a55ffe7190db96fe8ed85a62e376 g
 gb vendor fetch -no-recurse -revision 518eda9a0920a55ffe7190db96fe8ed85a62e376 google.golang.org/api/gmail/v1       # https://code.googlesource.com/google-api-go-client/gmail/v1   
 gb vendor fetch -no-recurse -revision 518eda9a0920a55ffe7190db96fe8ed85a62e376 google.golang.org/api/googleapi      # https://code.googlesource.com/google-api-go-client/googleapi  
 gb vendor fetch -no-recurse -tag v0.10.0 github.com/anthonynsimon/bild
+
+
+gb vendor fetch -no-recurse -revision d994347edadc56d6a7f863775fb6887606685ae6 github.com/spf13/cobra
+gb vendor fetch -no-recurse -revision c1de95864d73a5465492829d7cb2dd422b19ac96 github.com/spf13/viper
+gb vendor fetch -no-recurse -revision e57e3eeb33f795204c1ca35f56c44f83227c6e66 github.com/spf13/pflag

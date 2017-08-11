@@ -7,107 +7,91 @@ import (
 
 	"cwc/db"
 	"cwc/reporter"
-	"cwc/server"
-
-	"lib/input"
+	"github.com/spf13/cobra"
 )
 
-func run(action string, args ...string) {
-	var err error
-	switch action {
-	case "search":
-		if len(args) >= 1 {
-			search(args[0], "search")
-		} else {
-			search("", "search")
-		}
-	case "edit":
-		if len(args) >= 1 {
-			search(args[0], "edit")
-		} else {
-			search("", "edit")
-		}
-	case "json":
-		body, err := reporter.JSON(db.Default)
-		if err == nil {
-			os.Stdout.Write(body)
-		}
-	case "report":
-		err = reporter.Run(db.Default, os.Stdout)
-	case "new":
-		err = newComplaint()
-	case "short-reg", "short-regulations":
-		listRegulations(true)
-	case "reg", "regulations":
-		listRegulations(false)
-	case "server":
-		s := server.New(db.Default, "src/templates")
-		err = s.Serve("")
-	case "help":
-		fmt.Printf(`cwc -> Cyclists With Cameras
-
-For more information see https://github.com/jehiah/cwc
-`)
-	default:
-		log.Fatalf("not implemented")
-	}
-	if err != nil {
-		log.Fatalf("%s", err)
-	}
+func init() {
+	RootCmd.AddCommand(versionCmd)
+	RootCmd.AddCommand(listRegulations())
+	RootCmd.AddCommand(newComplaint())
+	RootCmd.AddCommand(serverCmd())
+	RootCmd.AddCommand(report())
+	RootCmd.AddCommand(json())
+	RootCmd.AddCommand(editCmd())
+	RootCmd.AddCommand(searchCmd())
 }
 
-type stringer string
+var RootCmd = &cobra.Command{
+	Use:   "cwc",
+	Short: "Cyclists With Cameras",
+	Long:  "Cyclists With Cameras - utilities for managing a database of T&LC complaints.\n\nFor more information see https://github.com/jehiah/cwc",
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			cmd.Usage()
+			os.Exit(1)
+		}
+	},
+}
 
-func (s stringer) String() string { return string(s) }
+func report() *cobra.Command {
+	cmd := &cobra.Command{
+		Use: "report",
+		Run: func(cmd *cobra.Command, args []string) {
+			err := reporter.Run(db.Default, os.Stdout)
+			if err != nil {
+				log.Fatal(err)
+			}
+		},
+	}
+	return cmd
+}
+
+func json() *cobra.Command {
+	cmd := &cobra.Command{
+		Use: "json",
+		Run: func(cmd *cobra.Command, args []string) {
+			body, err := reporter.JSON(db.Default)
+			if err != nil {
+				log.Fatal(err)
+			}
+			os.Stdout.Write(body)
+		},
+	}
+	return cmd
+}
+
+func editCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use: "edit",
+		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) >= 1 {
+				search(db.Default, args[0], "edit")
+			} else {
+				search(db.Default, "", "edit")
+			}
+		},
+	}
+	return cmd
+}
+
+func searchCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use: "search",
+		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) >= 1 {
+				search(db.Default, args[0], "search")
+			} else {
+				search(db.Default, "", "search")
+			}
+		},
+	}
+	return cmd
+}
 
 func main() {
-	if len(os.Args) > 1 {
-		run(os.Args[1], os.Args[2:]...)
-	} else {
-		choices := []string{"help", "search", "new", "report", "regulations", "short-regulations", "json", "edit", "server"}
-		action, err := input.SelectString("", "new", choices...)
-		if err != nil {
-			log.Fatalf("%s", err)
-		}
-		run(action)
-	}
-}
-
-func search(query, action string) {
-	var err error
-	if query == "" {
-		query, err = input.Ask("Search for?", "")
-		if err != nil {
-			log.Fatalf("%s", err)
-		}
-		if query == "" {
-			log.Fatalf("missing query")
-		}
-	} else {
-		fmt.Printf("Searching for: %q\n", query)
-	}
-
-	files, err := db.Default.Find(query)
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
-		return
-	}
-	for i, c := range files {
-		if i == 0 {
-			fmt.Printf("opening: %s %s\n", c, db.Default.FullPath(c))
-			switch action {
-			case "search":
-				err = db.Default.ShowInFinder(c)
-				if err != nil {
-					fmt.Printf("%s\n", err)
-				}
-			}
-			err = db.Default.Edit(c)
-			if err != nil {
-				fmt.Printf("%s\n", err)
-			}
-		} else {
-			fmt.Printf("also found: %s %s\n", c, db.Default.FullPath(c))
-		}
+	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Llongfile)
+	if err := RootCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 }
