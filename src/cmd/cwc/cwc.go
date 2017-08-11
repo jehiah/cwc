@@ -21,6 +21,13 @@ func init() {
 	RootCmd.AddCommand(searchCmd())
 }
 
+func loadDB(p string, err error) db.DB {
+	if p == "" {
+		return db.Default
+	}
+	return db.DB(p)
+}
+
 var RootCmd = &cobra.Command{
 	Use:   "cwc",
 	Short: "Cyclists With Cameras",
@@ -35,14 +42,16 @@ var RootCmd = &cobra.Command{
 
 func report() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "report",
+		Use:   "report",
+		Short: "Text format summarized view of report activity",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := reporter.Run(db.Default, os.Stdout)
+			err := reporter.Run(loadDB(cmd.Flags().GetString("db")), os.Stdout)
 			if err != nil {
 				log.Fatal(err)
 			}
 		},
 	}
+	cmd.Flags().String("db", string(db.Default), "DB path")
 	return cmd
 }
 
@@ -50,13 +59,14 @@ func json() *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "json",
 		Run: func(cmd *cobra.Command, args []string) {
-			body, err := reporter.JSON(db.Default)
+			body, err := reporter.JSON(loadDB(cmd.Flags().GetString("db")))
 			if err != nil {
 				log.Fatal(err)
 			}
 			os.Stdout.Write(body)
 		},
 	}
+	cmd.Flags().String("db", string(db.Default), "DB path")
 	return cmd
 }
 
@@ -65,12 +75,13 @@ func editCmd() *cobra.Command {
 		Use: "edit",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) >= 1 {
-				search(db.Default, args[0], "edit")
+				search(loadDB(cmd.Flags().GetString("db")), args[0], "edit")
 			} else {
-				search(db.Default, "", "edit")
+				search(loadDB(cmd.Flags().GetString("db")), "", "edit")
 			}
 		},
 	}
+	cmd.Flags().String("db", string(db.Default), "DB path")
 	return cmd
 }
 
@@ -79,12 +90,13 @@ func searchCmd() *cobra.Command {
 		Use: "search",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) >= 1 {
-				search(db.Default, args[0], "search")
+				search(loadDB(cmd.Flags().GetString("db")), args[0], "search")
 			} else {
-				search(db.Default, "", "search")
+				search(loadDB(cmd.Flags().GetString("db")), "", "search")
 			}
 		},
 	}
+	cmd.Flags().String("db", string(db.Default), "DB path")
 	return cmd
 }
 

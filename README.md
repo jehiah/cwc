@@ -8,7 +8,6 @@ Included are the following utilities:
 
 * cwc - a multi-purpose search & report tool
 * `reports.sh` generate statistics (i.e [this report](https://on.jehiah.cz/29J6lIX))
-* `cwc server` a HTTP UI for viewing and searching reports
 * `sync_w_gmail` a tool to extract 311 updates from the TLC and update matching `notes.txt` files
 
 ## File Format
@@ -27,7 +26,36 @@ At <LOCATION> I observed <VEHICLE> <VIOLATION>. Pictures included.
 C-1-1-123445678
 ```
 
-## cwc search
+## cwc
+
+```
+$ ./bin/cwc help
+Cyclists With Cameras - utilities for managing a database of T&LC complaints.
+
+For more information see https://github.com/jehiah/cwc
+
+Usage:
+  cwc [command]
+
+Available Commands:
+  edit        
+  help        Help about any command
+  json        
+  new         New Complaint
+  reg         List Regulations
+  report      Text format summarized view of report activity
+  search      
+  server      Web UI for viewing reports and adding notes
+  version     Print the version number
+
+Flags:
+  -h, --help   help for cwc
+```
+
+Most commands take a  `--db` flag that defaults to `~/Documents/cyclists_with_cameras`
+
+
+### cwc search
 
 cwc is a flexible tool for searching for keywords in complaints. This is helpful when reviewing cases with the TLC as you can search for the TLC complaint number, the 311 number, the license plate, or anything that is present in the notes file.
 
@@ -38,7 +66,7 @@ opening: 4K45 - Fri Jul 29 2016 5:48pm /Users/jehiah/Documents/cyclists_with_cam
 also found: 4K45 - Fri Jul 8 2016 4:20pm /Users/jehiah/Documents/cyclists_with_cameras/20160708_1620_4K45
 ```
 
-## cwc new - complaint creation tool
+### cwc new - complaint creation tool
 
 `cwc new` is a tool to walk through generating a detailed consistent complaint. It helps you gather information, make sure you have a clear complaint and a clearly identified violation.
 
@@ -96,13 +124,18 @@ Enter a number (Default is 1): 2
 > done
 ```
 
-## cwc report
-
-`cwc report` provides a summarized view of activity based on complaint directories
-
 ## cwc server
 
-`cwc server` runs a HTTP server that provides a web UI for viewing reports and adding notes
+```
+Usage:
+  cwc server [flags]
+
+Flags:
+      --addr string            http listen address (default ":53000")
+      --db string              DB path (default "/Users/jehiah/Documents/cyclists_with_cameras")
+  -h, --help                   help for server
+  -t, --template-path string   path to templates (default "src/templates")
+```
 
 ## sync_w_gmail
 

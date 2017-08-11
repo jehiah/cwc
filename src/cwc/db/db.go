@@ -8,6 +8,7 @@ import (
 // DB is the directory path containing a cwc repo
 type DB string
 
+// Default is the default DB at ~/Documents/cyclists_with_cameras
 var Default DB
 
 func init() {

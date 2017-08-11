@@ -21,16 +21,17 @@ func newComplaint() *cobra.Command {
 		Use:   "new",
 		Short: "New Complaint",
 		Run: func(cmd *cobra.Command, args []string) {
-			err := runNewComplaint()
+			err := runNewComplaint(loadDB(cmd.Flags().GetString("db")))
 			if err != nil {
 				log.Fatal(err.Error())
 			}
 		},
 	}
+	cmd.Flags().String("db", string(db.Default), "DB path")
 	return cmd
 }
 
-func runNewComplaint() error {
+func runNewComplaint(d db.DB) error {
 
 	yyyymmdd, err := input.Ask("Date (YYYYMMDD) or Filename", "")
 	if err != nil {
@@ -88,12 +89,12 @@ func runNewComplaint() error {
 		return err
 	}
 
-	complaint, err := db.Default.New(dt, license)
+	complaint, err := d.New(dt, license)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("> creating %s\n", db.Default.FullPath(complaint))
-	f, err := db.Default.Create(complaint)
+	fmt.Printf("> creating %s\n", d.FullPath(complaint))
+	f, err := d.Create(complaint)
 	if err != nil {
 		return err
 	}
@@ -135,8 +136,8 @@ func runNewComplaint() error {
 		return err
 	}
 	fmt.Printf("> opening %s\n", url)
-	db.Default.Edit(complaint)
-	db.Default.ShowInFinder(complaint)
+	d.Edit(complaint)
+	d.ShowInFinder(complaint)
 	fmt.Printf("> done\n")
 	return nil
 }
