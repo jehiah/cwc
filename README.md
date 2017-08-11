@@ -2,9 +2,22 @@ cwc -> Cyclists With Cameras
 
 For more information on CyclistsWithCameras see [here](https://github.com/jehiah/safe_streets/blob/master/cyclists_with_cameras.md)
 
-This repository is a set of command line utilities for managing a database of complaints. It expects complaints to be one per directory in a directory named `YYYYMMDD_HHMM_$LICENSE`. The default location for these is `~/Documents/cyclists_with_cameras`.
+This repository is a set of command line utilities for managing a database of complaints. 
 
-A directory is a spot to combine your notes on the complaint (in a `notes.txt` file) and all the images or video related to that complaint. A typical notes.txt follows the structure
+Included are the following utilities:
+
+* cwc - a multi-purpose search & report tool
+* `reports.sh` generate statistics (i.e [this report](https://on.jehiah.cz/29J6lIX))
+* `cwc server` a HTTP UI for viewing and searching reports
+* `sync_w_gmail` a tool to extract 311 updates from the TLC and update matching `notes.txt` files
+
+## File Format
+
+`cwc` expects complaints to be stored one per directory in a directory named `YYYYMMDD_HHMM_$LICENSE`. The default location for these is `~/Documents/cyclists_with_cameras`.
+
+A directory is a spot to combine your notes on the complaint (in a `notes.txt` file) and all the images or video related to that complaint. 
+
+The `notes.txt` is a required file and MUST have the first line in the following format. All other file context are unstructured but typically there is a paragraph of the complaint text, a line specifying which photos were uploaded, the 311 number, and then single line notes with updats from the TLC.
 
 ```
 YYYY/MM/DD hh:mm:p [Taxi|FHV] $LICENSE $LOCATION
@@ -13,11 +26,6 @@ At <LOCATION> I observed <VEHICLE> <VIOLATION>. Pictures included.
   
 C-1-1-123445678
 ```
-
-Included are the following utilities:
-
-* cwc - a multi-purpose search & report tool
-* `reports.sh` generate statistics (i.e [this report](https://on.jehiah.cz/29J6lIX))
 
 ## cwc search
 
@@ -91,6 +99,24 @@ Enter a number (Default is 1): 2
 ## cwc report
 
 `cwc report` provides a summarized view of activity based on complaint directories
+
+## cwc server
+
+`cwc server` runs a HTTP server that provides a web UI for viewing reports and adding notes
+
+## sync_w_gmail
+
+This utility extracts 311 update information from Gmail and updates relevant `notes.txt` files.
+
+To use you will need to create/configure a google application (via https://console.developers.google.com/project) with access to the gmail API and store the client secret in `~/.credentials/client_secret.json`. When first run it will prompt for gmail authentication (write access is used to archive emails) and it will store the credentials in `~/.credentials/cwc.json`
+
+```
+$ ./bin/sync_w_gmail 
+2017/08/10 23:43:21 [email:15dadb9404793037 2017/08/04 10:49] C1-1-1440629331 Subject:311 Service Request Update #: C1-1-1440629331 , Taxi Complaint
+2017/08/10 23:43:21 	found related complaint 6J12 - Sun Jul 30 2017 5:37pm
+2017/08/10 23:43:21 	already recorded
+2017/08/10 23:43:21 	archiving email
+```
 
 ## Building from Source
 
