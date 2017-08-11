@@ -10,13 +10,12 @@ import (
 )
 
 func Run(d db.DB, w io.Writer) error {
-	err := ByHour(d, w)
-	if err != nil {
-		return err
-	}
-	err = ByRegulation(d, w)
-	if err != nil {
-		return err
+	type reporter func(d db.DB, w io.Writer) error
+	for _, r := range []reporter{ByHour, ByMonth, PerDay, ByRegulation} {
+		err := r(d, w)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

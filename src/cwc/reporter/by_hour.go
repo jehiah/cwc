@@ -18,9 +18,12 @@ func ByHour(d db.DB, w io.Writer) error {
 	if err != nil {
 		return err
 	}
+	scale := &Scale{}
 	for _, c := range complaints {
 		total += 1
-		hours[c.Time().Hour()] += 1
+		hour := c.Time().Hour()
+		hours[hour] += 1
+		scale.Update(hours[hour])
 	}
 	start, stop := 0, 0
 	for i, v := range hours {
@@ -35,12 +38,14 @@ func ByHour(d db.DB, w io.Writer) error {
 		}
 	}
 
+	io.WriteString(w, scale.String())
+
 	table := tablewriter.NewWriter(w)
 	table.SetBorder(false)
 	table.SetHeader([]string{"Hour", "Complaints", ""})
 	for h, v := range hours[start+1 : stop] {
 		t := time.Date(2010, 1, 1, h+start, 0, 0, 0, time.UTC)
-		table.Append([]string{t.Format("3pm"), fmt.Sprintf("%d", v), strings.Repeat("∎", v)})
+		table.Append([]string{t.Format("3pm"), fmt.Sprintf("%d", v), strings.Repeat("∎", v/scale.Scale)})
 	}
 	table.SetFooter([]string{"Total:", fmt.Sprintf("%d", total), ""})
 	table.Render()
