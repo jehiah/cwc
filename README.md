@@ -6,7 +6,7 @@ This repository is a set of command line utilities for managing a database of co
 
 Included are the following utilities:
 
-* cwc - a multi-purpose search & report tool
+* `cwc` - a multi-purpose search & report tool
 * `reports.sh` generate statistics (i.e [this report](https://on.jehiah.cz/29J6lIX))
 * `sync_w_gmail` a tool to extract 311 updates from the TLC and update matching `notes.txt` files
 
@@ -145,12 +145,29 @@ This utility extracts 311 update information from Gmail and updates relevant `no
 To use you will need to create/configure a google application (via https://console.developers.google.com/project) with access to the gmail API and store the client secret in `~/.credentials/client_secret.json`. When first run it will prompt for gmail authentication (write access is used to archive emails) and it will store the credentials in `~/.credentials/cwc.json`
 
 ```
-$ ./bin/sync_w_gmail 
-2017/08/10 23:43:21 [email:15dadb9404793037 2017/08/04 10:49] C1-1-1440629331 Subject:311 Service Request Update #: C1-1-1440629331 , Taxi Complaint
-2017/08/10 23:43:21 	found related complaint 6J12 - Sun Jul 30 2017 5:37pm
-2017/08/10 23:43:21 	already recorded
-2017/08/10 23:43:21 	archiving email
+2017/08/11 19:46:15 [email:15dd2e2daeaec612 2017/08/11 16:01] C1-1-1439952551 Subject:311 Service Request Update #: C1-1-1439952551 , For Hire Vehicle Complaint
+2017/08/11 19:46:15 	found related complaint T740155C - Fri Jul 28 2017 4:54pm
+2017/08/11 19:46:15 	> Driver stip 10090330S mailed to driver 8/11/17.NT
+2017/08/11 19:46:15 	archiving email
+2017/08/11 19:46:17 [email:15dd2c162e9c4a5e 2017/08/11 15:24] C1-1-1437236951 Subject:311 Service Request Update #: C1-1-1437236951 , Taxi Complaint
+2017/08/11 19:46:17 	found related complaint 6H29 - Mon Jul 17 2017 6:59pm
+2017/08/11 19:46:17 	> Driver stip 10090019S mailed to driver 8/11/17.NT
+2017/08/11 19:46:17 	archiving email
 ```
+
+This records an entry in the appropriate `notes.txt` relating to the email. For example in `~/Documents/cyclists_with_cameras/20170728_1654_T740155C/notes.txt`
+
+```
+[email:15dd2e2daeaec612 2017/08/11 16:01] Driver stip 10090330S mailed to driver 8/11/17.NT
+```
+
+and in `~/Documents/cyclists_with_cameras/20170717_1859_6H29/notes.txt` the following was recorded
+
+```
+[email:15dd2c162e9c4a5e 2017/08/11 15:24] Driver stip 10090019S mailed to driver 8/11/17.NT
+```
+
+The `15dd2c162e9c4a5e` is the Gmail Message ID which will show in the URL when viewing that email in gmail
 
 ## Building from Source
 
