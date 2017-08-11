@@ -57,7 +57,8 @@ func report() *cobra.Command {
 
 func json() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "json",
+		Use:   "json",
+		Short: "Output all complaints as JSON",
 		Run: func(cmd *cobra.Command, args []string) {
 			body, err := reporter.JSON(loadDB(cmd.Flags().GetString("db")))
 			if err != nil {
@@ -72,7 +73,9 @@ func json() *cobra.Command {
 
 func editCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "edit",
+		Use:     "edit",
+		Short:   "Edit complaint notes.txt",
+		Example: "edit [query]",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) >= 1 {
 				search(loadDB(cmd.Flags().GetString("db")), args[0], "edit")
@@ -87,7 +90,9 @@ func editCmd() *cobra.Command {
 
 func searchCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "search",
+		Use:     "search",
+		Short:   "Search for a complaint by keword",
+		Example: "search [query]",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) >= 1 {
 				search(loadDB(cmd.Flags().GetString("db")), args[0], "search")

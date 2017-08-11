@@ -38,13 +38,13 @@ Usage:
   cwc [command]
 
 Available Commands:
-  edit        
+  edit        Edit complaint notes.txt
   help        Help about any command
-  json        
+  json        Output all complaints as JSON
   new         New Complaint
   reg         List Regulations
   report      Text format summarized view of report activity
-  search      
+  search      Search for a complaint by keword
   server      Web UI for viewing reports and adding notes
   version     Print the version number
 
@@ -124,7 +124,7 @@ Enter a number (Default is 1): 2
 > done
 ```
 
-## cwc server
+### cwc server
 
 ```
 Usage:
@@ -136,6 +136,7 @@ Flags:
   -h, --help                   help for server
   -t, --template-path string   path to templates (default "src/templates")
 ```
+
 
 ## sync_w_gmail
 
