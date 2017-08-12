@@ -8,17 +8,30 @@ type State string
 
 const (
 	Unknown          State = "Unknown"
-	Submitted              = "Submitted"
-	Invalid                = "Invalid"
 	Fined                  = "FINED"
-	ClosedPenalty          = "Plead Guilty"
 	HearingScheduled       = "Hearing Scheduled"
-	NoticeOfDecision       = "Notice of Decision"
-	ClosedGuilty           = "FINED (guilty)"
-	ClosedNotGuilty        = "CLOSED (not guilty)"
-	ClosedInspection       = "CLOSED (Referred to S&E)"
-	ClosedUnableToID       = "CLOSED (Uanble to ID)"
+
+	NoticeOfDecision = "Notice of Decision"
+	ClosedPenalty    = "Plead Guilty"
+	// ClosedNotGuilty        = "CLOSED (not guilty)"
+	// ClosedGuilty           = "CLOSED (guilty)"
+	ClosedInspection = "CLOSED (Referred to S&E)"
+	ClosedUnableToID = "CLOSED (Uanble to ID)"
+	Invalid          = "CLOSED (Invalid)"
+	Expired          = "EXPIRED (Unknown)"
 )
+
+var AllStates []State = []State{
+	Unknown,
+	Fined,
+	HearingScheduled,
+	NoticeOfDecision,
+	ClosedPenalty,
+	ClosedInspection,
+	ClosedUnableToID,
+	Invalid,
+	Expired,
+}
 
 func (s State) String() string {
 	return string(s)
@@ -36,7 +49,7 @@ func DetectState(s string) State {
 		return Fined
 	case strings.Contains(s, "unable to identify"):
 		return ClosedUnableToID
-	case strings.Contains(s, "Not a TLC violation"):
+	case strings.Contains(s, "Not a TLC violation") || strings.Contains(s, "not a violation of TLC rules"):
 		return Invalid
 	}
 	return Unknown

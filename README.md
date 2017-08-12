@@ -96,20 +96,36 @@ Violation:
 6. no u-turns in business district
 7. no honking in non-danger situations
 8. no driving in bus & right turn only lane
-9. yield sign violation
-10. failing to yield right of way
-11. traffic signal violation
-12. improper passing
-13. unsafe lane change
-14. no right from center lane
-15. no left from center lane when both two-way streets
-16. no left from center lane at one-way street
-17. no passing zone
-18. license plate must not be obstructed
-19. no side window tint below 70%
-20. cell-phone use while driving
-21. threats, harassment, abuse
-22. use or threat of physical force
+9. no right from center lane
+10. no left from center lane when both two-way streets
+11. no left from center lane at one-way street
+12. no passing zone
+13. license plate must not be obstructed
+14. no side window tint below 70%
+15. no obstructed view of road
+16. cell-phone use while driving
+17. park w/in 12 inches of curb (two way street)
+18. park w/in 12 inches of curb (one way street)
+19. no blue lights except emergency vehicles
+20. no double parking
+21. no driving on sidewalks
+22. threats, harassment, abuse
+23. use or threat of physical force
+24. yield sign violation
+25. following too closely (tailgating)
+26. failing to yield right of way
+27. traffic signal violation
+28. stop sign violation
+29. improper passing
+30. unsafe lane change
+31. driving left of center
+32. driving in wrong direction
+33. Speeding 1 to 10 mph above speed limit
+34. Speeding 11 to 20 mph above speed limit
+35. Speeding 21 to 30 mph above speed limit
+36. Speeding 31 to 40 mph above speed limit
+37. Speeding 41 or more mph above speed limit
+38. no smoking
 
 Enter a number: 2
 

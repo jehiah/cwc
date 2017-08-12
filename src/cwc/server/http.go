@@ -33,7 +33,7 @@ func ComplaintClass(c *db.FullComplaint) string {
 		return "warning"
 	case db.Fined:
 		return "info"
-	case db.ClosedUnableToID, db.Invalid:
+	case db.ClosedUnableToID, db.Invalid, db.Expired:
 		return "active"
 	}
 	return ""

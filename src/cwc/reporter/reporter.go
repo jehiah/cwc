@@ -11,7 +11,7 @@ import (
 
 func Run(d db.DB, w io.Writer) error {
 	type reporter func(d db.DB, w io.Writer) error
-	for _, r := range []reporter{ByHour, ByMonth, PerDay, ByRegulation} {
+	for _, r := range []reporter{ByHour, ByMonth, PerDay, ByRegulation, ByStatus} {
 		err := r(d, w)
 		if err != nil {
 			return err

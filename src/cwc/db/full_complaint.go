@@ -125,6 +125,11 @@ func ParseComplaint(c Complaint, body []byte, path string, files []string) (*Ful
 		}
 	}
 
+	// if Unknown and >6month, set to expired
+	if f.Status == Unknown && time.Since(f.Time) > (time.Hour*4320) {
+		f.Status = Expired
+	}
+
 	return f, nil
 }
 
