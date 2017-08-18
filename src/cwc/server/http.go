@@ -23,6 +23,8 @@ type Server struct {
 	*template.Template
 	*http.ServeMux
 	listener net.Listener
+	ReadOnly bool
+	BasePath string
 }
 
 func ComplaintClass(c *db.FullComplaint) string {
@@ -49,7 +51,7 @@ func PhotoClass(p *db.Photo) string {
 	panic("here")
 }
 
-func New(d db.DB, templatePath string) *Server {
+func New(d db.DB, templatePath, basePath string, readOnly bool) *Server {
 	t, err := template.New("").Funcs(template.FuncMap{"ComplaintClass": ComplaintClass, "PhotoClass": PhotoClass}).ParseGlob(filepath.Join(templatePath, "*.html"))
 
 	if err != nil {
@@ -59,21 +61,24 @@ func New(d db.DB, templatePath string) *Server {
 		DB:       d,
 		Template: t,
 		ServeMux: http.NewServeMux(),
+		ReadOnly: readOnly,
+		BasePath: basePath,
 	}
-	s.ServeMux.HandleFunc("/reg", s.Regulations)
-	s.ServeMux.HandleFunc("/complaint/", s.Complaint)
+	s.ServeMux.HandleFunc(basePath+"reg", s.Regulations)
+	s.ServeMux.HandleFunc(basePath+"complaint/", s.Complaint)
 	s.ServeMux.HandleFunc("/", s.Complaints)
-	s.ServeMux.HandleFunc("/data/report", s.DataReport)
-	s.ServeMux.HandleFunc("/report", s.Report)
+	s.ServeMux.HandleFunc(basePath+"data/report", s.DataReport)
+	s.ServeMux.HandleFunc(basePath+"report", s.Report)
 	return s
 }
 
 func (s *Server) Report(w http.ResponseWriter, r *http.Request) {
 	type payload struct {
-		Query string
-		Page  string
+		Query    string
+		Page     string
+		BasePath string
 	}
-	err := s.Template.ExecuteTemplate(w, "report.html", payload{Page: "Report"})
+	err := s.Template.ExecuteTemplate(w, "report.html", payload{Page: "Report", BasePath: s.BasePath})
 	if err != nil {
 		log.Printf("%s", err)
 		s.Error(w, err)
@@ -97,8 +102,9 @@ func (s *Server) Regulations(w http.ResponseWriter, r *http.Request) {
 		Regulations []reg.Reg
 		Query       string
 		Page        string
+		BasePath    string
 	}
-	p := payload{Regulations: reg.All, Page: "Regulations"}
+	p := payload{Regulations: reg.All, Page: "Regulations", BasePath: s.BasePath}
 	err := s.Template.ExecuteTemplate(w, "reg.html", p)
 	if err != nil {
 		log.Printf("%s", err)
@@ -107,7 +113,7 @@ func (s *Server) Regulations(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) OpenInBrowser() error {
-	u := &url.URL{Scheme: "http", Host: s.listener.Addr().String()}
+	u := &url.URL{Scheme: "http", Host: s.listener.Addr().String(), Path: s.BasePath}
 	err := exec.Command("/usr/bin/open", u.String()).Run()
 	return err
 }
@@ -122,13 +128,6 @@ func (s *Server) Serve(addr string) error {
 		return err
 	}
 	log.Printf("Running cwc server at %s", s.listener.Addr())
-	go func() {
-		time.Sleep(200 * time.Millisecond)
-		err := s.OpenInBrowser()
-		if err != nil {
-			log.Println(err)
-		}
-	}()
 	err = http.Serve(s.listener, s)
 	return err
 }
@@ -136,7 +135,7 @@ func (s *Server) Serve(addr string) error {
 func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) {
 	// The "/" pattern matches everything, so we need to check
 	// that we're at the root here.
-	if r.URL.Path != "/" {
+	if r.URL.Path != s.BasePath {
 		http.NotFound(w, r)
 		return
 	}
@@ -147,10 +146,12 @@ func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) {
 		PendingHearings []*db.FullComplaint
 		Query           string
 		Page            string
+		BasePath        string
 	}
 	p := payload{
-		Query: r.Form.Get("q"),
-		Page:  "Complaints",
+		Query:    r.Form.Get("q"),
+		Page:     "Complaints",
+		BasePath: s.BasePath,
 	}
 	var complaints []db.Complaint
 	var err error
@@ -197,18 +198,25 @@ func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) {
 func (s *Server) Error(w http.ResponseWriter, err error) {
 	w.WriteHeader(500)
 	type payload struct {
-		Error string
-		Query string
-		Page  string
+		Error    string
+		Query    string
+		Page     string
+		BasePath string
 	}
-	err = s.Template.ExecuteTemplate(w, "error.html", payload{Error: err.Error()})
+
+	p := payload{Error: err.Error(), BasePath: s.BasePath}
+	if s.ReadOnly {
+		p.Error = "An Error Occurred"
+	}
+	err = s.Template.ExecuteTemplate(w, "error.html", p)
 	if err != nil {
 		log.Printf("error rendering %s", err)
 	}
 }
 
 func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
-	patterns := strings.SplitN(r.URL.Path[1:], "/", 3)
+	path := r.URL.Path[len(s.BasePath):]
+	patterns := strings.SplitN(path, "/", 3)
 	c := db.Complaint(patterns[1])
 
 	if ok, err := s.DB.Exists(c); err != nil {
@@ -241,6 +249,10 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 
 	// handle POST
 	if r.Method == "POST" {
+		if s.ReadOnly {
+			http.Error(w, "Method not supported", 405)
+			return
+		}
 		r.ParseForm()
 		txt := strings.TrimSpace(r.Form.Get("append_text"))
 		if txt == "" {
@@ -265,10 +277,14 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 		FullComplaint *db.FullComplaint
 		Query         string
 		Page          string
+		ReadOnly      bool
+		BasePath      string
 	}
 	p := payload{
 		FullComplaint: f,
 		Page:          "Complaints",
+		ReadOnly:      s.ReadOnly,
+		BasePath:      s.BasePath,
 	}
 	err = s.Template.ExecuteTemplate(w, "complaint.html", p)
 	if err != nil {

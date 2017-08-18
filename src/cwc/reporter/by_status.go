@@ -33,8 +33,7 @@ func ByStatus(d db.DB, w io.Writer) error {
 		if n == 0 {
 			continue
 		}
-		p := (float32(n) / float32(total)) * 100
-		fmt.Fprintf(w, "%30s [ %3d complaints] %s (%0.1f%%)\n", state, n, strings.Repeat("∎", n/scale.Scale), p)
+		fmt.Fprintf(w, "%30s [ %3d complaints] %s (%0.1f%%)\n", state, n, strings.Repeat("∎", n/scale.Scale), percent(n, total))
 	}
 	fmt.Fprint(w, "\n")
 	return nil

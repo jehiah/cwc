@@ -1,3 +1,4 @@
+{{ $BasePath := .BasePath }}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -33,7 +34,7 @@
           <h3><span class="glyphicon glyphicon-calendar" aria-hidden="true"></span> {{.PendingHearings | len}} Pending Hearings</h3>
           <ul>
             {{ range .PendingHearings }}
-            <li>{{.Hearing.Format "Mon Jan 2 3:04pm"}} <code><a href="/complaint/{{.Complaint.ID}}">{{.ServiceRequestID}}</a></code> {{ if .TLCID}}<code>{{.TLCID}}</code>{{end}} - {{.VehicleType}} {{.License}} {{.Location}} {{ range $index, $violation := .Violations }}{{if $index}},{{end}} {{$violation.Description}}{{ end }}</li>
+            <li>{{.Hearing.Format "Mon Jan 2 3:04pm"}} <code><a href="{{$BasePath}}complaint/{{.Complaint.ID}}">{{.ServiceRequestID}}</a></code> {{ if .TLCID}}<code>{{.TLCID}}</code>{{end}} - {{.VehicleType}} {{.License}} {{.Location}} {{ range $index, $violation := .Violations }}{{if $index}},{{end}} {{$violation.Description}}{{ end }}</li>
             {{ end }}
           </ul>
         </div>
@@ -54,7 +55,7 @@
       <table class="table table-small table-condensed">
         {{ range .FullComplaints }}
           <tr class="{{. | ComplaintClass}}">
-            <td><code><a href="/complaint/{{.Complaint.ID}}">{{.ServiceRequestID}}</a></code>
+            <td><code><a href="{{$BasePath}}complaint/{{.Complaint.ID}}">{{.ServiceRequestID}}</a></code>
             {{if .TLCID}}<code>{{.TLCID}}</code>{{end}}
             {{if ne .Status "Unknown"}}<span class="label label-default">{{.Status}}</span>{{end}}</td>
             <td class="date">{{.Time.Format "2006/01/02 03:04pm"}}</td>

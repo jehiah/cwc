@@ -85,6 +85,6 @@ func (s *Server) Image(w http.ResponseWriter, r *http.Request, c db.Complaint, f
 
 func (s *Server) Download(w http.ResponseWriter, r *http.Request, c db.Complaint, file string) {
 	path := s.DB.FullPath(c)
-	staticServer := http.StripPrefix(fmt.Sprintf("/complaint/%s/", c.ID()), http.FileServer(http.Dir(path)))
+	staticServer := http.StripPrefix(fmt.Sprintf(s.BasePath+"complaint/%s/", c.ID()), http.FileServer(http.Dir(path)))
 	staticServer.ServeHTTP(w, r)
 }

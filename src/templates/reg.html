@@ -1,3 +1,5 @@
+{{ $BasePath := .BasePath }}
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -23,7 +25,7 @@
       <table class="table">
         {{ range .Regulations }}
           <tr>
-            <td><a href="/?q={{.Code}}">{{.LongCode}}</a>{{if .Outdated}} <span class="label label-danger">outdated</span>{{end}}</td>
+            <td><a href="{{$BasePath}}?q={{.Code}}">{{.LongCode}}</a>{{if .Outdated}} <span class="label label-danger">outdated</span>{{end}}</td>
             <td>{{.Description}}</td>
             <td><small>{{.Type}}</small></td>
             <td>

@@ -11,7 +11,7 @@ import (
 
 func Run(d db.DB, w io.Writer) error {
 	type reporter func(d db.DB, w io.Writer) error
-	for _, r := range []reporter{ByHour, ByMonth, PerDay, ByRegulation, ByStatus} {
+	for _, r := range []reporter{ByHour, ByMonth, PerDay, ByRegulation, ByStatus, ByVehicle} {
 		err := r(d, w)
 		if err != nil {
 			return err
@@ -56,4 +56,8 @@ func JSON(d db.DB) ([]byte, error) {
 	}
 	body, err := json.Marshal(data)
 	return body, err
+}
+
+func percent(n, total int) float32 {
+	return (float32(n) / float32(total)) * 100
 }

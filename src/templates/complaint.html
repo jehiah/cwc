@@ -1,4 +1,7 @@
 {{ $complaint := .FullComplaint.Complaint }}
+{{ $ReadOnly := .ReadOnly }}
+{{ $BasePath := .BasePath }}
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -17,6 +20,9 @@
   .complaint-photo {
     image-orientation: from-image; /* Use EXIF data from the image */
   }
+  .panel-heading .time {
+    font-size:80%;
+  }
   </style>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -33,7 +39,7 @@
     <div class="row">
       <div class="col-xs-12">
       <div class="well well-sm">
-        <div class="pull-right text-center"><samp>{{.Complaint.ID}}</samp>{{if .HasGPSInfo }}<br/><img src="/complaint/{{$complaint.ID}}/map?s=200x150&z=15" width="200" height="150" />{{end}}</div>
+        <div class="pull-right text-center"><samp>{{.Complaint.ID}}</samp>{{if .HasGPSInfo }}<br/><img src="{{$BasePath}}complaint/{{$complaint.ID}}/map?s=200x150&z=15" width="200" height="150" />{{end}}</div>
         <p>When: <code>{{.Time.Format "2006/01/02 03:04pm (Mon Jan 2)"}}</code></p>
         <p>Vehicle: <code>{{.VehicleType}} <span class="license">{{.License}}</span></code></p>
         <p>Location: <code>{{.Location}}</code></p>
@@ -58,10 +64,12 @@
       <p>{{.}}</p>
       {{ end }}
       </div>
+      {{if not $ReadOnly}}
       <form action="" method="POST">
         <textarea class="form-control" rows="3" name="append_text"></textarea>
         <button type="submit" class="btn btn-primary">Add Notes</button>
       </form>
+      {{end}}
     </div>
     </div>
 
@@ -94,7 +102,7 @@
         <h3>Attachments</h3>
         <ul>
         {{ range .PDFs }}
-          <li><a href="/complaint/{{$complaint.ID}}/{{.}}">{{.}}</a></li>
+          <li><a href="{{$BasePath}}complaint/{{$complaint.ID}}/{{.}}">{{.}}</a></li>
         {{ end }}
         </ul>
       </div>
@@ -107,7 +115,7 @@
         <h3>Attachments</h3>
         <ul>
         {{ range .Files }}
-          <li><a href="/complaint/{{$complaint.ID}}/{{.}}">{{.}}</a></li>
+          <li><a href="{{$BasePath}}complaint/{{$complaint.ID}}/{{.}}">{{.}}</a></li>
         {{ end }}
         </ul>
       </div>
@@ -122,8 +130,8 @@
       {{ range .PhotoDetails }}
       <div class="col-md-4 col-lg-3 col-xs-6">
         <div class="panel {{. | PhotoClass }}"> 
-          <div class="panel-heading">{{.Name}}</div>
-          <a href="/complaint/{{$complaint.ID}}/{{.Name}}"><img src="/complaint/{{$complaint.ID}}/{{.Name}}?w=350" class="img-responsive complaint-photo" title="{{.Name}}" /></a>
+          <div class="panel-heading">{{.Name}} <code class="time">{{.Created.Format "2006-01-02 03:04pm"}}</code></div>
+          <a href="{{$BasePath}}complaint/{{$complaint.ID}}/{{.Name}}"><img src="{{$BasePath}}complaint/{{$complaint.ID}}/{{.Name}}?w=350" class="img-responsive complaint-photo" title="{{.Name}}" /></a>
         </div>
       </div>
       {{ end }}
