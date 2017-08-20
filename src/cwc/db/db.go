@@ -12,6 +12,11 @@ type DB string
 var Default DB
 
 func init() {
+	// in Go 1.8 this isn't implemented in linux
+	defer func() {
+		recover()
+	}()
+
 	usr, err := user.Current()
 	if err != nil {
 		panic(err.Error())
