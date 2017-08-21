@@ -40,8 +40,58 @@ func NewByHour(d db.DB, f []*db.FullComplaint) (Reporter, error) {
 	return r, nil
 }
 
+var byHourHTML string = `
+<div class="col-xs-6">
+<h2>Complaints Per Hour</h2>
+<table class="table table-condensed">
+<thead>
+	<tr>
+		<th class="number">Hour</th>
+		<th class="number">Complaints</th>
+		<th></th>
+	</tr>
+</thead>
+<tbody>
+	{{range .}}
+	<tr>
+		<td class="number">{{.T.Format "3pm"}}</td>
+		<td class="number">{{.N}}</td>
+		<td>
+		<div class="progress">
+		  <div class="progress-bar" role="progressbar" aria-valuenow="{{printf "%0.2f" .Percent}}" aria-valuemin="0" aria-valuemax="100" style="width: {{printf "%0.2f" .RelPercent}}%;">
+		    {{printf "%0.2f" .Percent}}%
+		  </div>
+		</div>
+		</td>
+	</tr>
+	{{end}}
+</tbody>
+</table>
+</div>
+`
+var byHourTemplate *template.Template = template.Must(template.New("foo").Parse(byHourHTML))
+
 func (r ByHour) HTML() template.HTML {
-	return ""
+	type row struct {
+		T          time.Time
+		N          int
+		Percent    float32
+		RelPercent float32
+	}
+	var rows []row
+	var max int
+	for _, n := range r.Hours {
+		if n > max {
+			max = n
+		}
+	}
+
+	for h, n := range r.Hours[r.Start+1 : r.Stop] {
+		t := time.Date(2010, 1, 1, h+r.Start, 0, 0, 0, time.UTC)
+		rows = append(rows, row{t, n, percent(n, r.Total), percent(n, max)})
+	}
+
+	return GetTemplateString(byHourTemplate, rows)
 }
 
 func (r ByHour) Text() string {

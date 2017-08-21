@@ -77,8 +77,17 @@ func (s *Server) Report(w http.ResponseWriter, r *http.Request) {
 		Query    string
 		Page     string
 		BasePath string
+		Reports  []template.HTML
 	}
-	err := s.Template.ExecuteTemplate(w, "report.html", payload{Page: "Report", BasePath: s.BasePath})
+
+	reports, err := reporter.RunHTML(s.DB)
+	if err != nil {
+		log.Printf("%s", err)
+		s.Error(w, err)
+		return
+	}
+
+	err = s.Template.ExecuteTemplate(w, "report.html", payload{Page: "Report", BasePath: s.BasePath, Reports: reports})
 	if err != nil {
 		log.Printf("%s", err)
 		s.Error(w, err)

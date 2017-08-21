@@ -1,6 +1,7 @@
 package reporter
 
 import (
+	"bytes"
 	"encoding/json"
 	"html/template"
 	"io"
@@ -38,6 +39,35 @@ func Run(d db.DB, w io.Writer) error {
 		io.WriteString(w, r.Text())
 	}
 	return nil
+}
+
+func RunHTML(d db.DB) ([]template.HTML, error) {
+	var full []*db.FullComplaint
+	complaints, err := d.All()
+	if err != nil {
+		return nil, err
+	}
+	for _, c := range complaints {
+		f, err := d.FullComplaint(c)
+		if err != nil {
+			continue
+		}
+		full = append(full, f)
+	}
+
+	var o []template.HTML
+	for _, g := range []Generator{NewByMonth, NewByHour, NewPerDay, NewByStatus, NewByRegulation, NewByVehicle} {
+		r, err := g(d, full)
+		if err != nil {
+			return nil, err
+		}
+		h := r.HTML()
+		if h == "" {
+			continue
+		}
+		o = append(o, h)
+	}
+	return o, nil
 }
 
 func JSON(d db.DB) ([]byte, error) {
@@ -80,4 +110,12 @@ func JSON(d db.DB) ([]byte, error) {
 
 func percent(n, total int) float32 {
 	return (float32(n) / float32(total)) * 100
+}
+func GetTemplateString(t *template.Template, data interface{}) template.HTML {
+	b := &bytes.Buffer{}
+	err := t.Execute(b, data)
+	if err != nil {
+		panic(err)
+	}
+	return template.HTML(b.String())
 }

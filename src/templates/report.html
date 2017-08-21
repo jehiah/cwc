@@ -9,16 +9,27 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dc/2.0.0-beta.32/dc.min.css" integrity="sha256-vhoUR1mPIIBUT33DIysRCsX+OCdZmNArccsNDR3s2MQ=" crossorigin="anonymous" />
 
   <style>
-  g.row text {
-    fill:#999;
-  }
-  #violations-by-code-chart g.row text {
-    fill:#333;
-  }
-  #day-of-week-chart g.row text {
-    stroke:2px solid #fff;
-    fill:#333;
-  }
+.table-small>tbody>tr>td {
+  font-size:85%;
+}
+.table-condensed>tbody>tr>td {
+  padding: 2px 5px;
+}
+tbody>tr>td.date {
+  font-size:11px;
+}
+.table .progress {
+  min-width:65px;
+  margin-bottom:0;
+}
+td.number {
+  padding-right:2px;
+  max-width:100px;
+  min-width:30px;
+  text-align:right;
+}
+
+  
   </style>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -35,200 +46,9 @@
     <h1>Cyclists With Cameras</h1>
     </div>
     <div class="row">
-      <div id="violations-by-code-chart">
-        <strong>Violations Cited</strong>
-        <a class="reset" href="javascript:violationsByCodeChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-        <div class="clearfix"></div>
-      </div>
-
-      <div id="day-of-week-chart">
-        <strong>Day of Week</strong>
-        <a class="reset" href="javascript:dayOfWeekChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-        <div class="clearfix"></div>
-      </div>
-      
-      
-      <div id="vehicle-type-chart">
-        <strong>Vehicle Type</strong>
-        <a class="reset" href="javascript:vehicleTypeChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-        <div class="clearfix"></div>
-      </div>
-
-      <div id="reports-by-month-chart">
-        <strong>Reports by Month</strong>
-        <a class="reset" href="javascript:reportsByMonthChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-        <div class="clearfix"></div>
-      </div>
-
+    {{range .Reports}}
+      {{.}}
+    {{end}}
     </div>
-    <div id="version"></div>
-    
-    <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script> -->
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js" integrity="sha256-dsOXGNHAo/syFnazt+KTBsCQeRmlcW1XKL0bCK4Baec=" crossorigin="anonymous"></script>
-<!--    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.12/crossfilter.min.js" integrity="sha256-T9tvV3x+/vCnCoFciKNZwbaJ46q9lh6iZjD0ZjD95lE=" crossorigin="anonymous"></script> -->
-<script src="http://crossfilter.github.io/crossfilter/crossfilter.v1.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dc/2.0.0-beta.32/dc.min.js"  integrity="sha256-aASvdO5geFLJ4Ht0Od5L63JG7LESIYpcciY4E48czP8=" crossorigin="anonymous"></script>
-    
-    <script>
-    var dayOfWeekChart = dc.rowChart('#day-of-week-chart');
-    var reportsByMonthChart = dc.barChart("#reports-by-month-chart");
-    var violationsByCodeChart = dc.rowChart('#violations-by-code-chart')
-    var vehicleTypeChart = dc.pieChart("#vehicle-type-chart")
-    
-    function isTaxi(v) {
-      return v.vehicle_type === "TAXI"
-    }
-    
-    d3.json('/data/report', function (data) {
-      var violationLookup = {};
-      data.forEach(function (d) {
-        d.dd = new Date(d.timestamp * 1000)
-        d.month = d3.time.month.utc(d.dd); // pre-calculate month for better performance
-        d.violations.forEach(function(dd) {
-          violationLookup[dd.code] = dd;
-        })
-        d.codes = d.violations.map(function(dd){return dd.code})
-      });      
-      
-      var ndx = crossfilter(data);
-      var all = ndx.groupAll();
-
-      // var dateDimension = ndx.dimension(function (d) {
-      //   return d.dd;
-      // });
-      
-    var dayOfWeek = ndx.dimension(function (d) {
-      var day = d.dd.getDay();
-      var name = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-      return day + '.' + name[day];
-    });
-    var dayOfWeekGroup = dayOfWeek.group();
-
-    // monthDay = d3.time.format.utc("%Y-%m.%b %Y")
-    var monthOfYear = ndx.dimension(function (d) {
-      return d.month;
-    });
-    var monthOfYearGroup = monthOfYear.group().reduce(
-      function(p, v) {
-        if (isTaxi(v)) {
-          p.taxi ++;
-        } else {
-          p.fhv ++;
-        }
-        p.total++
-        return p
-      },
-      function(p, v) {
-        if (isTaxi(v)) {
-          p.taxi --;
-        } else {
-          p.fhv --;
-        }
-        p.total--
-        return p
-      },
-      function(){ return {taxi:0, fhv:0, total:0}}
-      );
-    
-
-    var violationCodes = ndx.dimension(function(d) { return d.codes }, true)
-    var violationCodesGroup = violationCodes.group() //.reduceCount();
-
-    var vehicleTypes = ndx.dimension(function(d){ return d.vehicle_type})
-    var vehicleTypeGroup = vehicleTypes.group()
-    
-    dayOfWeekChart /* dc.rowChart('#day-of-week-chart', 'chartGroup') */
-      .width(180)
-      .height(180)
-      .margins({top: 20, left: 10, right: 10, bottom: 20})
-      .group(dayOfWeekGroup)
-      .dimension(dayOfWeek)
-
-      .ordinalColors(['#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#dadaeb'])
-      .label(function (d) {
-          return d.key.split('.')[1];
-      })
-      
-      .title(function (d) {
-          return d.value;
-      })
-      .elasticX(true)
-      .xAxis().ticks(4);
-  
-  
-    var monthExtent = d3.extent(data, function(d){return d.month});
-    monthExtent[1] = d3.time.month.utc.offset(monthExtent[1], 1)
-    
-    reportsByMonthChart // dc.barChart("#reports-by-month-chart");
-      .width(640)
-      .height(190)
-      .margins({top:10, left:25, right: 20, bottom:25})
-      .dimension(monthOfYear)
-      .group(monthOfYearGroup, "Taxi")
-      .valueAccessor(function(d){return d.value.taxi})
-      .stack(monthOfYearGroup, "For Hire", function(d){return d.value.fhv;})
-      .legend(dc.legend().x(540).y(10))
-      .elasticY(true)
-      // .centerBar(true)
-      .gap(3)
-      .alwaysUseRounding(true)
-      .x(d3.time.scale.utc().domain(monthExtent))
-      .y(d3.scale.linear())
-      .round(d3.time.month.utc.round)
-      .xUnits(d3.time.months)
-      .renderHorizontalGridLines(true)
-
-
-
-    violationsByCodeChart
-      .width(350)
-      .height(600)
-      .margins({top: 0, left: 5, right: 10, bottom: 20})
-      .dimension(violationCodes)
-      .group(violationCodesGroup)
-      .data(function(group){
-        // key would be the unique aray of violations, but we want to flatten the chart
-        var counts = {}
-        group.all().forEach(function(d){
-          d.key.forEach(function(dd){
-            counts[dd] = counts[dd] ? counts[dd] + d.value : d.value
-            console.log(dd, counts[dd])
-          })
-        })
-        var values = d3.entries(counts)
-        console.log(values)
-        values.sort(function(a,b){return d3.descending(a.value, b.value)})
-        return values
-      })
-      // .ordinalColors(['#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#dadaeb'])
-      .gap(3)
-
-      .label(function (d) {
-          return violationLookup[d.key].description + " (" + d.key + ")"
-      })
-      
-      // .title(function (d) {
-      //     // console.log(d);
-      //     return violationLookup[d.value].description;
-      // })
-      // .elasticX(true)
-      .xAxis().ticks(4);
-  
-    vehicleTypeChart
-      .width(150)
-      .height(150)
-      .dimension(vehicleTypes)
-      .group(vehicleTypeGroup)
-  
-  
-      dc.renderAll();
-      d3.selectAll('#version').text(dc.version);
-        
-        
-    })
-
-
-
-    </script>
   </body>
 </html>

@@ -63,13 +63,32 @@ func NewByRegulation(d db.DB, f []*db.FullComplaint) (Reporter, error) {
 		}
 		r.Matches = append(r.Matches, m)
 	}
-	sort.Sort(byCount(r.Matches))
+	sort.Sort(sort.Reverse(byCount(r.Matches)))
 	return r, nil
 
 }
 
+var byRegulationHTML string = `
+<div class="col-xs-6">
+<h2>Violations Cited</h2>
+<table class="table table-condensed">
+<tbody>
+	{{range .Matches}}
+	<tr>
+		<td class="text-right">{{.Key}}</td>
+		<td class="number">{{.Count}}</td>
+		<td class="number">{{printf "%0.2f" .Percent}}%</td>
+		<td><a href="./?q={{.Code}}">{{.Code}}</a></td>
+	</tr>
+	{{end}}
+</tbody>
+</table>
+</div>
+`
+var byRegulationTemplate *template.Template = template.Must(template.New("foo").Parse(byRegulationHTML))
+
 func (r ByRegulation) HTML() template.HTML {
-	return ""
+	return GetTemplateString(byRegulationTemplate, r)
 }
 
 func (r ByRegulation) Text() string {
