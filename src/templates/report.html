@@ -28,7 +28,9 @@ td.number {
   min-width:30px;
   text-align:right;
 }
-
+.progress-bar-active {
+  background-color:#999;
+}
   
   </style>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -42,9 +44,6 @@ td.number {
     <div class="container">
     {{template "nav.html" .}}
     
-    <div class="row">
-    <h1>Cyclists With Cameras</h1>
-    </div>
     <div class="row">
     {{range .Reports}}
       {{.}}

@@ -54,7 +54,7 @@
       <div class="col-xs-12">
       <table class="table table-small table-condensed">
         {{ range .FullComplaints }}
-          <tr class="{{. | ComplaintClass}}">
+          <tr class="{{.Status | ComplaintClass}}">
             <td><code><a href="{{$BasePath}}complaint/{{.Complaint.ID}}">{{.ServiceRequestID}}</a></code>
             {{if .TLCID}}<code>{{.TLCID}}</code>{{end}}
             {{if ne .Status "Unknown"}}<span class="label label-default">{{.Status}}</span>{{end}}</td>

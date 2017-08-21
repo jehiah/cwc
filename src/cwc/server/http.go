@@ -27,8 +27,8 @@ type Server struct {
 	BasePath string
 }
 
-func ComplaintClass(c *db.FullComplaint) string {
-	switch c.Status {
+func ComplaintClass(s db.State) string {
+	switch s {
 	case db.ClosedPenalty, db.ClosedInspection, db.NoticeOfDecision:
 		return "success"
 	case db.HearingScheduled:

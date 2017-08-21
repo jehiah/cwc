@@ -77,7 +77,7 @@ var byRegulationHTML string = `
 	<tr>
 		<td class="text-right">{{.Key}}</td>
 		<td class="number">{{.Count}}</td>
-		<td class="number">{{printf "%0.2f" .Percent}}%</td>
+		<td class="number"><small>{{printf "%0.2f" .Percent}}%</small></td>
 		<td><a href="./?q={{.Code}}">{{.Code}}</a></td>
 	</tr>
 	{{end}}
