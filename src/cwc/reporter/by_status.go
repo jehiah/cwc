@@ -1,40 +1,48 @@
 package reporter
 
 import (
+	"bytes"
 	"fmt"
-	"io"
+	"html/template"
 	"strings"
 
 	"cwc/db"
 )
 
-func ByStatus(d db.DB, w io.Writer) error {
-	data := make(map[db.State]int)
-	complaints, err := d.All()
-	if err != nil {
-		return err
-	}
-	var total int
-	scale := &Scale{}
-	for _, c := range complaints {
-		f, err := d.FullComplaint(c)
-		if err != nil {
-			continue
-		}
-		total++
-		data[f.Status]++
-		scale.Update(data[f.Status])
+type ByStatus struct {
+	Data map[db.State]int
+	Scale
+	Total int
+}
+
+func NewByStatus(d db.DB, f []*db.FullComplaint) (Reporter, error) {
+	r := &ByStatus{
+		Data:  make(map[db.State]int),
+		Total: len(f),
 	}
 
-	io.WriteString(w, scale.String())
+	for _, c := range f {
+		r.Data[c.Status]++
+		r.Scale.Update(r.Data[c.Status])
+	}
+	return r, nil
+}
+
+func (r ByStatus) HTML() template.HTML {
+	return ""
+}
+
+func (r ByStatus) Text() string {
+	w := &bytes.Buffer{}
 
 	for _, state := range db.AllStates {
-		n := data[state]
+		n := r.Data[state]
 		if n == 0 {
 			continue
 		}
-		fmt.Fprintf(w, "%30s [ %3d complaints] %s (%0.1f%%)\n", state, n, strings.Repeat("∎", n/scale.Scale), percent(n, total))
+		fmt.Fprintf(w, "%24s [ %3d complaints] %s (%0.1f%%)\n", state, n, strings.Repeat("∎", n/r.Scale.Scale), percent(n, r.Total))
 	}
+	fmt.Fprintf(w, "%24s [ %3d complaints] %s", "Total:", r.Total, r.Scale.String())
 	fmt.Fprint(w, "\n")
-	return nil
+	return w.String()
 }

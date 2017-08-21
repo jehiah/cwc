@@ -1,8 +1,9 @@
 package reporter
 
 import (
+	"bytes"
 	"fmt"
-	"io"
+	"html/template"
 	"sort"
 
 	"cwc/db"
@@ -22,12 +23,16 @@ func (a byCount) Len() int           { return len(a) }
 func (a byCount) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a byCount) Less(i, j int) bool { return a[i].Count < a[j].Count }
 
-func ByRegulation(d db.DB, w io.Writer) error {
-	allComplaints, err := d.All()
-	if err != nil {
-		return err
+type ByRegulation struct {
+	Total   int
+	MaxDesc int
+	Matches []regMatch
+}
+
+func NewByRegulation(d db.DB, f []*db.FullComplaint) (Reporter, error) {
+	r := &ByRegulation{
+		Total: len(f),
 	}
-	totalComplaints := float64(len(allComplaints))
 
 	short := func(r reg.Reg) string {
 		if r.Short != "" {
@@ -36,31 +41,46 @@ func ByRegulation(d db.DB, w io.Writer) error {
 		return r.Description
 	}
 
-	var matches []regMatch
-	maxDesc := 0
-	for _, r := range reg.All {
-		complaints, err := d.Find(r.Code)
-		if err != nil {
-			return err
+	finder := func(needle string) []*db.FullComplaint {
+		var out []*db.FullComplaint
+		for _, c := range f {
+			if c.Contains(needle) {
+				out = append(out, c)
+			}
 		}
+		return out
+	}
+
+	for _, reg := range reg.All {
+		complaints := finder(reg.Code)
 		count := len(complaints)
 		if count == 0 {
 			continue
 		}
-		m := regMatch{short(r), count, (float64(count) / totalComplaints) * 100, r.Code}
-		if len(m.Key) > maxDesc {
-			maxDesc = len(m.Key)
+		m := regMatch{short(reg), count, (float64(count) / float64(r.Total)) * 100, reg.Code}
+		if len(m.Key) > r.MaxDesc {
+			r.MaxDesc = len(m.Key)
 		}
-		matches = append(matches, m)
+		r.Matches = append(r.Matches, m)
 	}
-	sort.Sort(byCount(matches))
+	sort.Sort(byCount(r.Matches))
+	return r, nil
+
+}
+
+func (r ByRegulation) HTML() template.HTML {
+	return ""
+}
+
+func (r ByRegulation) Text() string {
+	w := &bytes.Buffer{}
 
 	fmt.Fprintf(w, "Violations Cited:\n")
-	size := fmt.Sprintf("%d", maxDesc)
-	for _, m := range matches {
+	size := fmt.Sprintf("%d", r.MaxDesc)
+	for _, m := range r.Matches {
 		percent := fmt.Sprintf("(%0.1f%%)", m.Percent)
 		fmt.Fprintf(w, "%"+size+"s %3d %-8s %s\n", m.Key, m.Count, percent, m.Code)
 	}
 	fmt.Fprint(w, "\n")
-	return nil
+	return w.String()
 }

@@ -2,6 +2,7 @@ package reporter
 
 import (
 	"encoding/json"
+	"html/template"
 	"io"
 	"log"
 
@@ -9,13 +10,32 @@ import (
 	"cwc/reg"
 )
 
+type Reporter interface {
+	HTML() template.HTML
+	Text() string
+}
+type Generator func(db.DB, []*db.FullComplaint) (Reporter, error)
+
 func Run(d db.DB, w io.Writer) error {
-	type reporter func(d db.DB, w io.Writer) error
-	for _, r := range []reporter{ByHour, ByMonth, PerDay, ByRegulation, ByStatus, ByVehicle} {
-		err := r(d, w)
+	var full []*db.FullComplaint
+	complaints, err := d.All()
+	if err != nil {
+		return err
+	}
+	for _, c := range complaints {
+		f, err := d.FullComplaint(c)
+		if err != nil {
+			continue
+		}
+		full = append(full, f)
+	}
+
+	for _, g := range []Generator{NewByMonth, NewByHour, NewPerDay, NewByStatus, NewByRegulation, NewByVehicle} {
+		r, err := g(d, full)
 		if err != nil {
 			return err
 		}
+		io.WriteString(w, r.Text())
 	}
 	return nil
 }

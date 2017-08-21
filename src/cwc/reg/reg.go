@@ -37,7 +37,7 @@ var All []Reg = []Reg{
 	{Code: "NY VTL 1225-c(2)", Description: "cell-phone use while driving", Type: "moving", Vehicle: either},
 	{Code: "NY VTL 1203(a)", Description: "park w/in 12 inches of curb (two way street)", Type: "parking", Vehicle: either, Short: "park w/in 12 inches (@ 2-way)"},
 	{Code: "NY VTL 1203(b)", Description: "park w/in 12 inches of curb (one way street)", Type: "parking", Vehicle: either, Short: "park w/in 12 inches (@ 1-way)"},
-	{Code: "NY VTL 375(41)", Description: "no blue lights except emergency vehicles", Type: "parking", Vehicle: either},
+	{Code: "NY VTL 375(41)", Description: "no blue lights except emergency vehicles", Type: "parking", Vehicle: either, Short: "no blue lights"},
 	{Code: "NY VTL 1202(a)(1)(a)", Description: "no double parking", Type: "parking", Vehicle: either},
 	{Code: "NY VTL 1225-a", Description: "no driving on sidewalks", Type: "moving", Vehicle: either},
 
@@ -54,11 +54,11 @@ var All []Reg = []Reg{
 	{Code: "80-13(a)(3)(xii)", Description: "unsafe lane change", Vehicle: either},
 	{Code: "80-13(a)(3)(xiii)", Description: "driving left of center", Vehicle: either},
 	{Code: "80-13(a)(3)(xiv)", Description: "driving in wrong direction", Vehicle: either},
-	{Code: "80-13(a)(3)(i)(A)", Description: "Speeding 1 to 10 mph above speed limit", Vehicle: either},
-	{Code: "80-13(a)(3)(i)(B)", Description: "Speeding 11 to 20 mph above speed limit", Vehicle: either},
-	{Code: "80-13(a)(3)(i)(C)", Description: "Speeding 21 to 30 mph above speed limit", Vehicle: either},
-	{Code: "80-13(a)(3)(i)(D)", Description: "Speeding 31 to 40 mph above speed limit", Vehicle: either},
-	{Code: "80-13(a)(3)(i)(E)", Description: "Speeding 41 or more mph above speed limit", Vehicle: either},
+	{Code: "80-13(a)(3)(i)(A)", Description: "Speeding 1 to 10 mph above speed limit", Short: "Speeding 1-10mph over limit", Vehicle: either},
+	{Code: "80-13(a)(3)(i)(B)", Description: "Speeding 11 to 20 mph above speed limit", Short: "Speeding 11-20mph over limit", Vehicle: either},
+	{Code: "80-13(a)(3)(i)(C)", Description: "Speeding 21 to 30 mph above speed limit", Short: "Speeding 21-30mph over limit", Vehicle: either},
+	{Code: "80-13(a)(3)(i)(D)", Description: "Speeding 31 to 40 mph above speed limit", Short: "Speeding 31-40mph over limit", Vehicle: either},
+	{Code: "80-13(a)(3)(i)(E)", Description: "Speeding 41 or more mph above speed limit", Short: "Speeding >40mph over limit", Vehicle: either},
 	{Code: "80-15(b)", Description: "no smoking", Vehicle: either},
 
 	// Valid through 10/25/16
@@ -84,7 +84,7 @@ var All []Reg = []Reg{
 	{Outdated: true, Code: "55-12(f)", Description: "use or threat of physical force", Vehicle: FHV, Short: "use/threat of physical force"},
 	{Outdated: true, Code: "54-22(f)", Description: "device must not obstruct view of road", Vehicle: Taxi},
 	{Outdated: true, Code: "54-13(a)(3)(i)(A)", Description: "Speeding 1 to 10 miles above posted speed limit", Vehicle: Taxi},
-	{Outdated: true, Code: "54-13(a)(3)(i)(B)", Description: "Speeding 11 to 20 miles above posted speed limit", Vehicle: Taxi},
+	{Outdated: true, Code: "54-13(a)(3)(i)(B)", Description: "Speeding 11 to 20 miles above posted speed limit", Short: "Speeding 11-20mph over limit", Vehicle: Taxi},
 	{Outdated: true, Code: "55-13(a)(3)(i)(A)", Description: "Speeding 1 to 10 miles above posted speed limit", Vehicle: FHV},
 	{Outdated: true, Code: "55-13(a)(3)(i)(B)", Description: "Speeding 11 to 20 miles above posted speed limit", Vehicle: FHV},
 }

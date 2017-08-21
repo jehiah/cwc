@@ -1,8 +1,9 @@
 package reporter
 
 import (
+	"bytes"
 	"fmt"
-	"io"
+	"html/template"
 	"sort"
 	"strings"
 
@@ -11,31 +12,44 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-func ByMonth(d db.DB, w io.Writer) error {
-	counts := make(map[string]int)
-	complaints, err := d.All()
-	if err != nil {
-		return err
+type ByMonth struct {
+	counts map[string]int
+	months []string
+	Scale
+}
+
+func NewByMonth(d db.DB, f []*db.FullComplaint) (Reporter, error) {
+	r := &ByMonth{
+		counts: make(map[string]int),
 	}
-	for _, c := range complaints {
-		month := c.Time().Format("200601")
-		counts[month] += 1
+	for _, c := range f {
+		month := c.Time.Format("200601")
+		r.counts[month] += 1
+		r.Scale.Update(r.counts[month])
 	}
-	var months []string
-	for m, _ := range counts {
-		months = append(months, m)
+	for m, _ := range r.counts {
+		r.months = append(r.months, m)
 	}
-	sort.Strings(months)
+	sort.Strings(r.months)
+	return r, nil
+}
+
+func (r ByMonth) HTML() template.HTML {
+	return ""
+}
+
+func (r ByMonth) Text() string {
+	w := &bytes.Buffer{}
 
 	// io.WriteString(w, "TLC Complaints by month\n")
 	table := tablewriter.NewWriter(w)
 	table.SetBorder(false)
-	table.SetHeader([]string{"Month", "Complaints", ""})
-	for _, month := range months {
-		n := counts[month]
-		table.Append([]string{month, fmt.Sprintf("%d", n), strings.Repeat("∎", n)})
+	table.SetHeader([]string{"Month", "Complaints", r.Scale.String()})
+	for _, month := range r.months {
+		n := r.counts[month]
+		table.Append([]string{month, fmt.Sprintf("%d", n), strings.Repeat("∎", n/r.Scale.Scale)})
 	}
 	table.Render()
 	fmt.Fprint(w, "\n")
-	return nil
+	return w.String()
 }

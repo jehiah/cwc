@@ -1,8 +1,9 @@
 package reporter
 
 import (
+	"bytes"
 	"fmt"
-	"io"
+	"html/template"
 	"strings"
 	"time"
 
@@ -11,44 +12,50 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-func ByHour(d db.DB, w io.Writer) error {
-	var hours [24]int
-	var total int64
-	complaints, err := d.All()
-	if err != nil {
-		return err
-	}
-	scale := &Scale{}
-	for _, c := range complaints {
-		total += 1
-		hour := c.Time().Hour()
-		hours[hour] += 1
-		scale.Update(hours[hour])
-	}
-	start, stop := 0, 0
-	for i, v := range hours {
-		// if v > max {
-		// 	max = v
-		// }
-		if (start == 0 || start == i-1) && v == 0 {
-			start = i
-		}
-		if v != 0 {
-			stop = i
-		}
+type ByHour struct {
+	Scale
+	Start, Stop, Total int
+	Hours              [24]int
+}
+
+func NewByHour(d db.DB, f []*db.FullComplaint) (Reporter, error) {
+	r := &ByHour{
+		Total: len(f),
 	}
 
-	io.WriteString(w, scale.String())
+	for _, c := range f {
+		hour := c.Time.Hour()
+		r.Hours[hour] += 1
+		r.Scale.Update(r.Hours[hour])
+	}
+
+	for i, v := range r.Hours {
+		if (r.Start == 0 || r.Start == i-1) && v == 0 {
+			r.Start = i
+		}
+		if v != 0 {
+			r.Stop = i
+		}
+	}
+	return r, nil
+}
+
+func (r ByHour) HTML() template.HTML {
+	return ""
+}
+
+func (r ByHour) Text() string {
+	w := &bytes.Buffer{}
 
 	table := tablewriter.NewWriter(w)
 	table.SetBorder(false)
-	table.SetHeader([]string{"Hour", "Complaints", ""})
-	for h, v := range hours[start+1 : stop] {
-		t := time.Date(2010, 1, 1, h+start, 0, 0, 0, time.UTC)
-		table.Append([]string{t.Format("3pm"), fmt.Sprintf("%d", v), strings.Repeat("∎", v/scale.Scale)})
+	table.SetHeader([]string{"Hour", "Complaints", strings.TrimSpace(r.Scale.String())})
+	for h, v := range r.Hours[r.Start+1 : r.Stop] {
+		t := time.Date(2010, 1, 1, h+r.Start, 0, 0, 0, time.UTC)
+		table.Append([]string{t.Format("3pm"), fmt.Sprintf("%d", v), strings.Repeat("∎", v/r.Scale.Scale)})
 	}
-	table.SetFooter([]string{"Total:", fmt.Sprintf("%d", total), ""})
+	table.SetFooter([]string{"Total:", fmt.Sprintf("%d", r.Total), ""})
 	table.Render()
 	fmt.Fprint(w, "\n")
-	return nil
+	return w.String()
 }
