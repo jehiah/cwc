@@ -46,3 +46,11 @@ func (d DB) All() ([]Complaint, error) {
 	sort.Sort(sort.Reverse(complaintsByAge(o)))
 	return o, nil
 }
+
+func (d DB) Latest() (Complaint, error) {
+	c, err := d.All()
+	if err != nil || len(c) == 0 {
+		return Complaint(""), err
+	}
+	return c[0], nil
+}

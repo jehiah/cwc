@@ -2,6 +2,7 @@ package db
 
 import (
 	"log"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -15,6 +16,7 @@ type Photo struct {
 	Submitted bool
 	Created   time.Time
 	Lat, Long float64
+	Size      int64
 	// Orientation
 }
 
@@ -43,12 +45,13 @@ func (f *FullComplaint) ParsePhotos() {
 	}
 
 	// catch 'copy' records
-	// side effect of workflow for resized entries
+	// side effect of workflow for resized/annotated entries
 	for _, file := range f.Photos {
 		if strings.Contains(file, " copy.") {
 			real := strings.Replace(file, " copy.", ".", 1)
-			submitted[real] = true
-			skip[file] = true
+			// ommit the original photo
+			submitted[file] = true
+			skip[real] = true
 		}
 	}
 
@@ -56,9 +59,15 @@ func (f *FullComplaint) ParsePhotos() {
 		if skip[file] {
 			continue
 		}
+		fi, err := os.Stat(filepath.Join(f.BasePath, file))
+		if err != nil {
+			log.Print(err)
+			continue
+		}
 		p := Photo{
 			Name:      file,
 			Filename:  filepath.Join(f.BasePath, file),
+			Size:      fi.Size(),
 			Submitted: submitted[file],
 		}
 		x, err := exif.Parse(p.Filename)

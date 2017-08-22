@@ -1,12 +1,14 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"sort"
@@ -223,10 +225,27 @@ func (s *Server) Error(w http.ResponseWriter, err error) {
 	}
 }
 
+// Complaint handles
+// /complaint/yyyymmdd_HHMM_LICENSE
+// /complaint/yyyymmdd_HHMM_LICENSE.json
+// /complaint/yyyymmdd_HHMM_LICENSE/iamge.jpg
 func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path[len(s.BasePath):]
 	patterns := strings.SplitN(path, "/", 3)
+	var isAPI bool
+	if strings.HasSuffix(patterns[1], ".json") {
+		isAPI = true
+		patterns[1] = patterns[1][:len(patterns[1])-5]
+	}
 	c := db.Complaint(patterns[1])
+	if patterns[1] == "latest" {
+		var err error
+		c, err = s.DB.Latest()
+		if err != nil {
+			http.Error(w, "Error getting latest", 500)
+			return
+		}
+	}
 
 	if ok, err := s.DB.Exists(c); err != nil {
 		s.Error(w, err)
@@ -281,6 +300,18 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 	}
 
 	f.ParsePhotos()
+	if isAPI {
+		w.Header().Set("Content-type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+		b, err := json.Marshal(JsonAPI(s.DB, f))
+		if err != nil {
+			http.Error(w, "JSON ERROR", 500)
+			log.Printf("%s", err)
+		} else {
+			w.Write(b)
+		}
+		return
+	}
 
 	type payload struct {
 		FullComplaint *db.FullComplaint
@@ -300,4 +331,37 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 		s.Error(w, err)
 		log.Printf("%s", err)
 	}
+}
+
+func JsonAPI(d db.DB, f *db.FullComplaint) interface{} {
+	type wrapper struct {
+		Complaint *db.FullComplaint
+		Address   struct {
+			Email        string
+			FirstName    string
+			LastName     string
+			PhoneNumber  string
+			Borough      string
+			StreetNumber string
+			StreetName   string
+			Apartment    string
+		}
+		DateTimeOfIncident string
+	}
+	o := wrapper{
+		Complaint:          f,
+		DateTimeOfIncident: f.Time.Format("01/02/2006 03:04:05 PM"),
+	}
+
+	addrFile := d.FullPath(db.Complaint("address.json"))
+	af, err := os.Open(addrFile)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer af.Close()
+	err = json.NewDecoder(af).Decode(&o.Address)
+	if err != nil {
+		panic(err.Error())
+	}
+	return o
 }

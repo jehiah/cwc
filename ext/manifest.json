@@ -1,0 +1,38 @@
+{
+  "name": "Cyclists With Cameras Extension",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "This helps populate a 311 form with data from cyclists with cameras app",
+  "homepage_url": "https://github.com/jehiah/cwc",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "default_locale": "en",
+  "background": {
+    "scripts": [
+      "src/bg/background.js"
+    ],
+    "persistent": false
+  },
+  "options_page": "src/options/index.html",
+  "page_action": {
+    "default_icon": "icons/icon19.png",
+    "default_title": "🚴👮🏻"
+  },
+  "permissions": [
+    "declarativeContent",
+    "https://www1.nyc.gov/apps/311universalintake/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www1.nyc.gov/apps/311universalintake/*"
+      ],
+      "js": [
+        "src/inject/inject.js"
+      ]
+    }
+  ]
+}
