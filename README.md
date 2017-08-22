@@ -153,6 +153,8 @@ Flags:
   -t, --template-path string   path to templates (default "src/templates")
 ```
 
+<img src="ui_example.png" width="700">
+
 
 ## sync_w_gmail
 
