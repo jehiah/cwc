@@ -115,7 +115,8 @@ var Templates []Template = []Template{
 	{"NY VTL 402(b)", "At <LOCATION> I observed <VEHICLE> with license plate frame obstructing view of front license plate <VIOLATION>. NYC VTL 402(6) indicates this constitues a parking violation subject to Commission Rule 55-13(a)(1). Pictures included show obstructed view."},
 	{"NY VTL 402(b)", "At <LOCATION> I observed <VEHICLE> with license plate frame obstructing view of \"T&LC\" text on rear license plate <VIOLATION>. Pictures included show obstructed view.."},
 	{"NY VTL 402(b)", "At <LOCATION> I observed <VEHICLE> with license plate frame obstructing view of \"T&LC\" text on rear license plate <VIOLATION>. NYC VTL 402(6) indicates this constitues a parking violation subject to Commission Rule 55-13(a)(1). Pictures included show obstructed view."},
-	{"NY VTL 1202(a)(1)(a)", "While biking on <LOCATION> I observed <VEHICLE> double parked with no driver in vehicle causing other vehicles to drive in the bike lane <VIOLATION>. Pictures included."},
+	{"NY VTL 1202(a)(1)(a)", "While biking on <LOCATION> I observed <VEHICLE> double parked (with no driver in vehicle) causing other vehicles to drive in the bike lane <VIOLATION>. Pictures included."},
+	{"NY VTL 1202(a)(1)(a)", "While biking on <LOCATION> I observed <VEHICLE> double parked (with no driver in vehicle) causing other vehicles to drive in the bike lane <VIOLATION>. Note this Agent fails to meet off-street parking requirements in Commission Rule 63-10(a) so illegal driving & parking abounds (i.e. 80-15(j)). Pictures included."},
 }
 
 func FormatTemplate(template, location, vehicle, violation string) string {

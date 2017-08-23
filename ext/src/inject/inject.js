@@ -39,8 +39,8 @@ chrome.runtime.onMessage.addListener(
         } else if (document.getElementById("addressType___Intersection") !== null) {
             document.getElementById("addressType___Intersection").click()
             document.getElementById("incidentBorough5").options[3].selected = true  // manhattan // TODO
-            // incidentOnStreet - street 1
-            // incidentStreet1Name - street 2
+            document.getElementById("incidentOnStreet").value = request.Street
+            document.getElementById("incidentStreet1Name").value = request.CrossStreet
             document.getElementById("locationDetails").value = request.Complaint.location
         } else if (document.getElementById("contactEmailAddress") !== null) {
             document.getElementById("contactEmailAddress").value = request.Address.Email;

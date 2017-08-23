@@ -347,11 +347,14 @@ func JsonAPI(d db.DB, f *db.FullComplaint) interface{} {
 			Apartment    string
 		}
 		DateTimeOfIncident string
+		Street             string
+		CrossStreet        string
 	}
 	o := wrapper{
 		Complaint:          f,
 		DateTimeOfIncident: f.Time.Format("01/02/2006 03:04:05 PM"),
 	}
+	o.Street, o.CrossStreet = parseStreetCrossStreet(o.Complaint.Location)
 
 	addrFile := d.FullPath(db.Complaint("address.json"))
 	af, err := os.Open(addrFile)
@@ -364,4 +367,22 @@ func JsonAPI(d db.DB, f *db.FullComplaint) interface{} {
 		panic(err.Error())
 	}
 	return o
+}
+
+func parseStreetCrossStreet(loc string) (s1, s2 string) {
+	loc = strings.Replace(loc, " Between ", " between ", -1)
+	switch {
+	case strings.Contains(loc, " between "):
+		c := strings.SplitN(loc, " between ", 2)
+		s1 = c[0]
+		c = strings.SplitN(c[1], " and ", 2)
+		s2 = c[0]
+	case strings.Contains(loc, " and "):
+		c := strings.SplitN(loc, " and ", 2)
+		s1 = c[0]
+		s2 = c[1]
+	default:
+		return loc, ""
+	}
+	return
 }
