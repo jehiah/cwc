@@ -13,8 +13,8 @@ import (
 type regMatch struct {
 	Key     string
 	Count   int
-	Percent float64
-	Code    string
+	Percent float32
+	Codes   []string
 }
 
 type byCount []regMatch
@@ -41,27 +41,32 @@ func NewByRegulation(d db.DB, f []*db.FullComplaint) (Reporter, error) {
 		return r.Description
 	}
 
-	finder := func(needle string) []*db.FullComplaint {
-		var out []*db.FullComplaint
-		for _, c := range f {
-			if c.Contains(needle) {
-				out = append(out, c)
+	lookup := make(map[string]*regMatch)
+	for _, c := range f {
+		for _, v := range c.Violations {
+			m, ok := lookup[short(v)]
+			if !ok {
+				m = &regMatch{Key: short(v)}
+				lookup[short(v)] = m
+			}
+			m.Count += 1
+			ok = false
+			for _, code := range m.Codes {
+				if code == v.Code {
+					ok = true
+				}
+			}
+			if !ok {
+				m.Codes = append(m.Codes, v.Code)
 			}
 		}
-		return out
 	}
-
-	for _, reg := range reg.All {
-		complaints := finder(reg.Code)
-		count := len(complaints)
-		if count == 0 {
-			continue
-		}
-		m := regMatch{short(reg), count, (float64(count) / float64(r.Total)) * 100, reg.Code}
+	for _, m := range lookup {
+		m.Percent = percent(m.Count, r.Total)
+		r.Matches = append(r.Matches, *m)
 		if len(m.Key) > r.MaxDesc {
 			r.MaxDesc = len(m.Key)
 		}
-		r.Matches = append(r.Matches, m)
 	}
 	sort.Sort(sort.Reverse(byCount(r.Matches)))
 	return r, nil
@@ -78,7 +83,7 @@ var byRegulationHTML string = `
 		<td class="text-right">{{.Key}}</td>
 		<td class="number">{{.Count}}</td>
 		<td class="number"><small>{{printf "%0.2f" .Percent}}%</small></td>
-		<td><a href="./?q={{.Code}}">{{.Code}}</a></td>
+		<td><small>{{range $i, $c := .Codes }}{{if $i}}, {{end}}<a href="./?q={{$c}}">{{$c}}</a>{{end}}</small></td>
 	</tr>
 	{{end}}
 </tbody>
@@ -98,7 +103,15 @@ func (r ByRegulation) Text() string {
 	size := fmt.Sprintf("%d", r.MaxDesc)
 	for _, m := range r.Matches {
 		percent := fmt.Sprintf("(%0.1f%%)", m.Percent)
-		fmt.Fprintf(w, "%"+size+"s %3d %-8s %s\n", m.Key, m.Count, percent, m.Code)
+		fmt.Fprintf(w, "%"+size+"s %3d %-8s ", m.Key, m.Count, percent)
+		for i, c := range m.Codes {
+			if i == 0 {
+				fmt.Fprintf(w, "%s", c)
+			} else {
+				fmt.Fprintf(w, ", %s", c)
+			}
+		}
+		fmt.Fprint(w, "\n")
 	}
 	fmt.Fprint(w, "\n")
 	return w.String()
