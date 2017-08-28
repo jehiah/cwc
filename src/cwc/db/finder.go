@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"errors"
 )
 
 // Find finds the CWC reports that have a given pattern in them
@@ -48,9 +49,26 @@ func (d DB) All() ([]Complaint, error) {
 }
 
 func (d DB) Latest() (Complaint, error) {
-	c, err := d.All()
-	if err != nil || len(c) == 0 {
+	var latest os.FileInfo
+	f, err := os.Open(string(d))
+	if err != nil {
 		return Complaint(""), err
 	}
-	return c[0], nil
+	defer f.Close()
+	finfos, err := f.Readdir(-1)
+	if err != nil {
+		return Complaint(""), err
+	}
+	for _, fi := range finfos {
+		if !fi.IsDir() {
+			continue
+		}
+		if latest == nil || fi.ModTime().After(latest.ModTime()) {
+			latest = fi
+		}
+	}
+	if latest == nil {
+		return Complaint(""), errors.New("No Complaints Found in DB")
+	}
+	return Complaint(latest.Name()), nil
 }
