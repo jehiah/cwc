@@ -1,10 +1,10 @@
 package db
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"sort"
-	"errors"
 )
 
 // Find finds the CWC reports that have a given pattern in them
