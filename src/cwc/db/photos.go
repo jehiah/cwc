@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -81,7 +82,8 @@ func (f *FullComplaint) ParsePhotos() {
 		f.PhotoDetails = append(f.PhotoDetails, &p)
 	}
 
-	// TODO: sort by timestamps ?
+	sort.Slice(f.PhotoDetails, func(i, j int) bool { return f.PhotoDetails[i].Created.Before(f.PhotoDetails[j].Created) })
+
 	return
 }
 
