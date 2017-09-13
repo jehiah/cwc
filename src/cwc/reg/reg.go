@@ -37,6 +37,8 @@ var All []Reg = []Reg{
 	{Code: "NY VTL 402(b)", Description: "license plate must not be obstructed", Type: "parking", Vehicle: either, Short: "obstructed license plate"},
 	{Code: "NY VTL 375(12-a)(b)(2)", Description: "no side window tint below 70%", Type: "parking", Vehicle: either, Short: "no tint below 70%"},
 	{Code: "NY VTL 375(30)", Description: "no obstructed view of road", Type: "moving", Vehicle: either},
+	{Code: "NY VTL 375(1)(b)(i)", Description: "no posters or stickers on windshield", Type: "moving", Vehicle: either},
+	{Code: "NY VTL 375(12-a)(a)", Description: "no sign in windshield or side windows", Type: "moving", Vehicle: either},
 	{Code: "NY VTL 1225-c(2)", Description: "cell-phone use while driving", Type: "moving", Vehicle: either},
 	{Code: "NY VTL 1203(a)", Description: "park w/in 12 inches of curb (two way street)", Type: "parking", Vehicle: either, Short: "park w/in 12 inches (@ 2-way)"},
 	{Code: "NY VTL 1203(b)", Description: "park w/in 12 inches of curb (one way street)", Type: "parking", Vehicle: either, Short: "park w/in 12 inches (@ 1-way)"},
