@@ -87,7 +87,7 @@ func (r ByHour) HTML() template.HTML {
 	}
 
 	for h, n := range r.Hours[r.Start+1 : r.Stop] {
-		t := time.Date(2010, 1, 1, h+r.Start, 0, 0, 0, time.UTC)
+		t := time.Date(2010, 1, 1, h+r.Start+1, 0, 0, 0, time.UTC)
 		rows = append(rows, row{t, n, percent(n, r.Total), percent(n, max)})
 	}
 
