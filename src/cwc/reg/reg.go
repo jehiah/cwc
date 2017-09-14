@@ -112,6 +112,7 @@ var Templates []Template = []Template{
 	{"4-12(p)(2)", "<VEHICLE> was driving in bike lane to avoid waiting in traffic in through lane, obstructing my use of bike lane <VIOLATION>. Pictures included."},
 	{"4-12(p)(2)", "While near <LOCATION> I observed <VEHICLE> driving in bike lane to avoid waiting in through lane for other vehicles <VIOLATION>. Pictures included."},
 	{"4-12(p)(2)", "While biking on <LOCATION> I observed <VEHICLE> driving in bike lane as a second vehicle lane (it's not) obstructing my use of bike lane <VIOLATION>. Pictures included."},
+	{"4-12(m)", "While at <LOCATION> I observed a <VEHICLE> driving in bus only lane (4-7pm M-F) to avoid traffic <VIOLATION>. Pictures included."},
 	{"4-12(m)", "At <LOCATION> I observed <VEHICLE> driving in bus only lane (4-7pm M-F) to avoid traffic. Driver did not make a right turn or stop to up/discharging passenger at curb <VIOLATION>. Pictures included."},
 	{"80-13(a)(3)(vi)", "At <LOCATION>, <VEHICLE> cut me off in the bike lane failing to yield right of way <VIOLATION>. Pictures included."},
 	{"80-13(a)(3)(vii)", "At <LOCATION> I observed <VEHICLE> run red light <VIOLATION>. Pictures included. Pictures show light red and vehicle before intersection, and then vehicle proceeding through intersection on red."},
@@ -122,6 +123,7 @@ var Templates []Template = []Template{
 	{"NY VTL 402(b)", "At <LOCATION> I observed <VEHICLE> with license plate frame obstructing view of \"T&LC\" text on rear license plate <VIOLATION>. NYC VTL 402(6) indicates this constitues a parking violation subject to Commission Rule 55-13(a)(1). Pictures included show obstructed view."},
 	{"NY VTL 1202(a)(1)(a)", "While biking on <LOCATION> I observed <VEHICLE> double parked (with no driver in vehicle) causing other vehicles to drive in the bike lane <VIOLATION>. Pictures included."},
 	{"NY VTL 1202(a)(1)(a)", "While biking on <LOCATION> I observed <VEHICLE> double parked (with no driver in vehicle) causing other vehicles to drive in the bike lane <VIOLATION>. Note this Agent fails to meet off-street parking requirements in Commission Rule 63-10(a) so illegal driving & parking abounds (i.e. 80-15(j)). Pictures included."},
+	{"NY VTL 1160(c)", "While at <LOCATION> I observed a <VEHICLE> make a left turn from center lane to avoid turning traffic <LOCATION>. Pictures included."},
 }
 
 func FormatTemplate(template, location, vehicle, violation string) string {
