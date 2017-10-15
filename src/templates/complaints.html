@@ -17,6 +17,10 @@
   tbody>tr>td.date {
     font-size:11px;
   }
+  .hearing-date {
+    font-family:Menlo,Monaco,Consolas,"Courier New",monospace;
+    font-size:90%;
+  }
   </style>
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -34,7 +38,7 @@
           <h3><span class="glyphicon glyphicon-calendar" aria-hidden="true"></span> {{.PendingHearings | len}} Pending Hearings</h3>
           <ul>
             {{ range .PendingHearings }}
-            <li>{{.Hearing.Format "Mon Jan 2 3:04pm"}} <code><a href="{{$BasePath}}complaint/{{.Complaint.ID}}">{{.ServiceRequestID}}</a></code> {{ if .TLCID}}<code>{{.TLCID}}</code>{{end}} - {{.VehicleType}} {{.License}} {{.Location}} {{ range $index, $violation := .Violations }}{{if $index}},{{end}} {{$violation.Description}}{{ end }}</li>
+            <li><span class="hearing-date">{{.Hearing.Format "Mon Jan 02 03:04pm"}}</span> <code><a href="{{$BasePath}}complaint/{{.Complaint.ID}}">{{.ServiceRequestID}}</a></code> {{ if .TLCID}}<code>{{.TLCID}}</code>{{end}} - {{.VehicleType}} {{.License}} {{.Location}} {{ range $index, $violation := .Violations }}{{if $index}},{{end}} {{$violation.Description}}{{ end }}</li>
             {{ end }}
           </ul>
         </div>
