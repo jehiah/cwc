@@ -101,7 +101,7 @@ func (r ByHour) Text() string {
 	table.SetBorder(false)
 	table.SetHeader([]string{"Hour", "Complaints", strings.TrimSpace(r.Scale.String())})
 	for h, v := range r.Hours[r.Start+1 : r.Stop] {
-		t := time.Date(2010, 1, 1, h+r.Start, 0, 0, 0, time.UTC)
+		t := time.Date(2010, 1, 1, h+r.Start+1, 0, 0, 0, time.UTC)
 		table.Append([]string{t.Format("3pm"), fmt.Sprintf("%d", v), strings.Repeat("∎", v/r.Scale.Scale)})
 	}
 	table.SetFooter([]string{"Total:", fmt.Sprintf("%d", r.Total), ""})
