@@ -1,7 +1,6 @@
 package db
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"sort"
@@ -68,7 +67,7 @@ func (d DB) Latest() (Complaint, error) {
 		}
 	}
 	if latest == nil {
-		return Complaint(""), errors.New("No Complaints Found in DB")
+		return Complaint(""), nil
 	}
 	return Complaint(latest.Name()), nil
 }

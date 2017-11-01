@@ -32,7 +32,6 @@ func newComplaint() *cobra.Command {
 }
 
 func runNewComplaint(d db.DB) error {
-
 	yyyymmdd, err := input.Ask("Date (YYYYMMDD) or Filename", "")
 	if err != nil {
 		return err
@@ -65,6 +64,13 @@ func runNewComplaint(d db.DB) error {
 		}
 	}
 
+	latest := &db.FullComplaint{}
+	if c, err := d.Latest(); err == nil {
+		if delta := c.Time().Sub(dt); delta > (-1*time.Hour) && delta < time.Hour {
+			latest, _ = d.FullComplaint(c)
+		}
+	}
+
 	license, err := input.Ask("License Plate", "")
 	if err != nil {
 		return err
@@ -84,7 +90,7 @@ func runNewComplaint(d db.DB) error {
 		}
 	}
 
-	where, err := input.Ask("Where", "")
+	where, err := input.Ask("Where", latest.Location)
 	if err != nil {
 		return err
 	}
