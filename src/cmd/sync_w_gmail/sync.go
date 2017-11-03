@@ -48,6 +48,7 @@ func main() {
 		&SettlementNotification{DB: db.Default, ArchiveMessage: archiveMessage},
 		&ServiceReqeustUpdate{DB: db.Default, ArchiveMessage: archiveMessage},
 		&NoticeOfDecision{DB: db.Default, ArchiveMessage: archiveMessage, UsersMessagesAttachmentsService: attachmentSvc},
+		&NoticeOfAdjournment{DB: db.Default, ArchiveMessage: archiveMessage},
 	}
 	for _, h := range handlers {
 		q := h.BuildQuery(srv.Users.Messages.List(user)).MaxResults(50)
