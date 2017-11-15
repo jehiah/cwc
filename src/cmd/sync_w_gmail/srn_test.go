@@ -15,6 +15,7 @@ func TestTLCIDFromSubject(t *testing.T) {
 		{"notice  of adjournment 10091665c", "10091665"},
 		{"tlc notice of adjournment 10092127c", "10092127"},
 		{"REVISED ******* notice of adjournment 10091414c", "10091414"},
+		{"motion to vacate 10090018c", "10090018"},
 	}
 
 	for i, tc := range tests {
@@ -42,6 +43,12 @@ func TestHearingDateFromBody(t *testing.T) {
 			true,
 			time.Date(2017, 12, 1, 14, 30, 0, 0, time.UTC),
 		},
+		{
+			"   New Hearing Date:                       December 21, 2017",
+			"Time:              9:30 AM",
+			true,
+			time.Date(2017, 12, 21, 9, 30, 0, 0, time.UTC),
+		},
 	}
 
 	for i, tc := range tests {
@@ -51,7 +58,7 @@ func TestHearingDateFromBody(t *testing.T) {
 			lines := []string{tc.line1, tc.line2}
 			got, ok := HearingDateFromBody(lines)
 			if ok != tc.expect {
-				t.Fatalf("got %v expected %v for %q %q", ok, tc.expect, tc.line1, tc.line2)
+				t.Fatalf("got %v - %v expected %v for %q %q", got, ok, tc.expect, tc.line1, tc.line2)
 			}
 			if !got.Equal(tc.time) {
 				t.Errorf("got %s expected %s for %q %q", got, tc.time, tc.line1, tc.line2)
