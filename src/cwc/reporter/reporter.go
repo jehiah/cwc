@@ -89,6 +89,10 @@ func JSON(w io.Writer, d db.DB) error {
 		}
 
 		fc.ParsePhotos()
+		if !fc.HasGPSInfo() {
+			ll := fc.GeoClientLookup()
+			fc.Lat, fc.Long = ll.Lat, ll.Long
+		}
 		err = e.Encode(fc)
 		if err != nil {
 			return err

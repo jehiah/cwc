@@ -168,7 +168,7 @@ func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) {
 	}
 	var complaints []db.Complaint
 	var err error
-	if p.Query == "" || strings.HasPrefix(p.Query, "status:") {
+	if p.Query == "" || strings.HasPrefix(p.Query, "status:") || p.Query == "no_location" {
 		complaints, err = s.DB.All()
 	} else {
 		complaints, err = s.DB.Find(p.Query)
@@ -186,6 +186,11 @@ func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) {
 		}
 		if strings.HasPrefix(p.Query, "status:") && f.Status.String() != p.Query[len("status:"):] {
 			continue
+		}
+		if p.Query == "no_location" {
+			if f.HasGPSInfo() {
+				continue
+			}
 		}
 		p.FullComplaints = append(p.FullComplaints, f)
 	}
@@ -289,7 +294,10 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 			s.Error(w, fmt.Errorf("MISSING_ARG_APPEND_TEXT"))
 			return
 		}
-		s.DB.Append(c, fmt.Sprintf("\n[note:%s] %s\n", time.Now().Format("2006/01/02 15:04"), txt))
+		if !strings.HasPrefix(txt, "[ll") {
+			txt = fmt.Sprintf("[note:%s] %s", time.Now().Format("2006/01/02 15:04"), txt)
+		}
+		s.DB.Append(c, fmt.Sprintf("\n%s\n", txt))
 		http.Redirect(w, r, (&url.URL{Path: r.URL.Path}).String(), 302)
 		return
 	}
@@ -356,7 +364,7 @@ func JsonAPI(d db.DB, f *db.FullComplaint) interface{} {
 		Complaint:          f,
 		DateTimeOfIncident: f.Time.Format("01/02/2006 03:04:05 PM"),
 	}
-	o.Street, o.CrossStreet = parseStreetCrossStreet(o.Complaint.Location)
+	o.Street, o.CrossStreet = db.ParseStreetCrossStreet(o.Complaint.Location)
 
 	addrFile := d.FullPath(db.Complaint("address.json"))
 	af, err := os.Open(addrFile)
@@ -369,22 +377,4 @@ func JsonAPI(d db.DB, f *db.FullComplaint) interface{} {
 		panic(err.Error())
 	}
 	return o
-}
-
-func parseStreetCrossStreet(loc string) (s1, s2 string) {
-	loc = strings.Replace(loc, " Between ", " between ", -1)
-	switch {
-	case strings.Contains(loc, " between "):
-		c := strings.SplitN(loc, " between ", 2)
-		s1 = c[0]
-		c = strings.SplitN(c[1], " and ", 2)
-		s2 = c[0]
-	case strings.Contains(loc, " and "):
-		c := strings.SplitN(loc, " and ", 2)
-		s1 = c[0]
-		s2 = c[1]
-	default:
-		return loc, ""
-	}
-	return
 }

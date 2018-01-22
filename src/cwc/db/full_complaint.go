@@ -88,7 +88,7 @@ func ParseComplaint(c Complaint, body []byte, path string, files []string) (*Ful
 		ServiceRequestID: findServiceRequestID(lines),
 		Tweets:           tweetPattern.FindAllString(b, -1),
 	}
-	f.Long, f.Lat = findLongLatLine(lines)
+	f.Lat, f.Long = findLatLongLine(lines)
 
 	if contains("FHV") {
 		f.VehicleType = reg.FHV.String()

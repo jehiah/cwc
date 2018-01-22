@@ -86,16 +86,3 @@ func (f *FullComplaint) ParsePhotos() {
 
 	return
 }
-
-func (f *FullComplaint) HasGPSInfo() bool {
-	if f.Long != 0 && f.Lat != 0 {
-		return true
-	}
-	f.ParsePhotos()
-	for _, p := range f.PhotoDetails {
-		if p.Lat != 0 && p.Long != 0 {
-			return true
-		}
-	}
-	return false
-}
