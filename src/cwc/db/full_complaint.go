@@ -35,6 +35,8 @@ type FullComplaint struct {
 	Videos   []string `json:"videos"`
 	PDFs     []string `json:"pdfs"`
 	Files    []string `json:"files"`
+	Lat      float64  `json:"lat,omitempty"`
+	Long     float64  `json:"long,omitempty"`
 
 	PhotoDetails []*Photo `json:"photo_details"`
 }
@@ -86,6 +88,8 @@ func ParseComplaint(c Complaint, body []byte, path string, files []string) (*Ful
 		ServiceRequestID: findServiceRequestID(lines),
 		Tweets:           tweetPattern.FindAllString(b, -1),
 	}
+	f.Long, f.Lat = findLongLatLine(lines)
+
 	if contains("FHV") {
 		f.VehicleType = reg.FHV.String()
 	}

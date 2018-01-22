@@ -8,7 +8,6 @@ import (
 	"log"
 
 	"cwc/db"
-	"cwc/reg"
 )
 
 type Reporter interface {
@@ -70,42 +69,32 @@ func RunHTML(d db.DB) ([]template.HTML, error) {
 	return o, nil
 }
 
-func JSON(d db.DB) ([]byte, error) {
-	type record struct {
-		Timestamp   int64     `json:"timestamp"`
-		License     string    `json:"license_plate"`
-		VehicleType string    `json:"vehicle_type"`
-		Violations  []reg.Reg `json:"violations"`
-		// Tweets []string `json:"tweets,omitempty"`
-	}
-
+func JSON(w io.Writer, d db.DB) error {
 	complaints, err := d.All()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	var data []*record
+	e := json.NewEncoder(w)
+	e.SetEscapeHTML(false)
+
 	for _, c := range complaints {
-		record := &record{
-			Timestamp:   c.Time().Unix(),
-			License:     c.License(),
-			VehicleType: "TAXI",
+		fc, err := d.FullComplaint(c)
+		if err != nil {
+			return err
 		}
-		if ok, _ := d.ComplaintContains(c, " FHV "); ok {
-			record.VehicleType = "FHV"
-		}
-		for _, r := range reg.All {
-			if ok, _ := d.ComplaintContains(c, r.Code); ok {
-				record.Violations = append(record.Violations, r)
-			}
-		}
-		if len(record.Violations) == 0 {
+
+		if len(fc.Violations) == 0 {
 			log.Printf("Warning: %s has no violations", c)
 			continue
 		}
-		data = append(data, record)
+
+		fc.ParsePhotos()
+		err = e.Encode(fc)
+		if err != nil {
+			return err
+		}
 	}
-	body, err := json.Marshal(data)
-	return body, err
+	return nil
 }
 
 func percent(n, total int) float32 {

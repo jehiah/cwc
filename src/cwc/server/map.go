@@ -20,12 +20,20 @@ func (s *Server) Map(w http.ResponseWriter, r *http.Request, c db.Complaint) {
 
 	// https://api.mapbox.com/styles/v1/mapbox/streets-v8/static/-122.4241,37.78,14.25,-10,0/600x600?access_token=
 	// env.Get("MAPBOX_TOKEN")
-	f.ParsePhotos()
-	var lat, long float64
-	for _, p := range f.PhotoDetails {
-		if p.Lat != 0 && p.Long != 0 {
-			lat, long = p.Lat, p.Long
-			break
+	accessToken := os.Getenv("MAPBOX_TOKEN")
+	if accessToken == "" {
+		http.Error(w, "Mapbox not configured", 404)
+		return
+	}
+	lat, long := f.Lat, f.Long
+
+	if lat != 0 && long != 0 {
+		f.ParsePhotos()
+		for _, p := range f.PhotoDetails {
+			if p.Lat != 0 && p.Long != 0 {
+				lat, long = p.Lat, p.Long
+				break
+			}
 		}
 	}
 
@@ -41,7 +49,7 @@ func (s *Server) Map(w http.ResponseWriter, r *http.Request, c db.Complaint) {
 
 	rotation := 28 // the manhattan street grid offset
 	tile := fmt.Sprintf("%0.4f,%0.4f,%s,%d,0", long, lat, zoom, rotation)
-	params := url.Values{"access_token": {os.Getenv("MAPBOX_TOKEN")}}
+	params := url.Values{"access_token": {accessToken}}
 	url := &url.URL{
 		Scheme:   "https",
 		Host:     "api.mapbox.com",

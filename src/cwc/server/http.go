@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -99,13 +100,14 @@ func (s *Server) Report(w http.ResponseWriter, r *http.Request) {
 // for /data/report
 func (s *Server) DataReport(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	body, err := reporter.JSON(s.DB)
+	var b bytes.Buffer
+	err := reporter.JSON(&b, s.DB)
 	if err != nil {
 		log.Printf("%s", err)
 		s.Error(w, err)
 		return
 	}
-	w.Write(body)
+	w.Write(b.Bytes())
 }
 
 func (s *Server) Regulations(w http.ResponseWriter, r *http.Request) {

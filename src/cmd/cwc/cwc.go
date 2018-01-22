@@ -60,11 +60,11 @@ func json() *cobra.Command {
 		Use:   "json",
 		Short: "Output all complaints as JSON",
 		Run: func(cmd *cobra.Command, args []string) {
-			body, err := reporter.JSON(loadDB(cmd.Flags().GetString("db")))
+			db := loadDB(cmd.Flags().GetString("db"))
+			err := reporter.JSON(os.Stdout, db)
 			if err != nil {
 				log.Fatal(err)
 			}
-			os.Stdout.Write(body)
 		},
 	}
 	cmd.Flags().String("db", string(db.Default), "DB path")
