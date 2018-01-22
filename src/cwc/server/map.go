@@ -25,17 +25,7 @@ func (s *Server) Map(w http.ResponseWriter, r *http.Request, c db.Complaint) {
 		http.Error(w, "Mapbox not configured", 404)
 		return
 	}
-	lat, long := f.Lat, f.Long
-
-	if lat != 0 && long != 0 {
-		f.ParsePhotos()
-		for _, p := range f.PhotoDetails {
-			if p.Lat != 0 && p.Long != 0 {
-				lat, long = p.Lat, p.Long
-				break
-			}
-		}
-	}
+	ll := f.GPSInfo()
 
 	r.ParseForm()
 	size := r.Form.Get("s")
@@ -48,7 +38,7 @@ func (s *Server) Map(w http.ResponseWriter, r *http.Request, c db.Complaint) {
 	}
 
 	rotation := 28 // the manhattan street grid offset
-	tile := fmt.Sprintf("%0.4f,%0.4f,%s,%d,0", long, lat, zoom, rotation)
+	tile := fmt.Sprintf("%0.4f,%0.4f,%s,%d,0", ll.Long, ll.Lat, zoom, rotation)
 	params := url.Values{"access_token": {accessToken}}
 	url := &url.URL{
 		Scheme:   "https",
