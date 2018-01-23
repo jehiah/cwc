@@ -22,4 +22,5 @@ func init() {
 		panic(err.Error())
 	}
 	Default = DB(filepath.Join(usr.HomeDir, "Documents", "cyclists_with_cameras"))
+	geoclientCache = make(map[string]LL)
 }

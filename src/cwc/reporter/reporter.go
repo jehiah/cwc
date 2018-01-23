@@ -6,7 +6,6 @@ import (
 	"html/template"
 	"io"
 	"log"
-	"math/rand"
 
 	"cwc/db"
 )
@@ -93,11 +92,6 @@ func JSON(w io.Writer, d db.DB) error {
 		if !fc.HasGPSInfo() {
 			ll := fc.GeoClientLookup()
 			fc.Lat, fc.Long = ll.Lat, ll.Long
-			if fc.Lat != 0 {
-				// nudge points slightly for randomization
-				fc.Lat += random(-0.000128, 0.000128)
-				fc.Long += random(-0.000128, 0.000128)
-			}
 		}
 		err = e.Encode(fc)
 		if err != nil {
@@ -105,12 +99,6 @@ func JSON(w io.Writer, d db.DB) error {
 		}
 	}
 	return nil
-}
-
-// random produces a float [min, max]
-// from https://groups.google.com/forum/#!topic/Golang-Nuts/_M-8hRpQs84
-func random(min, max float64) float64 {
-	return rand.Float64()*(max-min) + min
 }
 
 func percent(n, total int) float32 {

@@ -24,3 +24,31 @@ func TestFindLongLatLine(t *testing.T) {
 		})
 	}
 }
+
+func TestRandomBetween(t *testing.T) {
+	type testCase struct {
+		A, B LL
+	}
+	tests := []testCase{
+		{LL{40.76311, -73.999}, LL{40.762155, -73.997407}},
+		{LL{40.760790, -73.998308}, LL{40.762757, -73.996956}},
+	}
+	for i, tc := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			extent := func(a, b float64) (float64, float64) {
+				if a > b {
+					return b, a
+				}
+				return a, b
+			}
+			got := randomBetween(tc.A, tc.B)
+			if min, max := extent(tc.A.Lat, tc.B.Lat); min > got.Lat || max < got.Lat {
+				t.Errorf("Lat %#v not between %#v and %#v", got, tc.A, tc.B)
+			}
+			if min, max := extent(tc.A.Long, tc.B.Long); min > got.Long || max < got.Long {
+				t.Errorf("Long %#v not between %#v and %#v", got, tc.A, tc.B)
+			}
+		})
+	}
+
+}

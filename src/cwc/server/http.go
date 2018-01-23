@@ -364,7 +364,7 @@ func JsonAPI(d db.DB, f *db.FullComplaint) interface{} {
 		Complaint:          f,
 		DateTimeOfIncident: f.Time.Format("01/02/2006 03:04:05 PM"),
 	}
-	o.Street, o.CrossStreet = db.ParseStreetCrossStreet(o.Complaint.Location)
+	o.Street, o.CrossStreet, _ = db.ParseStreetCrossStreet(o.Complaint.Location)
 
 	addrFile := d.FullPath(db.Complaint("address.json"))
 	af, err := os.Open(addrFile)
