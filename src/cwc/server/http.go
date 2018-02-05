@@ -168,7 +168,7 @@ func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) {
 	}
 	var complaints []db.Complaint
 	var err error
-	if p.Query == "" || strings.HasPrefix(p.Query, "status:") || p.Query == "no_location" {
+	if p.Query == "" || strings.HasPrefix(p.Query, "status:") || p.Query == "no_location" || p.Query == "no_discernable_location" {
 		complaints, err = s.DB.All()
 	} else {
 		complaints, err = s.DB.Find(p.Query)
@@ -188,6 +188,16 @@ func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		if p.Query == "no_location" {
+			if f.HasGPSInfo() {
+				continue
+			}
+		}
+		if p.Query == "no_discernable_location" {
+			if f.HasGPSInfo() {
+				continue
+			}
+			ll := f.GeoClientLookup()
+			f.Lat, f.Long = ll.Lat, ll.Long
 			if f.HasGPSInfo() {
 				continue
 			}

@@ -55,7 +55,7 @@ func RunHTML(d db.DB) ([]template.HTML, error) {
 	}
 
 	var o []template.HTML
-	for _, g := range []Generator{NewByMonth, NewByHour, NewPerDay, NewByStatus, NewByRegulation, NewByVehicle} {
+	for _, g := range []Generator{NewByMonth, NewByHour, NewPerDay, NewByStatus, NewByRegulation, NewByVehicle, NewByViolationType} {
 		r, err := g(d, full)
 		if err != nil {
 			return nil, err
