@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CWC Taxi Complaints</title>
+
+  <style>
+  html{margin:0; padding:0}
+  body{padding:5px}
+  .t {
+    display: inline-block;
+    float:left;
+    color:#ccc;
+    font-size:8px;
+    line-height:8px;
+    font-family:monospace;
+    margin:1px 1px;
+  }
+  .c1 {
+    color:#933;
+  }
+  .c2 {
+    color:#f66;
+  }
+  </style>
+
+{{ range .}}
+<div class="t c{{.Count}}">{{.License}}</div>
+{{ end}}
+
+  </body>
+</html>

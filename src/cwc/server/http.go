@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -72,7 +73,62 @@ func New(d db.DB, templatePath, basePath string, readOnly bool) *Server {
 	s.ServeMux.HandleFunc("/", s.Complaints)
 	s.ServeMux.HandleFunc(basePath+"data/report", s.DataReport)
 	s.ServeMux.HandleFunc(basePath+"report", s.Report)
+	s.ServeMux.HandleFunc(basePath+"report/taxi", s.TaxiReport)
 	return s
+}
+
+func (s *Server) TaxiReport(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	query := r.Form.Get("q")
+	var complaints []db.Complaint
+	var err error
+	if query == "" {
+		complaints, err = s.DB.All()
+	} else {
+		complaints, err = s.DB.Find(query)
+	}
+
+	if err != nil {
+		log.Printf("%s", err)
+		s.Error(w, err)
+		return
+	}
+	seen := make(map[string]int)
+
+	for _, c := range complaints {
+		f, err := s.DB.FullComplaint(c)
+		if err != nil {
+			log.Printf("error parsing %s, %s", c, err)
+			continue
+		}
+		if f.VehicleType != reg.Taxi.String() {
+			continue
+		}
+		seen[f.License] += 1
+	}
+
+	f, err := os.Open("source_data/authorized_medallions.csv")
+	if err != nil {
+		log.Printf("%s", err)
+		s.Error(w, err)
+		return
+	}
+	type Record struct {
+		License string
+		Count   int
+	}
+	all := make([]Record, 0, 13000)
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		license := scanner.Text()
+		all = append(all, Record{License: license, Count: seen[license]})
+	}
+
+	err = s.Template.ExecuteTemplate(w, "report_taxi.html", all)
+	if err != nil {
+		log.Printf("%s", err)
+		s.Error(w, err)
+	}
 }
 
 func (s *Server) Report(w http.ResponseWriter, r *http.Request) {
