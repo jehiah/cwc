@@ -65,6 +65,8 @@ var All []Reg = []Reg{
 	{Code: "80-13(a)(3)(i)(D)", Type: "moving", Description: "Speeding 31 to 40 mph above speed limit", Short: "Speeding 31-40mph over limit", Vehicle: either},
 	{Code: "80-13(a)(3)(i)(E)", Type: "moving", Description: "Speeding 41 or more mph above speed limit", Short: "Speeding >40mph over limit", Vehicle: either},
 	{Code: "80-15(b)", Type: "other", Description: "no smoking", Vehicle: either},
+	{Code: "80-17(e)(1)(iv)", Type: "other", Description: "must not pickup if not able to accept credit card", Vehicle: either},
+	{Code: "80-17(k)(3)", Type: "other", Description: "fare must be calculated by taximeter", Vehicle: either},
 
 	// Valid through 10/25/16
 	{Outdated: true, Code: "54-13(a)(3)(ix)", Type: "moving", Description: "yield sign violation", Vehicle: Taxi},
