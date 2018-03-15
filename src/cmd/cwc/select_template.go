@@ -6,7 +6,7 @@ import (
 	"lib/input"
 )
 
-func SelectTemplate(r reg.Reg, location string) (string, error) {
+func SelectTemplate(r reg.Reg, location, license string) (string, error) {
 	var choices []string
 	for _, s := range reg.Templates {
 		if s.Code == r.Code || s.Code == "*" {
@@ -19,5 +19,5 @@ func SelectTemplate(r reg.Reg, location string) (string, error) {
 		return "", err
 	}
 
-	return reg.FormatTemplate(selection, location, r.Vehicle.String(), r.String()), nil
+	return reg.FormatTemplate(selection, location, r.Vehicle.String(), license, r.String()), nil
 }

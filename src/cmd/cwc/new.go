@@ -115,7 +115,7 @@ func runNewComplaint(d db.DB) error {
 		if r == nil {
 			return errors.New("no regulation selected")
 		}
-		body, err := SelectTemplate(*r, where)
+		body, err := SelectTemplate(*r, where, license)
 		if err != nil {
 			return err
 		}
