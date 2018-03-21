@@ -69,7 +69,7 @@ func (s *ServiceReqeustUpdate) Handle(m *gmail.Message) error {
 	if ok, err := db.Default.ComplaintContains(complaint, m.Id); ok {
 		log.Printf("\talready recorded")
 		if s.force == false {
-			if !strings.Contains(line, "scheduled") && !s.dryrun {
+			if !s.dryrun {
 				log.Printf("\tarchiving email")
 				err = s.ArchiveMessage(m.Id)
 				if err != nil {
