@@ -16,7 +16,7 @@ const (
 	// ClosedNotGuilty        = "CLOSED (not guilty)"
 	// ClosedGuilty           = "CLOSED (guilty)"
 	ClosedInspection = "CLOSED (Referred to S&E)"
-	ClosedUnableToID = "CLOSED (Uanble to ID)"
+	ClosedUnableToID = "CLOSED (Unable to ID)"
 	Invalid          = "CLOSED (Invalid)"
 	Expired          = "EXPIRED (Unknown)"
 )
@@ -41,7 +41,7 @@ func DetectState(s string) State {
 	switch {
 	case strings.Contains(s, "pled guilty") || strings.Contains(s, "STIP violation") || strings.Contains(s, "has paid a penalty") || strings.Contains(s, "pleaded guilty"):
 		return ClosedPenalty
-	case strings.Contains(s, "Referred to S&E"):
+	case strings.Contains(s, "Referred to S&E") || strings.Contains(s, "S&E Referral"):
 		return ClosedInspection
 	case strings.Contains(s, "scheduled") || strings.Contains(s, "Scheduled") || strings.Contains(s, "hearing sch"):
 		return HearingScheduled
