@@ -12,6 +12,8 @@ func findServiceRequestID(lines []string) string {
 			return "C" + line
 		case strings.HasPrefix(line, "C1-1-1") && len(line) == 15:
 			return line
+		case strings.HasPrefix(line, "311-") && len(line) == 12:
+			return line
 		case strings.HasPrefix(line, "Service Request #: C1-1-1") && len(line) == 34:
 			return line[19:34]
 		}

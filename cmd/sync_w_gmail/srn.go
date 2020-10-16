@@ -10,12 +10,16 @@ import (
 )
 
 var sRNPattern = regexp.MustCompile("1-1-1[0-9]{9}")
+var threeOneOnePattern = regexp.MustCompile("311-[0-9]{8}")
 var adjournmentPattern = regexp.MustCompile(`NOTICE\s+OF\s+(?:HEARING|ADJOURNMENT)\s+(?:AND HEARING LOCATION\s+)?(10[0-9]{6})C`)
 var vacatePattern = regexp.MustCompile(`MOTION TO VACATE\s+(10[0-9]{6})C`)
 
 func SRNFromSubject(s string) string {
 	if v := sRNPattern.FindString(s); v != "" {
 		return "C" + v
+	}
+	if v := threeOneOnePattern.FindString(s); v != "" {
+		return v
 	}
 	return ""
 }
