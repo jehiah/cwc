@@ -340,7 +340,7 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		switch strings.ToLower(filepath.Ext(file)) {
-		case ".png", ".jpg", ".jpeg":
+		case ".png", ".jpg", ".jpeg", ".heic":
 			s.Image(w, r, c, file)
 		default:
 			s.Download(w, r, c, file)

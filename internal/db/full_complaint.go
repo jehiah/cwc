@@ -117,7 +117,7 @@ func ParseComplaint(c Complaint, body []byte, path string, files []string) (*Ful
 		switch ext {
 		case ".mov", ".m4v":
 			f.Videos = append(f.Videos, filename)
-		case ".bmp", ".png", ".jpg", ".jpeg", ".tif", ".gif":
+		case ".bmp", ".png", ".jpg", ".jpeg", ".tif", ".gif", ".heic":
 			f.Photos = append(f.Photos, filename)
 		case ".pdf":
 			f.PDFs = append(f.PDFs, filename)
