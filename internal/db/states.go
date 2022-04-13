@@ -13,7 +13,7 @@ const (
 
 	NoticeOfDecision = "Notice of Decision"
 	ClosedPenalty    = "Plead Guilty"
-	// ClosedNotGuilty        = "CLOSED (not guilty)"
+	// ClosedNotGuilty  = "CLOSED (not guilty)"
 	// ClosedGuilty           = "CLOSED (guilty)"
 	ClosedInspection = "CLOSED (Referred to S&E)"
 	ClosedUnableToID = "CLOSED (Unable to ID)"

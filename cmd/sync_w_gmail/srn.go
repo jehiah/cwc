@@ -81,6 +81,10 @@ func SRNFromBody(lines []string) string {
 	if s != "" {
 		return ("C" + s)[:15]
 	}
+	s = FirstLineWithPrefix("Service Request Number: ", lines, true)
+	if strings.TrimSpace(s) != "" {
+		return strings.TrimSpace(s)
+	}
 	return ""
 }
 

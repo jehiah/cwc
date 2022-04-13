@@ -76,7 +76,7 @@ func (r ByViolationType) Text() string {
 	fmt.Fprintf(w, "Violation Type:\n")
 	for _, m := range r.Matches {
 		percent := fmt.Sprintf("(%0.1f%%)", m.Percent)
-		fmt.Fprintf(w, "%s %s %s", m.Type, m.Count, percent)
+		fmt.Fprintf(w, "%s %d %s", m.Type, m.Count, percent)
 		fmt.Fprint(w, "\n")
 	}
 	fmt.Fprint(w, "\n")

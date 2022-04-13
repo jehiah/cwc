@@ -18,7 +18,7 @@ type ServiceReqeustUpdate struct {
 }
 
 func (s *ServiceReqeustUpdate) BuildQuery(u *gmail.UsersMessagesListCall) *gmail.UsersMessagesListCall {
-	return u.LabelIds("INBOX").Q("subject:\"311 Service Request Update\" OR subject:\"311 Service Request Closed\"")
+	return u.LabelIds("INBOX").Q("subject:\"311 Service Request Update\" OR subject:\"311 Service Request Closed\" OR subject:\"SR Updated\"")
 }
 
 func (s *ServiceReqeustUpdate) Handle(m *gmail.Message) error {
@@ -132,6 +132,11 @@ func (s *ServiceReqeustUpdate) Handle(m *gmail.Message) error {
 func interestingLine(lines []string) string {
 	// line before 'Get Service Request Details' is most likely interesting
 	for i, line := range lines {
+		if line == "TLC provided the following information:" {
+			if i < len(lines) {
+				return lines[i+1]
+			}
+		}
 		if line != "Get Service Request Details" {
 			continue
 		}

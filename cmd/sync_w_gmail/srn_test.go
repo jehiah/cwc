@@ -6,6 +6,24 @@ import (
 	"time"
 )
 
+func TestSRNFromSubject(t *testing.T) {
+	type testCase struct {
+		subject, expect string
+	}
+	tests := []testCase{
+		{"SR Updated # 311-09751295", "311-09751295"},
+	}
+	for i, tc := range tests {
+		tc := tc
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			t.Parallel()
+			if got := SRNFromSubject(tc.subject); got != tc.expect {
+				t.Errorf("got %q expected %q for %q", got, tc.expect, tc.subject)
+			}
+		})
+	}
+}
+
 func TestTLCIDFromSubject(t *testing.T) {
 	type testCase struct {
 		subject, expect string
