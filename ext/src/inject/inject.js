@@ -17,31 +17,23 @@ chrome.runtime.onMessage.addListener(
 
         console.log("in inject.js onMessage ")
         
-        if (document.getElementById("char1_1___No") !== null) { // Taxi
-            document.getElementById("char1_1___No").click();
-            document.getElementById("vehicletype___Yellow").click();
-            document.getElementById("affidavit___Yes").click();
-            document.getElementById("attendHearing___Yes").click();
-        } else if (document.getElementById("char1_1___Withinthe5BoroughsofNewYorkCity") !== null) { // FHV
-            document.getElementById("char1_1___Withinthe5BoroughsofNewYorkCity").click();
-            document.getElementById("licenseType_1-B3X-3").click();
-            document.getElementById("affidavit___Yes").click();
-            document.getElementById("attendHearing___Yes").click();
-        } else if (document.getElementById("vehicletype_1-B3X-7") !== null) { // FHV
-            document.getElementById("taxiLicenseNumber").value = request.Complaint.license_plate;
-            document.getElementById("vehicletype_1-B3X-7").click();
-            document.getElementById("complaintDetails").value = request.Complaint.description;
-            document.getElementById("dateTimeOfIncident").value = request.DateTimeOfIncident;
-        } else if (document.getElementById("taxiMedallioNum") !== null) {
-            document.getElementById("taxiMedallioNum").value = request.Complaint.license_plate;
-            document.getElementById("complaintDetails").value = request.Complaint.description;
-            document.getElementById("dateTimeOfIncident").value = request.DateTimeOfIncident;
-        } else if (document.getElementById("addressType___Intersection") !== null) {
-            document.getElementById("addressType___Intersection").click()
-            document.getElementById("incidentBorough5").options[3].selected = true  // manhattan // TODO
-            document.getElementById("incidentOnStreet").value = request.Street
-            document.getElementById("incidentStreet1Name").value = request.CrossStreet
-            document.getElementById("locationDetails").value = request.Complaint.location
+        if (document.getElementById("n311_attendhearing_1") !== null) {
+            document.getElementById("n311_attendhearing_1").click();
+            if (request.Complaint.vehicle_type == "FHV") {
+                document.getElementById("n311_coloroftaxi_2").click() // aka other
+                document.getElementById("n311_licensenumber").value = request.Complaint.license_plate;
+            } else {
+                document.getElementById("n311_coloroftaxi_1").click() // yellow
+                document.getElementById("n311_taximedallionnumber_name").value = request.Complaint.license_plate;
+                document.getElementById("n311_additionaldetailsid_select").options[3].selected = true // Unsafe Driving - Non-Passenger
+            }
+            document.getElementById("n311_description").value = request.Complaint.description;
+            document.getElementById("n311_datetimeobserved_datepicker_description").value = request.DateTimeOfIncident;
+        } else if (document.getElementById("n311_locationtypeid_select") !== null) {
+            document.getElementById("n311_locationtypeid_select").options[1].selected = true // street
+            document.getElementById("SelectAddressWhere").click()
+            document.getElementById("address-search-box-input").value = request.Street + " at " + request.CrossStreet
+            document.getElementById("n311_additionallocationdetails").value = request.Complaint.location
         } else if (document.getElementById("contactEmailAddress") !== null) {
             document.getElementById("contactEmailAddress").value = request.Address.Email;
             document.getElementById("contactFirstName").value = request.Address.FirstName;

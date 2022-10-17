@@ -15,7 +15,7 @@ chrome.runtime.onInstalled.addListener(function() {
         // That fires when a page's URL contains a 'g' ...
         conditions: [
           new chrome.declarativeContent.PageStateMatcher({
-            pageUrl: { urlContains: 'https://www1.nyc.gov/apps/311universalintake/form.htm' },
+            pageUrl: { urlContains: 'https://portal.311.nyc.gov/sr-step/' },
           })
         ],
         // And shows the extension's page action.

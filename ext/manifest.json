@@ -23,12 +23,12 @@
   },
   "permissions": [
     "declarativeContent",
-    "https://www1.nyc.gov/apps/311universalintake/*"
+    "https://portal.311.nyc.gov/sr-step/*"
   ],
   "content_scripts": [
     {
       "matches": [
-        "https://www1.nyc.gov/apps/311universalintake/*"
+      "https://portal.311.nyc.gov/sr-step/*"
       ],
       "js": [
         "src/inject/inject.js"
