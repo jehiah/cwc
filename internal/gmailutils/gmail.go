@@ -17,7 +17,7 @@ import (
 	"google.golang.org/api/gmail/v1"
 )
 
-const credentialsFile = "client_secret.json"
+const credentialsFile = "client_secret_2977553563-vug5r3jusdcalvkfdj8uje7jmh3n4vha.apps.googleusercontent.com.json"
 const tokenCacheFilename = "cache.json"
 const credentialsDir = ".credentials"
 
@@ -44,6 +44,7 @@ func GmailService(cacheFile string) *gmail.Service {
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
+	config.RedirectURL = "https://jehiah.cz/"
 	client := getClient(ctx, config)
 
 	srv, err := gmail.New(client)
@@ -71,7 +72,7 @@ func getClient(ctx context.Context, config *oauth2.Config) *http.Client {
 // getTokenFromWeb uses Config to request a Token.
 // It returns the retrieved Token.
 func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
-	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+	authURL := config.AuthCodeURL("state", oauth2.AccessTypeOffline)
 	fmt.Printf("Go to the following link in your browser then type the "+
 		"authorization code: \n%v\n", authURL)
 

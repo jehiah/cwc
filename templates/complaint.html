@@ -43,7 +43,9 @@
         <p>When: <code>{{.Time.Format "2006/01/02 03:04pm (Mon Jan 2)"}}</code></p>
         <p>Vehicle: <code>{{.VehicleType}} <span class="license">{{.License}}</span></code></p>
         <p>Location: <code>{{.Location}}</code></p>
-        <p>Service Request ID: <code>{{.ServiceRequestID}}</code> <a href="http://www1.nyc.gov/NYC311-SRLookup/srlookup.htm?serviceRequestNumber={{.ServiceRequestID}}"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> 311 Service Request Lookup</a></p>
+        <p>Service Request ID: <code>{{.ServiceRequestID}}</code> 
+          <a href="{{ if .IsNewSRNumberFormat }}https://portal.311.nyc.gov/check-status/{{else}}http://www1.nyc.gov/NYC311-SRLookup/srlookup.htm?serviceRequestNumber={{.ServiceRequestID}}{{end}}"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> 311 Service Request Lookup</a>
+        </p>
         {{ if .TLCID }}
         <p>TLC Complaint ID: <code>{{.TLCID}}</code></p>
         {{end}}

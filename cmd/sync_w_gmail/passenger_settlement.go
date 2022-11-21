@@ -55,7 +55,7 @@ func (s *SettlementNotification) Handle(m *gmail.Message) error {
 		return nil
 	}
 	if len(complaints) != 1 {
-		log.Printf("found unexpected number of complaints %d", len(complaints))
+		log.Printf("found unexpected number of complaints %d for %q", len(complaints), srn)
 		return nil
 	}
 	complaint := complaints[0]

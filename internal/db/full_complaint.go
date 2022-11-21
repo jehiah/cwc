@@ -41,6 +41,10 @@ type FullComplaint struct {
 	PhotoDetails []*Photo `json:"photo_details"`
 }
 
+func (fc FullComplaint) IsNewSRNumberFormat() bool {
+	return strings.HasPrefix(fc.ServiceRequestID, "311-")
+}
+
 func (d DB) FullComplaint(c Complaint) (*FullComplaint, error) {
 	f, err := d.Open(c)
 	if err != nil {
