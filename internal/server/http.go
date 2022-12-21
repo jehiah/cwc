@@ -418,9 +418,11 @@ func JsonAPI(d db.DB, f *db.FullComplaint) interface{} {
 			LastName     string
 			PhoneNumber  string
 			Borough      string
-			StreetNumber string
-			StreetName   string
-			Apartment    string
+			AddressLine1 string
+			AddressLine2 string
+			City         string
+			State        string
+			ZipCode      string
 		}
 		DateTimeOfIncident string
 		Street             string

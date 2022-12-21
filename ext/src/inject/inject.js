@@ -34,15 +34,18 @@ chrome.runtime.onMessage.addListener(
             document.getElementById("SelectAddressWhere").click()
             document.getElementById("address-search-box-input").value = request.Street + " at " + request.CrossStreet
             document.getElementById("n311_additionallocationdetails").value = request.Complaint.location
-        } else if (document.getElementById("contactEmailAddress") !== null) {
-            document.getElementById("contactEmailAddress").value = request.Address.Email;
-            document.getElementById("contactFirstName").value = request.Address.FirstName;
-            document.getElementById("contactLastName").value = request.Address.LastName;
-            document.getElementById("contactDaytimePhone").value = request.Address.PhoneNumber;
-            document.getElementById("contactBorough").selectedIndex = 3; // manhattan // TODO
-            document.getElementById("contactAddressNumber").value = request.Address.StreetNumber;
-            document.getElementById("contactStreetName").value = request.Address.StreetName;
-            document.getElementById("contactApartment").value = request.Address.Apartment;
+        } else if (document.getElementById("n311_portalcustomeraddressline1") !== null) {
+            // TODO
+            // document.getElementById("contactEmailAddress").value = request.Address.Email;
+            // document.getElementById("contactFirstName").value = request.Address.FirstName;
+            // document.getElementById("contactLastName").value = request.Address.LastName;
+            // document.getElementById("contactDaytimePhone").value = request.Address.PhoneNumber;
+            document.getElementById("n311_portalcustomeraddressline1").value = request.Address.AddressLine1;
+            document.getElementById("n311_portalcustomeraddressline2").value = request.Address.AddressLine2;
+            document.getElementById("n311_portalcustomeraddressborough").selectedIndex = 3; // manhattan // TODO
+            document.getElementById("n311_portalcustomeraddresscity").value = request.Address.City;
+            document.getElementById("n311_portalcustomeraddressstate").value = request.Address.State;
+            document.getElementById("n311_portalcustomeraddresszip").value = request.Address.ZipCode;
         }
         // sendResponse({status: "goodbye"});
         return true
