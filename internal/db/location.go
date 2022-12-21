@@ -77,9 +77,11 @@ func geoclient(params *url.Values) LL {
 	if ll, ok := geoclientCache[cacheKey]; ok {
 		return ll
 	}
+	// https://api.nyc.gov/geoclient/v1/doc/
 	// /v1/intersection.json?crossStreetOne=broadway&crossStreetTwo=w 99 st&borough=manhattan&app_id=abc123&app_key=def456
 	// curl -v  -X GET "https://api.cityofnewyork.us/geoclient/v1/intersection.json?app_id=...&app_key=...&crossStreetOne=West+25rd+St&crossStreetTwo=8th+Ave&borough=Manhattan"
-	url := "https://api.cityofnewyork.us/geoclient/v1/intersection.json?" + params.Encode()
+	url := "https://api.nyc.gov/geo/geoclient/v1/intersection.json?" + params.Encode()
+
 	log.Printf("GET %s", url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
