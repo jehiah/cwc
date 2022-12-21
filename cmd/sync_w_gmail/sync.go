@@ -43,9 +43,11 @@ func main() {
 	// }
 	attachmentSvc := gmail.NewUsersMessagesAttachmentsService(srv)
 	handlers := []EmailHandler{
-		&SettlementNotification{DB: db.Default, alternate: true, ArchiveMessage: archiveMessage},
+		&SettlementNotification{DB: db.Default, version: 1, ArchiveMessage: archiveMessage},
+		&SettlementNotification{DB: db.Default, version: 2, ArchiveMessage: archiveMessage},
 		&SettlementNotification{DB: db.Default, ArchiveMessage: archiveMessage},
 		&ServiceReqeustUpdate{DB: db.Default, ArchiveMessage: archiveMessage},
+		&ServiceReqeustUpdate{DB: db.Default, ArchiveMessage: archiveMessage, version: 1},
 		&NoticeOfDecision{DB: db.Default, ArchiveMessage: archiveMessage, UsersMessagesAttachmentsService: attachmentSvc},
 		&NoticeOfAdjournment{DB: db.Default, ArchiveMessage: archiveMessage},
 		&NoticeOfAdjournment{DB: db.Default, ArchiveMessage: archiveMessage, Alternate: true},

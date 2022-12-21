@@ -12,12 +12,16 @@ import (
 
 type ServiceReqeustUpdate struct {
 	DB             db.DB
+	version        int
 	force          bool
 	dryrun         bool
 	ArchiveMessage MessageArchiver
 }
 
 func (s *ServiceReqeustUpdate) BuildQuery(u *gmail.UsersMessagesListCall) *gmail.UsersMessagesListCall {
+	if s.version == 1 {
+		return u.LabelIds("INBOX").Q("subject:\"TLC Complaint Received\" from:\"tlccomplaintreceived@tlc.nyc.gov\"")
+	}
 	return u.LabelIds("INBOX").Q("subject:\"311 Service Request Update\" OR subject:\"311 Service Request Closed\" OR subject:\"SR Updated\"")
 }
 
@@ -27,13 +31,6 @@ func (s *ServiceReqeustUpdate) Handle(m *gmail.Message) error {
 	subject := gmailutils.Subject(m)
 	srn := SRNFromSubject(subject)
 
-	log.Printf("%s %s Subject:%s", prettyID, srn, subject)
-
-	if srn == "" {
-		log.Printf("warning: no 311 service request number found")
-		return nil
-	}
-
 	body, err := gmailutils.MessageTextBody(m)
 	if err != nil {
 		log.Printf("error %s", err)
@@ -41,10 +38,21 @@ func (s *ServiceReqeustUpdate) Handle(m *gmail.Message) error {
 	}
 	lines := getLines(body)
 
-	if v := SRNFromBody(lines); v != srn {
-		log.Printf("error: missmatched SRN %q vs %q", srn, v)
+	if srn == "" {
+		srn = SRNFromTLCComplaintBody(lines)
+	}
+
+	log.Printf("%s %s Subject:%s", prettyID, srn, subject)
+
+	if srn == "" {
+		log.Printf("warning: no 311 service request number found")
 		return nil
 	}
+
+	// if v := SRNFromBody(lines); v != srn {
+	// 	log.Printf("error: missmatched SRN %q vs %q", srn, v)
+	// 	return nil
+	// }
 
 	complaints, err := db.Default.Find(srn[1:])
 	if err != nil {
@@ -96,6 +104,7 @@ func (s *ServiceReqeustUpdate) Handle(m *gmail.Message) error {
 		"The TLC is Investigating your complaint and will contact you if further information is needed.",
 		"The TLC is investigating your complint and will contact you if further information is needed.",
 		"The TLC is investigating your complint and will contact you if further information is needed.",
+		"Your complaint has been received by the Consumer Complaint Unit at TLC and is currently being investigated.  Please find details of your complaint below:",
 	} {
 		if strings.HasSuffix(line, needle) {
 			log.Printf("\tfound initial update line %q", line)
@@ -149,6 +158,9 @@ func interestingLine(lines []string) string {
 	}
 	for _, line := range lines {
 		if strings.HasPrefix(line, "The TLC is investigating") {
+			return line
+		}
+		if strings.HasPrefix(line, "Thank you for filing a complaint") {
 			return line
 		}
 	}

@@ -98,9 +98,10 @@ func SRNFromTLCComplaintBody(lines []string) string {
 		{"Subject: TLC Complaint #1-1", "Subject: TLC Complaint #"},
 		{"Subject: TLC Complaint 1-1", "Subject: TLC Complaint "},
 		{"Subject: TLC Complaint # 311", "Subject: TLC Complaint # "},
+		{"COMPLAINT NUMBER: 311-", "COMPLAINT NUMBER: "},
 	} {
 		if line := FirstLineWithPrefix(m.pattern, lines, false); line != "" {
-			return line[len(m.prefix):]
+			return strings.TrimSpace(line[len(m.prefix):])
 		}
 	}
 	return ""

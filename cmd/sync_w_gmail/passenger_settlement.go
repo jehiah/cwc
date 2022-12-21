@@ -12,14 +12,18 @@ import (
 
 type SettlementNotification struct {
 	DB             db.DB
-	alternate      bool
+	version        int
 	ArchiveMessage MessageArchiver
 }
 
 func (s *SettlementNotification) BuildQuery(u *gmail.UsersMessagesListCall) *gmail.UsersMessagesListCall {
-	if s.alternate {
+	if s.version == 1 {
 		return u.LabelIds("INBOX").Q("from:@tlc.nyc.gov to:tlccomplaintunit@tlc.nyc.gov \"No hearing will be necessary as the driver has plead guilty to an appropriate charge and paid a penalty.\"")
 	}
+	if s.version == 2 {
+		return u.LabelIds("INBOX").Q("from:@tlc.nyc.gov to:tlccomplaintunit@tlc.nyc.gov \"The driver has plead guilty to a rule violation and has paid the penalty. The case has now closed and there will be no hearing.\"")
+	}
+
 	return u.LabelIds("INBOX").Q("subject:\"Passenger Settlement Notification\"")
 }
 
@@ -37,7 +41,7 @@ func (s *SettlementNotification) Handle(m *gmail.Message) error {
 	if srn != "" {
 		if srn != "" && strings.Contains(srn, "/") {
 			v := strings.SplitN(srn, "/", 2)
-			srn, TLCComplaintNumber = v[0], v[1]
+			srn, TLCComplaintNumber = strings.TrimSpace(v[0]), strings.TrimSpace(v[1])
 		}
 	}
 
