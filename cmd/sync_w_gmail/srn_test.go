@@ -12,6 +12,7 @@ func TestSRNFromSubject(t *testing.T) {
 	}
 	tests := []testCase{
 		{"SR Updated # 311-09751295", "311-09751295"},
+		{"SR Submitted # 311-09751295", "311-09751295"}
 	}
 	for i, tc := range tests {
 		tc := tc

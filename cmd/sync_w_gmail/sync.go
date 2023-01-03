@@ -15,6 +15,7 @@ import (
 func main() {
 	limit := flag.Int("limit", 100, "max number to process")
 	dryRun := flag.Bool("dry-run", false, "dry run")
+	export := flag.Bool("export", false, "export 311 numbers")
 	flag.Parse()
 
 	srv := gmailutils.GmailService("cwc.json")
@@ -51,6 +52,11 @@ func main() {
 		&NoticeOfDecision{DB: db.Default, ArchiveMessage: archiveMessage, UsersMessagesAttachmentsService: attachmentSvc},
 		&NoticeOfAdjournment{DB: db.Default, ArchiveMessage: archiveMessage},
 		&NoticeOfAdjournment{DB: db.Default, ArchiveMessage: archiveMessage, Alternate: true},
+	}
+	if *export {
+		handlers = []EmailHandler{
+			&NYC311RequestExporter{},
+		}
 	}
 	for _, h := range handlers {
 		q := h.BuildQuery(srv.Users.Messages.List(user)).MaxResults(50)
