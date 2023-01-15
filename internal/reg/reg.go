@@ -22,6 +22,7 @@ var All []Reg = []Reg{
 	{Code: "4-12(p)(2)", Description: "no driving in bike lane", Type: "moving", Vehicle: either},
 	{Code: "4-08(e)(9)", Description: "no stopping in bike lane", Type: "parking", Vehicle: either},
 	{Code: "4-11(c)(6)", Description: "no pickup or discharge of passengers in bike lane", Type: "parking", Vehicle: either, Short: "pickup/discharge in bike lane"},
+	{Code: "4-08(a)(4)", Description: "no parking", Type: "parking", Vehicle: either},
 	{Code: "4-08(e)(3)", Description: "no parking on sidewalks", Type: "parking", Vehicle: either},
 	{Code: "4-08(b)", Description: "no stopping", Type: "parking", Vehicle: either},
 	{Code: "4-08(c)", Description: "no standing", Type: "parking", Vehicle: either},
