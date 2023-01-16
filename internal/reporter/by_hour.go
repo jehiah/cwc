@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jehiah/cwc/internal/complaint"
 	"github.com/jehiah/cwc/internal/db"
 	"github.com/olekukonko/tablewriter"
 )
@@ -17,7 +18,7 @@ type ByHour struct {
 	Hours              [24]int
 }
 
-func NewByHour(d db.DB, f []*db.FullComplaint) (Reporter, error) {
+func NewByHour(d db.DB, f []*complaint.FullComplaint) (Reporter, error) {
 	r := &ByHour{
 		Total: len(f),
 	}

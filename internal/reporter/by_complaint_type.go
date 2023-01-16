@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 
+	"github.com/jehiah/cwc/internal/complaint"
 	"github.com/jehiah/cwc/internal/db"
 )
 
@@ -19,7 +20,7 @@ type ByViolationType struct {
 	Matches map[string]*byViolation
 }
 
-func NewByViolationType(d db.DB, f []*db.FullComplaint) (Reporter, error) {
+func NewByViolationType(d db.DB, f []*complaint.FullComplaint) (Reporter, error) {
 	r := &ByViolationType{
 		Total: len(f),
 		Matches: map[string]*byViolation{

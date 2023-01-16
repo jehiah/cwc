@@ -7,6 +7,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/jehiah/cwc/internal/complaint"
 	"github.com/jehiah/cwc/internal/db"
 )
 
@@ -15,7 +16,7 @@ type PerDay struct {
 	Scale
 }
 
-func NewPerDay(d db.DB, f []*db.FullComplaint) (Reporter, error) {
+func NewPerDay(d db.DB, f []*complaint.FullComplaint) (Reporter, error) {
 	r := &PerDay{}
 
 	counts := make(map[string]int)

@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 
+	"github.com/jehiah/cwc/internal/complaint"
 	"github.com/jehiah/cwc/internal/db"
 )
 
@@ -14,10 +15,10 @@ type Reporter interface {
 	HTML() template.HTML
 	Text() string
 }
-type Generator func(db.DB, []*db.FullComplaint) (Reporter, error)
+type Generator func(db.DB, []*complaint.FullComplaint) (Reporter, error)
 
 func Run(d db.DB, w io.Writer) error {
-	var full []*db.FullComplaint
+	var full []*complaint.FullComplaint
 	complaints, err := d.All()
 	if err != nil {
 		return err
@@ -41,7 +42,7 @@ func Run(d db.DB, w io.Writer) error {
 }
 
 func RunHTML(d db.DB) ([]template.HTML, error) {
-	var full []*db.FullComplaint
+	var full []*complaint.FullComplaint
 	complaints, err := d.All()
 	if err != nil {
 		return nil, err

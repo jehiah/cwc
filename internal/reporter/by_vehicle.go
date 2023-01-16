@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jehiah/cwc/internal/complaint"
 	"github.com/jehiah/cwc/internal/db"
 )
 
@@ -15,7 +16,7 @@ type ByVehicle struct {
 	FHV, Taxi, Total int
 }
 
-func NewByVehicle(d db.DB, f []*db.FullComplaint) (Reporter, error) {
+func NewByVehicle(d db.DB, f []*complaint.FullComplaint) (Reporter, error) {
 	r := &ByVehicle{
 		Repeats: make(map[string][]time.Time),
 		Total:   len(f),

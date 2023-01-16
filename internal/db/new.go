@@ -5,17 +5,19 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/jehiah/cwc/internal/complaint"
 )
 
 // New constructs a new complaint directory
-func (d DB) New(dt time.Time, license string) (Complaint, error) {
-	complaint := fmt.Sprintf("%s_%s", dt.Format("20060102_1504"), license)
-	fullPath := filepath.Join(string(d), complaint)
+func (d DB) New(dt time.Time, license string) (complaint.Complaint, error) {
+	c := fmt.Sprintf("%s_%s", dt.Format("20060102_1504"), license)
+	fullPath := filepath.Join(string(d), c)
 	err := os.MkdirAll(fullPath, os.ModePerm)
-	return Complaint(complaint), err
+	return complaint.Complaint(c), err
 }
 
 // FullPath reuturns the absolute path to the complaint directory
-func (d DB) FullPath(c Complaint) string {
+func (d DB) FullPath(c complaint.Complaint) string {
 	return filepath.Join(string(d), string(c))
 }

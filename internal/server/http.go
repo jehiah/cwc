@@ -17,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jehiah/cwc/internal/complaint"
 	"github.com/jehiah/cwc/internal/db"
 	"github.com/jehiah/cwc/internal/reg"
 	"github.com/jehiah/cwc/internal/reporter"
@@ -31,21 +32,21 @@ type Server struct {
 	BasePath string
 }
 
-func ComplaintClass(s db.State) string {
+func ComplaintClass(s complaint.State) string {
 	switch s {
-	case db.ClosedPenalty, db.ClosedInspection, db.NoticeOfDecision:
+	case complaint.ClosedPenalty, complaint.ClosedInspection, complaint.NoticeOfDecision:
 		return "success"
-	case db.HearingScheduled:
+	case complaint.HearingScheduled:
 		return "warning"
-	case db.Fined:
+	case complaint.Fined:
 		return "info"
-	case db.ClosedUnableToID, db.Invalid, db.Expired:
+	case complaint.ClosedUnableToID, complaint.Invalid, complaint.Expired:
 		return "active"
 	}
 	return ""
 }
 
-func PhotoClass(p *db.Photo) string {
+func PhotoClass(p *complaint.Photo) string {
 	switch p.Submitted {
 	case true:
 		return "panel-primary"
@@ -80,7 +81,7 @@ func New(d db.DB, templatePath, basePath string, readOnly bool) *Server {
 func (s *Server) TaxiReport(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	query := r.Form.Get("q")
-	var complaints []db.Complaint
+	var complaints []complaint.Complaint
 	var err error
 	if query == "" {
 		complaints, err = s.DB.All()
@@ -211,8 +212,8 @@ func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) {
 
 	r.ParseForm()
 	type payload struct {
-		FullComplaints  []*db.FullComplaint
-		PendingHearings []*db.FullComplaint
+		FullComplaints  []*complaint.FullComplaint
+		PendingHearings []*complaint.FullComplaint
 		Query           string
 		Page            string
 		BasePath        string
@@ -222,7 +223,7 @@ func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) {
 		Page:     "Complaints",
 		BasePath: s.BasePath,
 	}
-	var complaints []db.Complaint
+	var complaints []complaint.Complaint
 	var err error
 	if p.Query == "" || strings.HasPrefix(p.Query, "status:") || p.Query == "no_location" || p.Query == "no_discernable_location" {
 		complaints, err = s.DB.All()
@@ -269,7 +270,7 @@ func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) {
 				p.PendingHearings = append(p.PendingHearings, f)
 			}
 		}
-		sort.Sort(db.FullComplaintsByHearing(p.PendingHearings))
+		sort.Sort(complaint.FullComplaintsByHearing(p.PendingHearings))
 	}
 
 	err = s.Template.ExecuteTemplate(w, "complaints.html", p)
@@ -310,7 +311,7 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 		isAPI = true
 		patterns[1] = patterns[1][:len(patterns[1])-5]
 	}
-	c := db.Complaint(patterns[1])
+	c := complaint.Complaint(patterns[1])
 	if patterns[1] == "latest" {
 		var err error
 		c, err = s.DB.Latest()
@@ -390,7 +391,7 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type payload struct {
-		FullComplaint *db.FullComplaint
+		FullComplaint *complaint.FullComplaint
 		Query         string
 		Page          string
 		ReadOnly      bool
@@ -409,9 +410,9 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func JsonAPI(d db.DB, f *db.FullComplaint) interface{} {
+func JsonAPI(d db.DB, f *complaint.FullComplaint) interface{} {
 	type wrapper struct {
-		Complaint *db.FullComplaint
+		Complaint *complaint.FullComplaint
 		Address   struct {
 			Email        string
 			FirstName    string
@@ -432,9 +433,9 @@ func JsonAPI(d db.DB, f *db.FullComplaint) interface{} {
 		Complaint:          f,
 		DateTimeOfIncident: f.Time.Format("01/02/2006 03:04:05 PM"),
 	}
-	o.Street, o.CrossStreet, _ = db.ParseStreetCrossStreet(o.Complaint.Location)
+	o.Street, o.CrossStreet, _ = complaint.ParseStreetCrossStreet(o.Complaint.Location)
 
-	addrFile := d.FullPath(db.Complaint("address.json"))
+	addrFile := d.FullPath(complaint.Complaint("address.json"))
 	af, err := os.Open(addrFile)
 	if err != nil {
 		panic(err.Error())

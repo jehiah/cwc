@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"sort"
 
+	"github.com/jehiah/cwc/internal/complaint"
 	"github.com/jehiah/cwc/internal/db"
 	"github.com/jehiah/cwc/internal/reg"
 )
@@ -29,7 +30,7 @@ type ByRegulation struct {
 	Matches []regMatch
 }
 
-func NewByRegulation(d db.DB, f []*db.FullComplaint) (Reporter, error) {
+func NewByRegulation(d db.DB, f []*complaint.FullComplaint) (Reporter, error) {
 	r := &ByRegulation{
 		Total: len(f),
 	}

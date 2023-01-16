@@ -7,10 +7,10 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/jehiah/cwc/internal/db"
+	"github.com/jehiah/cwc/internal/complaint"
 )
 
-func (s *Server) Map(w http.ResponseWriter, r *http.Request, c db.Complaint) {
+func (s *Server) Map(w http.ResponseWriter, r *http.Request, c complaint.Complaint) {
 	f, err := s.DB.FullComplaint(c)
 	if err != nil {
 		http.Error(w, "UNKNOWN_ERROR", 500)

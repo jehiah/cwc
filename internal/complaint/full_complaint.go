@@ -1,9 +1,7 @@
-package db
+package complaint
 
 import (
 	"bytes"
-	"io/ioutil"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -43,29 +41,6 @@ type FullComplaint struct {
 
 func (fc FullComplaint) IsNewSRNumberFormat() bool {
 	return strings.HasPrefix(fc.ServiceRequestID, "311-")
-}
-
-func (d DB) FullComplaint(c Complaint) (*FullComplaint, error) {
-	f, err := d.Open(c)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	body, err := ioutil.ReadAll(f)
-	if err != nil {
-		return nil, err
-	}
-	path := d.FullPath(c)
-	dir, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer dir.Close()
-	files, err := dir.Readdirnames(-1)
-	if err != nil {
-		return nil, err
-	}
-	return ParseComplaint(c, body, path, files)
 }
 
 var tweetPattern = regexp.MustCompile(`https?://[^\s]+`)
@@ -178,4 +153,8 @@ func (a FullComplaintsByHearing) Less(i, j int) bool {
 		return false
 	}
 	panic("unreachable")
+}
+
+func (f FullComplaint) Contains(pattern string) bool {
+	return strings.Contains(f.Body, pattern)
 }

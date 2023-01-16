@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/jehiah/cwc/internal/complaint"
 	"github.com/jehiah/cwc/internal/db"
 	"github.com/olekukonko/tablewriter"
 )
@@ -17,7 +18,7 @@ type ByMonth struct {
 	Scale
 }
 
-func NewByMonth(d db.DB, f []*db.FullComplaint) (Reporter, error) {
+func NewByMonth(d db.DB, f []*complaint.FullComplaint) (Reporter, error) {
 	r := &ByMonth{
 		Counts: make(map[string]int),
 	}

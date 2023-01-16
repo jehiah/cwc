@@ -3,10 +3,11 @@ package db
 import (
 	"bytes"
 	"io/ioutil"
-	"strings"
+
+	"github.com/jehiah/cwc/internal/complaint"
 )
 
-func (d DB) ComplaintContains(c Complaint, pattern string) (bool, error) {
+func (d DB) ComplaintContains(c complaint.Complaint, pattern string) (bool, error) {
 	f, err := d.Open(c)
 	if err != nil {
 		return false, err
@@ -20,8 +21,4 @@ func (d DB) ComplaintContains(c Complaint, pattern string) (bool, error) {
 		return true, nil
 	}
 	return false, nil
-}
-
-func (f FullComplaint) Contains(pattern string) bool {
-	return strings.Contains(f.Body, pattern)
 }

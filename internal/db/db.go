@@ -12,7 +12,6 @@ type DB string
 var Default DB
 
 func init() {
-	// in Go 1.8 this isn't implemented in linux
 	defer func() {
 		recover()
 	}()
@@ -22,5 +21,4 @@ func init() {
 		panic(err.Error())
 	}
 	Default = DB(filepath.Join(usr.HomeDir, "Documents", "cyclists_with_cameras"))
-	geoclientCache = make(map[string]LL)
 }

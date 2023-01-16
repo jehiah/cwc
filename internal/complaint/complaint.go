@@ -1,4 +1,4 @@
-package db
+package complaint
 
 import (
 	"fmt"
@@ -6,6 +6,11 @@ import (
 	"strings"
 	"time"
 )
+
+func init() {
+	geoclientCache = make(map[string]LL)
+
+}
 
 type Complaint string
 
@@ -38,8 +43,8 @@ func (c Complaint) License() string {
 
 // complaintsByAge implements sort.Interface for []Complaint based on
 // the Time function.
-type complaintsByAge []Complaint
+type ComplaintsByAge []Complaint
 
-func (a complaintsByAge) Len() int           { return len(a) }
-func (a complaintsByAge) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a complaintsByAge) Less(i, j int) bool { return a[i].Time().Before(a[j].Time()) }
+func (a ComplaintsByAge) Len() int           { return len(a) }
+func (a ComplaintsByAge) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ComplaintsByAge) Less(i, j int) bool { return a[i].Time().Before(a[j].Time()) }

@@ -6,18 +6,19 @@ import (
 	"html/template"
 	"strings"
 
+	"github.com/jehiah/cwc/internal/complaint"
 	"github.com/jehiah/cwc/internal/db"
 )
 
 type ByStatus struct {
-	Data map[db.State]int
+	Data map[complaint.State]int
 	Scale
 	Total int
 }
 
-func NewByStatus(d db.DB, f []*db.FullComplaint) (Reporter, error) {
+func NewByStatus(d db.DB, f []*complaint.FullComplaint) (Reporter, error) {
 	r := &ByStatus{
-		Data:  make(map[db.State]int),
+		Data:  make(map[complaint.State]int),
 		Total: len(f),
 	}
 
@@ -62,7 +63,7 @@ func (r ByStatus) HTML() template.HTML {
 	var rows []row
 	var max, total int
 
-	for _, state := range db.AllStates {
+	for _, state := range complaint.AllStates {
 		n := r.Data[state]
 		total += n
 		if n > max {
@@ -70,7 +71,7 @@ func (r ByStatus) HTML() template.HTML {
 		}
 	}
 
-	for _, state := range db.AllStates {
+	for _, state := range complaint.AllStates {
 		n := r.Data[state]
 		if n == 0 {
 			continue
@@ -84,15 +85,15 @@ func (r ByStatus) HTML() template.HTML {
 	return GetTemplateString(byStatusTemplate, rows)
 }
 
-func ComplaintClass(s db.State) string {
+func ComplaintClass(s complaint.State) string {
 	switch s {
-	case db.ClosedPenalty, db.ClosedInspection, db.NoticeOfDecision:
+	case complaint.ClosedPenalty, complaint.ClosedInspection, complaint.NoticeOfDecision:
 		return "success"
-	case db.HearingScheduled:
+	case complaint.HearingScheduled:
 		return "warning"
-	case db.Fined:
+	case complaint.Fined:
 		return "info"
-	case db.ClosedUnableToID, db.Invalid, db.Expired:
+	case complaint.ClosedUnableToID, complaint.Invalid, complaint.Expired:
 		return "active"
 	}
 	return ""
@@ -101,7 +102,7 @@ func ComplaintClass(s db.State) string {
 func (r ByStatus) Text() string {
 	w := &bytes.Buffer{}
 
-	for _, state := range db.AllStates {
+	for _, state := range complaint.AllStates {
 		n := r.Data[state]
 		if n == 0 {
 			continue
