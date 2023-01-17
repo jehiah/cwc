@@ -47,6 +47,7 @@ func (d LocalFilesystem) Index() ([]complaint.Complaint, error) {
 	return o, nil
 }
 
+// Latest - TODO: rename LastModified?
 func (d LocalFilesystem) Latest() (complaint.Complaint, error) {
 	var latest os.FileInfo
 	f, err := os.Open(string(d))

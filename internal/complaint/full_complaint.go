@@ -26,17 +26,16 @@ type FullComplaint struct {
 	Violations       []reg.Reg `json:"violations"`
 	Tweets           []string  `json:"tweets,omitempty"`
 
-	Body     string   `json:"body"`
-	Lines    []string `json:"lines"` // the non-empty lines of text
-	BasePath string   `json:"-"`
-	Photos   []string `json:"photos"`
-	Videos   []string `json:"videos"`
-	PDFs     []string `json:"pdfs"`
-	Files    []string `json:"files"`
-	Lat      float64  `json:"lat,omitempty"`
-	Long     float64  `json:"long,omitempty"`
+	Body   string   `json:"body"`
+	Lines  []string `json:"lines"` // the non-empty lines of text
+	Photos []string `json:"photos"`
+	Videos []string `json:"videos"`
+	PDFs   []string `json:"pdfs"`
+	Files  []string `json:"files"`
+	Lat    float64  `json:"lat,omitempty"`
+	Long   float64  `json:"long,omitempty"`
 
-	PhotoDetails []*Photo `json:"photo_details"`
+	PhotoDetails []Photo `json:"photo_details"`
 }
 
 func (fc FullComplaint) IsNewSRNumberFormat() bool {
@@ -45,14 +44,14 @@ func (fc FullComplaint) IsNewSRNumberFormat() bool {
 
 var tweetPattern = regexp.MustCompile(`https?://[^\s]+`)
 
-func ParseComplaint(c Complaint, body []byte, path string, files []string) (*FullComplaint, error) {
-	b := string(body)
+func ParseComplaint(c RawComplaint, files []string) (*FullComplaint, error) {
+	b := string(c.Body)
 	contains := func(pattern string) bool {
-		return bytes.Contains(body, []byte(pattern))
+		return bytes.Contains(c.Body, []byte(pattern))
 	}
 	lines := splitLines(b)
 	f := &FullComplaint{
-		Complaint:   c,
+		Complaint:   c.Complaint,
 		Timestamp:   c.Time().Unix(),
 		Time:        c.Time(),
 		License:     c.License(),
@@ -62,7 +61,6 @@ func ParseComplaint(c Complaint, body []byte, path string, files []string) (*Ful
 		Lines:            lines,
 		Hearing:          extractHearingDate(lines),
 		Status:           DetectState(b),
-		BasePath:         path,
 		TLCID:            findTLCID(lines),
 		ServiceRequestID: findServiceRequestID(lines),
 		Tweets:           tweetPattern.FindAllString(b, -1),
@@ -88,10 +86,6 @@ func ParseComplaint(c Complaint, body []byte, path string, files []string) (*Ful
 	}
 
 	for _, filename := range files {
-		switch filename {
-		case "notes.txt", ".DS_Store":
-			continue
-		}
 		ext := strings.ToLower(filepath.Ext(filename))
 		switch ext {
 		case ".mov", ".m4v":

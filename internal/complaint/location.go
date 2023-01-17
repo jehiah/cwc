@@ -43,7 +43,9 @@ func (f *FullComplaint) HasGPSInfo() bool {
 	if f.Lat != 0 && f.Long != 0 {
 		return true
 	}
-	f.ParsePhotos()
+	if len(f.PhotoDetails) != len(f.Photos) {
+		log.Printf("HasGPSInfo: photos not loaded %#v", f.Complaint)
+	}
 	for _, p := range f.PhotoDetails {
 		if p.Lat != 0 && p.Long != 0 {
 			return true
@@ -56,7 +58,9 @@ func (f *FullComplaint) GPSInfo() LL {
 	if f.Lat != 0 && f.Long != 0 {
 		return LL{f.Lat, f.Long}
 	}
-	f.ParsePhotos()
+	if len(f.PhotoDetails) != len(f.Photos) {
+		log.Printf("HasGPSInfo: photos not loaded %#v", f.Complaint)
+	}
 	for _, p := range f.PhotoDetails {
 		if p.Lat != 0 && p.Long != 0 {
 			return LL{p.Lat, p.Long}

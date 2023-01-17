@@ -18,6 +18,7 @@ type ReadOnly interface {
 
 	Read(complaint.Complaint) (complaint.RawComplaint, error)
 	Attachments(complaint.Complaint) ([]fs.DirEntry, error)
+	OpenAttachment(c complaint.Complaint, filename string) (fs.File, error)
 }
 
 type Write interface {

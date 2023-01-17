@@ -40,7 +40,7 @@ func runNewComplaint(d db.ReadWrite) error {
 	var dt time.Time
 	switch {
 	case strings.HasPrefix(yyyymmdd, "/"):
-		x, err := exif.Parse(yyyymmdd)
+		x, err := exif.ParseFile(yyyymmdd)
 		if err != nil {
 			return err
 		}

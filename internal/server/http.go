@@ -376,7 +376,12 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	f.ParsePhotos()
+	f.PhotoDetails, err = db.LoadPhotos(s.DB, f)
+	if err != nil {
+		s.Error(w, err)
+		log.Printf("%s", err)
+		return
+	}
 	if isAPI {
 		w.Header().Set("Content-type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))

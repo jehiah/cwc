@@ -5,39 +5,53 @@ import (
 	"image"
 	_ "image/jpeg"
 	"image/png"
+	"io"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strconv"
+	"sync"
 
 	"github.com/anthonynsimon/bild/transform"
 	"github.com/jehiah/cwc/exif"
 	"github.com/jehiah/cwc/internal/complaint"
 )
 
-func (s *Server) Image(w http.ResponseWriter, r *http.Request, c complaint.Complaint, file string) {
-	path := s.DB.FullPath(c)
-	file = filepath.Join(path, file)
+func duplicateReader(r io.Reader) (io.Reader, io.Reader) {
+	pr, pw := io.Pipe()
+	tr := io.TeeReader(r, pw)
+	return tr, pr
+}
 
-	f, err := os.Open(file)
+func (s *Server) Image(w http.ResponseWriter, r *http.Request, c complaint.Complaint, file string) {
+	f, err := s.DB.OpenAttachment(c, file)
 	if err != nil {
 		http.Error(w, "INTERNAL_ERROR", 500)
 		log.Printf("%s", err)
 		return
 	}
 	defer f.Close()
-	img, _, err := image.Decode(f)
+
+	r1, r2 := duplicateReader(f)
+
+	var x *exif.Exif
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		var err error
+		x, err = exif.Parse(r2)
+		if err != nil {
+			x = &exif.Exif{}
+		}
+	}()
+
+	img, _, err := image.Decode(r1)
 	if err != nil {
 		http.Error(w, "INTERNAL_ERROR", 500)
 		log.Printf("img decode error %s", err)
 		return
 	}
-
-	x, err := exif.Parse(file)
-	if err != nil {
-		x = &exif.Exif{}
-	}
+	wg.Wait()
 
 	// rotate & transform
 	r.ParseForm()

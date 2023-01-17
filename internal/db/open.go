@@ -88,28 +88,40 @@ func (d LocalFilesystem) Read(c complaint.Complaint) (complaint.RawComplaint, er
 
 }
 func (d LocalFilesystem) Attachments(c complaint.Complaint) ([]fs.DirEntry, error) {
-	return fs.ReadDir(os.DirFS(string(d)), string(c))
+	files, err := fs.ReadDir(os.DirFS(string(d)), string(c))
+	if err != nil {
+		return nil, err
+	}
+	var out []fs.DirEntry
+	for _, f := range files {
+		switch f.Name() {
+		case "notes.txt", ".DS_Store":
+			continue
+		}
+		out = append(out, f)
+	}
+	return out, nil
+}
+
+func (d LocalFilesystem) OpenAttachment(c complaint.Complaint, filename string) (fs.File, error) {
+	fullPath := filepath.Join(d.FullPath(c), filename)
+	return os.Open(fullPath)
 }
 
 func (d LocalFilesystem) FullComplaint(c complaint.Complaint) (*complaint.FullComplaint, error) {
-	f, err := d.Open(c)
+	rc, err := d.Read(c)
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
-	body, err := ioutil.ReadAll(f)
+
+	files, err := d.Attachments(c)
 	if err != nil {
 		return nil, err
 	}
-	path := d.FullPath(c)
-	dir, err := os.Open(path)
-	if err != nil {
-		return nil, err
+
+	var filenames []string
+	for _, f := range files {
+		filenames = append(filenames, f.Name())
 	}
-	defer dir.Close()
-	files, err := dir.Readdirnames(-1)
-	if err != nil {
-		return nil, err
-	}
-	return complaint.ParseComplaint(c, body, path, files)
+	return complaint.ParseComplaint(rc, filenames)
 }
