@@ -1,24 +1,37 @@
 package db
 
 import (
-	"os/user"
-	"path/filepath"
+	"io/fs"
+	"os"
+
+	"github.com/jehiah/cwc/internal/complaint"
 )
 
-// DB is the directory path containing a cwc repo
-type DB string
+type ReadOnly interface {
+	Index() ([]complaint.Complaint, error)
+	ComplaintContains(c complaint.Complaint, pattern string) (bool, error)
+	Exists(c complaint.Complaint) (bool, error)
+	Find(pattern string) ([]complaint.Complaint, error)
+	FullComplaint(c complaint.Complaint) (*complaint.FullComplaint, error)
+	FullPath(c complaint.Complaint) string
+	Latest() (complaint.Complaint, error)
 
-// Default is the default DB at ~/Documents/cyclists_with_cameras
-var Default DB
+	Read(complaint.Complaint) (complaint.RawComplaint, error)
+	Attachments(complaint.Complaint) ([]fs.DirEntry, error)
+}
 
-func init() {
-	defer func() {
-		recover()
-	}()
+type Write interface {
+	Append(c complaint.Complaint, s string) error
+	Create(c complaint.Complaint) (*os.File, error)
+	Open(c complaint.Complaint) (*os.File, error)
+}
 
-	usr, err := user.Current()
-	if err != nil {
-		panic(err.Error())
-	}
-	Default = DB(filepath.Join(usr.HomeDir, "Documents", "cyclists_with_cameras"))
+type ReadWrite interface {
+	ReadOnly
+	Write
+}
+
+type Interactive interface {
+	ShowInFinder(c complaint.Complaint) error
+	ShowInEditor(c complaint.Complaint) error
 }

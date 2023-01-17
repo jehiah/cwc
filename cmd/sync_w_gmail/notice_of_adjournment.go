@@ -10,7 +10,7 @@ import (
 )
 
 type NoticeOfAdjournment struct {
-	DB             db.DB
+	DB             db.ReadWrite
 	ArchiveMessage MessageArchiver
 	Alternate      bool
 }

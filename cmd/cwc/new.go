@@ -31,7 +31,7 @@ func newComplaint() *cobra.Command {
 	return cmd
 }
 
-func runNewComplaint(d db.DB) error {
+func runNewComplaint(d db.ReadWrite) error {
 	yyyymmdd, err := input.Ask("Date (YYYYMMDD) or Filename", "")
 	if err != nil {
 		return err
@@ -95,12 +95,10 @@ func runNewComplaint(d db.DB) error {
 		return err
 	}
 
-	complaint, err := d.New(dt, license)
-	if err != nil {
-		return err
-	}
-	fmt.Printf("> creating %s\n", d.FullPath(complaint))
-	f, err := d.Create(complaint)
+	c := complaint.New(dt, license)
+
+	fmt.Printf("> creating %s\n", d.FullPath(c))
+	f, err := d.Create(c)
 	if err != nil {
 		return err
 	}
@@ -143,9 +141,11 @@ func runNewComplaint(d db.DB) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("> opening %s\n", url)
-	d.Edit(complaint)
-	d.ShowInFinder(complaint)
+	if id, ok := d.(db.Interactive); ok {
+		fmt.Printf("> opening %s\n", url)
+		id.ShowInEditor(c)
+		id.ShowInFinder(c)
+	}
 	fmt.Printf("> done\n")
 	return nil
 }

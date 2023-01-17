@@ -16,7 +16,7 @@ type PerDay struct {
 	Scale
 }
 
-func NewPerDay(d db.DB, f []*complaint.FullComplaint) (Reporter, error) {
+func NewPerDay(d db.ReadOnly, f []*complaint.FullComplaint) (Reporter, error) {
 	r := &PerDay{}
 
 	counts := make(map[string]int)

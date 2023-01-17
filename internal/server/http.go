@@ -24,7 +24,7 @@ import (
 )
 
 type Server struct {
-	db.DB
+	DB db.ReadWrite
 	*template.Template
 	*http.ServeMux
 	listener net.Listener
@@ -56,7 +56,7 @@ func PhotoClass(p *complaint.Photo) string {
 	panic("here")
 }
 
-func New(d db.DB, templatePath, basePath string, readOnly bool) *Server {
+func New(d db.ReadWrite, templatePath, basePath string, readOnly bool) *Server {
 	t, err := template.New("").Funcs(template.FuncMap{"ComplaintClass": ComplaintClass, "PhotoClass": PhotoClass}).ParseGlob(filepath.Join(templatePath, "*.html"))
 
 	if err != nil {
@@ -84,7 +84,7 @@ func (s *Server) TaxiReport(w http.ResponseWriter, r *http.Request) {
 	var complaints []complaint.Complaint
 	var err error
 	if query == "" {
-		complaints, err = s.DB.All()
+		complaints, err = s.DB.Index()
 	} else {
 		complaints, err = s.DB.Find(query)
 	}
@@ -226,7 +226,7 @@ func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) {
 	var complaints []complaint.Complaint
 	var err error
 	if p.Query == "" || strings.HasPrefix(p.Query, "status:") || p.Query == "no_location" || p.Query == "no_discernable_location" {
-		complaints, err = s.DB.All()
+		complaints, err = s.DB.Index()
 	} else {
 		complaints, err = s.DB.Find(p.Query)
 	}
@@ -410,7 +410,7 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func JsonAPI(d db.DB, f *complaint.FullComplaint) interface{} {
+func JsonAPI(d db.ReadOnly, f *complaint.FullComplaint) interface{} {
 	type wrapper struct {
 		Complaint *complaint.FullComplaint
 		Address   struct {

@@ -11,7 +11,7 @@ import (
 )
 
 type ServiceReqeustUpdate struct {
-	DB             db.DB
+	DB             db.ReadWrite
 	version        int
 	force          bool
 	dryrun         bool

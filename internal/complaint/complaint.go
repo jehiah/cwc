@@ -12,6 +12,11 @@ func init() {
 
 }
 
+func New(dt time.Time, license string) Complaint {
+	c := fmt.Sprintf("%s_%s", dt.Format("20060102_1504"), license)
+	return Complaint(c)
+}
+
 type Complaint string
 
 func (c Complaint) String() string {
@@ -19,6 +24,11 @@ func (c Complaint) String() string {
 }
 func (c Complaint) ID() string {
 	return string(c)
+}
+
+type RawComplaint struct {
+	Complaint
+	Body []byte
 }
 
 func (c Complaint) Time() time.Time {

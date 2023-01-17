@@ -13,7 +13,7 @@ import (
 )
 
 type NoticeOfDecision struct {
-	DB             db.DB
+	DB             db.ReadWrite
 	ArchiveMessage MessageArchiver
 	*gmail.UsersMessagesAttachmentsService
 }

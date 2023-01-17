@@ -7,7 +7,7 @@ import (
 	"github.com/jehiah/cwc/internal/complaint"
 )
 
-func (d DB) ComplaintContains(c complaint.Complaint, pattern string) (bool, error) {
+func (d LocalFilesystem) ComplaintContains(c complaint.Complaint, pattern string) (bool, error) {
 	f, err := d.Open(c)
 	if err != nil {
 		return false, err

@@ -18,7 +18,7 @@ type ByHour struct {
 	Hours              [24]int
 }
 
-func NewByHour(d db.DB, f []*complaint.FullComplaint) (Reporter, error) {
+func NewByHour(d db.ReadOnly, f []*complaint.FullComplaint) (Reporter, error) {
 	r := &ByHour{
 		Total: len(f),
 	}

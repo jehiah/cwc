@@ -30,7 +30,7 @@ type ByRegulation struct {
 	Matches []regMatch
 }
 
-func NewByRegulation(d db.DB, f []*complaint.FullComplaint) (Reporter, error) {
+func NewByRegulation(d db.ReadOnly, f []*complaint.FullComplaint) (Reporter, error) {
 	r := &ByRegulation{
 		Total: len(f),
 	}

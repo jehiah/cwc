@@ -15,11 +15,11 @@ type Reporter interface {
 	HTML() template.HTML
 	Text() string
 }
-type Generator func(db.DB, []*complaint.FullComplaint) (Reporter, error)
+type Generator func(db.ReadOnly, []*complaint.FullComplaint) (Reporter, error)
 
-func Run(d db.DB, w io.Writer) error {
+func Run(d db.ReadOnly, w io.Writer) error {
 	var full []*complaint.FullComplaint
-	complaints, err := d.All()
+	complaints, err := d.Index()
 	if err != nil {
 		return err
 	}
@@ -41,9 +41,9 @@ func Run(d db.DB, w io.Writer) error {
 	return nil
 }
 
-func RunHTML(d db.DB) ([]template.HTML, error) {
+func RunHTML(d db.ReadOnly) ([]template.HTML, error) {
 	var full []*complaint.FullComplaint
-	complaints, err := d.All()
+	complaints, err := d.Index()
 	if err != nil {
 		return nil, err
 	}
@@ -70,8 +70,8 @@ func RunHTML(d db.DB) ([]template.HTML, error) {
 	return o, nil
 }
 
-func JSON(w io.Writer, d db.DB) error {
-	complaints, err := d.All()
+func JSON(w io.Writer, d db.ReadOnly) error {
+	complaints, err := d.Index()
 	if err != nil {
 		return err
 	}

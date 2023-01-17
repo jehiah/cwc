@@ -3,6 +3,7 @@ package db
 import (
 	"errors"
 	"io"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -16,7 +17,7 @@ var editors []string = []string{
 	"atom",
 }
 
-func (d DB) Edit(c complaint.Complaint) error {
+func (d LocalFilesystem) ShowInEditor(c complaint.Complaint) error {
 	for _, editor := range editors {
 		if e, err := exec.LookPath(editor); err != nil {
 			continue
@@ -29,21 +30,25 @@ func (d DB) Edit(c complaint.Complaint) error {
 	return errors.New("No editor found")
 }
 
-func (d DB) Create(c complaint.Complaint) (*os.File, error) {
+func (d LocalFilesystem) ShowInFinder(c complaint.Complaint) error {
+	return exec.Command("/usr/bin/open", d.FullPath(c)).Run()
+}
+
+func (d LocalFilesystem) Create(c complaint.Complaint) (*os.File, error) {
+	err := os.MkdirAll(d.FullPath(c), os.ModePerm)
+	if err != nil {
+		return nil, err
+	}
 	fullPath := filepath.Join(d.FullPath(c), "notes.txt")
 	return os.Create(fullPath)
 }
 
-func (d DB) Open(c complaint.Complaint) (*os.File, error) {
+func (d LocalFilesystem) Open(c complaint.Complaint) (*os.File, error) {
 	fullPath := filepath.Join(d.FullPath(c), "notes.txt")
 	return os.Open(fullPath)
 }
 
-func (d DB) ShowInFinder(c complaint.Complaint) error {
-	return exec.Command("/usr/bin/open", d.FullPath(c)).Run()
-}
-
-func (d DB) Append(c complaint.Complaint, s string) error {
+func (d LocalFilesystem) Append(c complaint.Complaint, s string) error {
 	fullPath := filepath.Join(d.FullPath(c), "notes.txt")
 	f, err := os.OpenFile(fullPath, os.O_APPEND|os.O_WRONLY, 066)
 	if err != nil {
@@ -55,7 +60,7 @@ func (d DB) Append(c complaint.Complaint, s string) error {
 }
 
 // Exists checks if the complaint exists in DB
-func (d DB) Exists(c complaint.Complaint) (bool, error) {
+func (d LocalFilesystem) Exists(c complaint.Complaint) (bool, error) {
 	fullPath := filepath.Join(d.FullPath(c), "notes.txt")
 	_, err := os.Stat(fullPath)
 	if err != nil && !os.IsNotExist(err) {
@@ -66,7 +71,27 @@ func (d DB) Exists(c complaint.Complaint) (bool, error) {
 	return true, nil
 }
 
-func (d DB) FullComplaint(c complaint.Complaint) (*complaint.FullComplaint, error) {
+func (d LocalFilesystem) Read(c complaint.Complaint) (complaint.RawComplaint, error) {
+	f, err := d.Open(c)
+	if err != nil {
+		return complaint.RawComplaint{}, err
+	}
+	defer f.Close()
+	body, err := ioutil.ReadAll(f)
+	if err != nil {
+		return complaint.RawComplaint{}, err
+	}
+	return complaint.RawComplaint{
+		Complaint: c,
+		Body:      body,
+	}, nil
+
+}
+func (d LocalFilesystem) Attachments(c complaint.Complaint) ([]fs.DirEntry, error) {
+	return fs.ReadDir(os.DirFS(string(d)), string(c))
+}
+
+func (d LocalFilesystem) FullComplaint(c complaint.Complaint) (*complaint.FullComplaint, error) {
 	f, err := d.Open(c)
 	if err != nil {
 		return nil, err

@@ -8,7 +8,7 @@ import (
 	"github.com/jehiah/cwc/internal/db"
 )
 
-func search(d db.DB, query, action string) {
+func search(d db.ReadWrite, query, action string) {
 	var err error
 	if query == "" {
 		query, err = input.Ask("Search for?", "")
@@ -27,22 +27,24 @@ func search(d db.DB, query, action string) {
 		fmt.Printf("Error: %s\n", err)
 		return
 	}
-	for i, c := range files {
-		if i == 0 {
-			fmt.Printf("opening: %s %s\n", c, d.FullPath(c))
-			switch action {
-			case "search":
-				err = d.ShowInFinder(c)
+	if id, ok := d.(db.Interactive); ok {
+		for i, c := range files {
+			if i == 0 {
+				fmt.Printf("opening: %s %s\n", c, d.FullPath(c))
+				switch action {
+				case "search":
+					err = id.ShowInFinder(c)
+					if err != nil {
+						fmt.Printf("%s\n", err)
+					}
+				}
+				err = id.ShowInEditor(c)
 				if err != nil {
 					fmt.Printf("%s\n", err)
 				}
+			} else {
+				fmt.Printf("also found: %s %s\n", c, d.FullPath(c))
 			}
-			err = d.Edit(c)
-			if err != nil {
-				fmt.Printf("%s\n", err)
-			}
-		} else {
-			fmt.Printf("also found: %s %s\n", c, d.FullPath(c))
 		}
 	}
 }

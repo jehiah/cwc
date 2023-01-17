@@ -18,7 +18,7 @@ type ByMonth struct {
 	Scale
 }
 
-func NewByMonth(d db.DB, f []*complaint.FullComplaint) (Reporter, error) {
+func NewByMonth(d db.ReadOnly, f []*complaint.FullComplaint) (Reporter, error) {
 	r := &ByMonth{
 		Counts: make(map[string]int),
 	}

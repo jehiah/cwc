@@ -11,7 +11,7 @@ import (
 )
 
 type SettlementNotification struct {
-	DB             db.DB
+	DB             db.ReadWrite
 	version        int
 	ArchiveMessage MessageArchiver
 }

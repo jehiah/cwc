@@ -21,11 +21,11 @@ func init() {
 	RootCmd.AddCommand(searchCmd())
 }
 
-func loadDB(p string, err error) db.DB {
+func loadDB(p string, err error) db.ReadWrite {
 	if p == "" {
 		return db.Default
 	}
-	return db.DB(p)
+	return db.LocalFilesystem(p)
 }
 
 var RootCmd = &cobra.Command{

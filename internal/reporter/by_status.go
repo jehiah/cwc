@@ -16,7 +16,7 @@ type ByStatus struct {
 	Total int
 }
 
-func NewByStatus(d db.DB, f []*complaint.FullComplaint) (Reporter, error) {
+func NewByStatus(d db.ReadOnly, f []*complaint.FullComplaint) (Reporter, error) {
 	r := &ByStatus{
 		Data:  make(map[complaint.State]int),
 		Total: len(f),

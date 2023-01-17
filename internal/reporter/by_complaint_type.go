@@ -20,7 +20,7 @@ type ByViolationType struct {
 	Matches map[string]*byViolation
 }
 
-func NewByViolationType(d db.DB, f []*complaint.FullComplaint) (Reporter, error) {
+func NewByViolationType(d db.ReadOnly, f []*complaint.FullComplaint) (Reporter, error) {
 	r := &ByViolationType{
 		Total: len(f),
 		Matches: map[string]*byViolation{

@@ -16,7 +16,7 @@ type ByVehicle struct {
 	FHV, Taxi, Total int
 }
 
-func NewByVehicle(d db.DB, f []*complaint.FullComplaint) (Reporter, error) {
+func NewByVehicle(d db.ReadOnly, f []*complaint.FullComplaint) (Reporter, error) {
 	r := &ByVehicle{
 		Repeats: make(map[string][]time.Time),
 		Total:   len(f),
