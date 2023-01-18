@@ -1,7 +1,6 @@
 package server
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -15,12 +14,14 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/jehiah/cwc/internal/complaint"
 	"github.com/jehiah/cwc/internal/db"
 	"github.com/jehiah/cwc/internal/reg"
 	"github.com/jehiah/cwc/internal/reporter"
+	"github.com/jehiah/cwc/templates"
 )
 
 type Server struct {
@@ -30,6 +31,9 @@ type Server struct {
 	listener net.Listener
 	ReadOnly bool
 	BasePath string
+
+	medallionsMutex sync.Mutex
+	medallions      []AuthorizedMedallion
 }
 
 func ComplaintClass(s complaint.State) string {
@@ -57,7 +61,13 @@ func PhotoClass(p *complaint.Photo) string {
 }
 
 func New(d db.ReadWrite, templatePath, basePath string, readOnly bool) *Server {
-	t, err := template.New("").Funcs(template.FuncMap{"ComplaintClass": ComplaintClass, "PhotoClass": PhotoClass}).ParseGlob(filepath.Join(templatePath, "*.html"))
+	t := template.New("").Funcs(template.FuncMap{"ComplaintClass": ComplaintClass, "PhotoClass": PhotoClass})
+	var err error
+	if templatePath == "" {
+		t, err = t.ParseFS(templates.FS, "*.html")
+	} else {
+		t, err = t.ParseGlob(filepath.Join(templatePath, "*.html"))
+	}
 
 	if err != nil {
 		log.Fatalf("%s", err)
@@ -76,6 +86,33 @@ func New(d db.ReadWrite, templatePath, basePath string, readOnly bool) *Server {
 	s.ServeMux.HandleFunc(basePath+"report", s.Report)
 	s.ServeMux.HandleFunc(basePath+"report/taxi", s.TaxiReport)
 	return s
+}
+
+type AuthorizedMedallion struct {
+	LicenseNumber string `json:"license_number"`
+}
+
+func (s *Server) AuthorizedMedallions() ([]AuthorizedMedallion, error) {
+	s.medallionsMutex.Lock()
+	defer s.medallionsMutex.Unlock()
+
+	if len(s.medallions) > 1 {
+		return s.medallions, nil
+	}
+
+	// get a list of authorized medallions - data for yesterday should always be available
+	yesterday := time.Now().Add(time.Hour * -24).Format("2006-01-02")
+	log.Printf("retrieving https://data.cityofnewyork.us/api/resource/rhe8-mgbb.json for %q", yesterday)
+	resp, err := http.Get("https://data.cityofnewyork.us/api/resource/rhe8-mgbb.json?$select=license_number&$limit=100000&$where=last_updated_date+=+%27" + yesterday + "%27")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	err = json.NewDecoder(resp.Body).Decode(&s.medallions)
+	if err != nil {
+		return nil, err
+	}
+	return s.medallions, nil
 }
 
 func (s *Server) TaxiReport(w http.ResponseWriter, r *http.Request) {
@@ -108,22 +145,22 @@ func (s *Server) TaxiReport(w http.ResponseWriter, r *http.Request) {
 		seen[f.License] += 1
 	}
 
-	f, err := os.Open("source_data/authorized_medallions.csv")
+	medallions, err := s.AuthorizedMedallions()
 	if err != nil {
 		log.Printf("%s", err)
 		s.Error(w, err)
 		return
 	}
+
 	type Record struct {
 		License string
 		Count   int
 	}
-	all := make([]Record, 0, 13000)
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		license := scanner.Text()
-		all = append(all, Record{License: license, Count: seen[license]})
+	all := make([]Record, 0, len(medallions))
+	for _, license := range medallions {
+		all = append(all, Record{License: license.LicenseNumber, Count: seen[license.LicenseNumber]})
 	}
+	sort.Slice(all, func(i, j int) bool { return strings.Compare(all[i].License, all[j].License) == -1 })
 
 	err = s.Template.ExecuteTemplate(w, "report_taxi.html", all)
 	if err != nil {
