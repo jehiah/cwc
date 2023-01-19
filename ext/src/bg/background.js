@@ -60,4 +60,12 @@ chrome.pageAction.onClicked.addListener(function(tab){
     }, function(status) {
     	alert('Something went wrong.');
     });
+    getJSON("http://[::]:53000/address.json").then(function(data) {
+        console.log("got address.json", data)
+        chrome.tabs.sendMessage(tab.id, data, function(response) {
+          console.log(response);
+        });
+    }, function(status) {
+      alert('Something went wrong.');
+    });
 })

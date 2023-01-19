@@ -85,6 +85,7 @@ func New(d db.ReadWrite, templatePath, basePath string, readOnly bool) *Server {
 	s.ServeMux.HandleFunc(basePath+"data/report", s.DataReport)
 	s.ServeMux.HandleFunc(basePath+"report", s.Report)
 	s.ServeMux.HandleFunc(basePath+"report/taxi", s.TaxiReport)
+	s.ServeMux.HandleFunc(basePath+"address.json", s.Address)
 	return s
 }
 
@@ -452,10 +453,13 @@ func (s *Server) Complaint(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func JsonAPI(d db.ReadOnly, f *complaint.FullComplaint) interface{} {
+func (s *Server) Address(w http.ResponseWriter, r *http.Request) {
+	if s.ReadOnly {
+		http.Error(w, "not found", 404)
+		return
+	}
 	type wrapper struct {
-		Complaint *complaint.FullComplaint
-		Address   struct {
+		Address struct {
 			Email        string
 			FirstName    string
 			LastName     string
@@ -467,25 +471,41 @@ func JsonAPI(d db.ReadOnly, f *complaint.FullComplaint) interface{} {
 			State        string
 			ZipCode      string
 		}
+	}
+	var o wrapper
+	addrFile := s.DB.FullPath(complaint.Complaint("address.json"))
+	f, err := os.Open(addrFile)
+	if err != nil {
+		if os.IsNotExist(err) {
+			http.Error(w, "not found", 404)
+			return
+		}
+		http.Error(w, "error", 500)
+		log.Printf("error %#f", err)
+		return
+	}
+	defer f.Close()
+	err = json.NewDecoder(f).Decode(&o.Address)
+	if err != nil {
+		log.Printf("error %#f", err)
+		http.Error(w, "error", 500)
+		return
+	}
+	json.NewEncoder(w).Encode(o)
+}
+
+func JsonAPI(d db.ReadOnly, f *complaint.FullComplaint) interface{} {
+	type wrapper struct {
+		Complaint          *complaint.FullComplaint
 		DateTimeOfIncident string
 		Street             string
 		CrossStreet        string
 	}
 	o := wrapper{
-		Complaint:          f,
-		DateTimeOfIncident: f.Time.Format("01/02/2006 03:04:05 PM"),
+		Complaint: f,
+		// TODO: move to JS formatting
+		DateTimeOfIncident: f.Time.Format("01/02/2006 03:04 PM"),
 	}
 	o.Street, o.CrossStreet, _ = complaint.ParseStreetCrossStreet(o.Complaint.Location)
-
-	addrFile := d.FullPath(complaint.Complaint("address.json"))
-	af, err := os.Open(addrFile)
-	if err != nil {
-		panic(err.Error())
-	}
-	defer af.Close()
-	err = json.NewDecoder(af).Decode(&o.Address)
-	if err != nil {
-		panic(err.Error())
-	}
 	return o
 }
