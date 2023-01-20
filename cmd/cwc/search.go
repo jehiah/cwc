@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/jehiah/cwc/db"
 	"github.com/jehiah/cwc/input"
-	"github.com/jehiah/cwc/internal/db"
 )
 
 func search(d db.ReadWrite, query, action string) {

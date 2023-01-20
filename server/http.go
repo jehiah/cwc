@@ -17,8 +17,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/jehiah/cwc/db"
 	"github.com/jehiah/cwc/internal/complaint"
-	"github.com/jehiah/cwc/internal/db"
 	"github.com/jehiah/cwc/internal/reg"
 	"github.com/jehiah/cwc/internal/reporter"
 	"github.com/jehiah/cwc/templates"

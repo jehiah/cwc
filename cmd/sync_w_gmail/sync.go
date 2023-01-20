@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/jehiah/cwc/internal/db"
+	"github.com/jehiah/cwc/db"
 	"github.com/jehiah/cwc/internal/gmailutils"
 	"golang.org/x/net/context"
 	gmail "google.golang.org/api/gmail/v1"

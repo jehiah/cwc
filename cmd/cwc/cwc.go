@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/jehiah/cwc/internal/db"
+	"github.com/jehiah/cwc/db"
 	"github.com/jehiah/cwc/internal/reporter"
 	"github.com/spf13/cobra"
 )

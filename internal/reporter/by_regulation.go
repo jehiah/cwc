@@ -6,8 +6,8 @@ import (
 	"html/template"
 	"sort"
 
+	"github.com/jehiah/cwc/db"
 	"github.com/jehiah/cwc/internal/complaint"
-	"github.com/jehiah/cwc/internal/db"
 	"github.com/jehiah/cwc/internal/reg"
 )
 

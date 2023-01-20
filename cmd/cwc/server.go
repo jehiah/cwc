@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jehiah/cwc/internal/db"
-	"github.com/jehiah/cwc/internal/server"
+	"github.com/jehiah/cwc/db"
+	"github.com/jehiah/cwc/server"
 	"github.com/spf13/cobra"
 )
 

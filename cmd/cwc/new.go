@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jehiah/cwc/db"
 	"github.com/jehiah/cwc/exif"
 	"github.com/jehiah/cwc/input"
 	"github.com/jehiah/cwc/internal/complaint"
-	"github.com/jehiah/cwc/internal/db"
 	"github.com/jehiah/cwc/internal/reg"
 	"github.com/spf13/cobra"
 )

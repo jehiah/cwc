@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jehiah/cwc/db"
 	"github.com/jehiah/cwc/internal/complaint"
-	"github.com/jehiah/cwc/internal/db"
 )
 
 type ByVehicle struct {

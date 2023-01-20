@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/jehiah/cwc/internal/db"
+	"github.com/jehiah/cwc/db"
 	"github.com/jehiah/cwc/internal/gmailutils"
 	gmail "google.golang.org/api/gmail/v1"
 )
