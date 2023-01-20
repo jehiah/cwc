@@ -1,10 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
+	"strings"
 
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/jehiah/cwc/db"
 	"github.com/jehiah/cwc/internal/reporter"
 	"github.com/spf13/cobra"
@@ -24,6 +29,19 @@ func init() {
 func loadDB(p string, err error) db.ReadWrite {
 	if p == "" {
 		return db.Default
+	}
+	if strings.HasPrefix(p, "s3://") {
+		u, err := url.Parse(p)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Printf("starting s3 background %#v", u)
+		cfg, err := config.LoadDefaultConfig(context.Background())
+		if err != nil {
+			log.Fatalf("failed to load configuration, %v", err)
+		}
+		client := s3.NewFromConfig(cfg)
+		return db.NewS3DB(client, u.Hostname(), u.Path)
 	}
 	return db.LocalFilesystem(p)
 }
