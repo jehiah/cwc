@@ -9,12 +9,13 @@ import (
 
 type ReadOnly interface {
 	Index() ([]complaint.Complaint, error)
-	ComplaintContains(c complaint.Complaint, pattern string) (bool, error)
 	Exists(c complaint.Complaint) (bool, error)
-	Find(pattern string) ([]complaint.Complaint, error)
-	FullComplaint(c complaint.Complaint) (*complaint.FullComplaint, error)
 	FullPath(c complaint.Complaint) string
 	Latest() (complaint.Complaint, error)
+
+	Find(pattern string) ([]complaint.Complaint, error)
+	FullComplaint(c complaint.Complaint) (*complaint.FullComplaint, error)
+	ComplaintContains(c complaint.Complaint, pattern string) (bool, error)
 
 	Read(complaint.Complaint) (complaint.RawComplaint, error)
 	Attachments(complaint.Complaint) ([]fs.DirEntry, error)
