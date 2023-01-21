@@ -41,6 +41,8 @@ chrome.runtime.onMessage.addListener(
             } else {
                 document.getElementById("n311_coloroftaxi_1").click() // yellow
                 document.getElementById("n311_taximedallionnumber_name").value = request.Complaint.license_plate;
+                // TODO: delay
+                // TODO: set n311_problemdetailid_select first?
                 document.getElementById("n311_additionaldetailsid_select").options[3].selected = true // Unsafe Driving - Non-Passenger
             }
             document.getElementById("n311_description").value = request.Complaint.description;

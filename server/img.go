@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"fmt"
 	"image"
 	_ "image/jpeg"
@@ -9,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"sync"
 
 	"github.com/anthonynsimon/bild/transform"
 	"github.com/jehiah/cwc/exif"
@@ -17,9 +17,9 @@ import (
 )
 
 func duplicateReader(r io.Reader) (io.Reader, io.Reader) {
-	pr, pw := io.Pipe()
-	tr := io.TeeReader(r, pw)
-	return tr, pr
+	var buf bytes.Buffer
+	tr := io.TeeReader(r, &buf)
+	return tr, &buf
 }
 
 func (s *Server) Image(w http.ResponseWriter, r *http.Request, c complaint.Complaint, file string) {
@@ -30,20 +30,7 @@ func (s *Server) Image(w http.ResponseWriter, r *http.Request, c complaint.Compl
 		return
 	}
 	defer f.Close()
-
 	r1, r2 := duplicateReader(f)
-
-	var x *exif.Exif
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		var err error
-		x, err = exif.Parse(r2)
-		if err != nil {
-			x = &exif.Exif{}
-		}
-	}()
 
 	img, _, err := image.Decode(r1)
 	if err != nil {
@@ -51,7 +38,11 @@ func (s *Server) Image(w http.ResponseWriter, r *http.Request, c complaint.Compl
 		log.Printf("img decode error %s", err)
 		return
 	}
-	wg.Wait()
+
+	x, err := exif.Parse(r2)
+	if err != nil {
+		x = &exif.Exif{}
+	}
 
 	// rotate & transform
 	r.ParseForm()
