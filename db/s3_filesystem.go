@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"io/ioutil"
 	"log"
@@ -95,7 +96,8 @@ func (d *S3DB) Read(c complaint.Complaint) (complaint.RawComplaint, error) {
 	}
 	defer obj.Body.Close()
 	rc := complaint.RawComplaint{
-		Complaint: c,
+		Complaint:    c,
+		LastModified: *obj.LastModified,
 	}
 	rc.Body, err = ioutil.ReadAll(obj.Body)
 	return rc, err
@@ -162,7 +164,7 @@ func (d *S3DB) Attachments(c complaint.Complaint) ([]fs.DirEntry, error) {
 		for _, obj := range page.Contents {
 			log.Printf("got obj %s", *obj.Key)
 			items = append(items, s3Obj{
-				name:    *obj.Key, // TODO
+				name:    strings.TrimPrefix(*obj.Key, p),
 				size:    obj.Size,
 				modTime: *obj.LastModified,
 			})
@@ -170,6 +172,13 @@ func (d *S3DB) Attachments(c complaint.Complaint) ([]fs.DirEntry, error) {
 	}
 	return items, nil
 }
-func (d *S3DB) OpenAttachment(c complaint.Complaint, filename string) (fs.File, error) {
-	return nil, fmt.Errorf("not implemented")
+func (d *S3DB) OpenAttachment(c complaint.Complaint, filename string) (io.ReadCloser, error) {
+	ctx := context.Background()
+	p := path.Join(d.Prefix, string(c), filename)
+	log.Printf("OpenAttachment %q", p)
+	obj, err := d.client.GetObject(ctx, &s3.GetObjectInput{Bucket: &d.Bucket, Key: &p})
+	if err != nil {
+		return nil, err
+	}
+	return obj.Body, nil
 }

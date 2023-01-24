@@ -55,14 +55,15 @@ func LoadPhotos(d ReadOnly, f *complaint.FullComplaint) ([]complaint.Photo, erro
 		if err != nil {
 			return nil, err
 		}
-		fi, err := f.Stat()
-		if err != nil {
-			return nil, err
-		}
+		// TODO: get photo size
+		// fi, err := f.Stat()
+		// if err != nil {
+		// 	return nil, err
+		// }
 
 		p := complaint.Photo{
-			Name:      file,
-			Size:      fi.Size(),
+			Name: file,
+			// Size:      fi.Size(),
 			Submitted: submitted[file],
 		}
 		x, err := exif.Parse(f)

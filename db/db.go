@@ -1,6 +1,7 @@
 package db
 
 import (
+	"io"
 	"io/fs"
 	"os"
 
@@ -19,7 +20,7 @@ type ReadOnly interface {
 
 	Read(complaint.Complaint) (complaint.RawComplaint, error)
 	Attachments(complaint.Complaint) ([]fs.DirEntry, error)
-	OpenAttachment(c complaint.Complaint, filename string) (fs.File, error)
+	OpenAttachment(c complaint.Complaint, filename string) (io.ReadCloser, error)
 }
 
 type Write interface {

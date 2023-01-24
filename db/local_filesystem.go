@@ -90,9 +90,11 @@ func (d LocalFilesystem) Read(c complaint.Complaint) (complaint.RawComplaint, er
 	if err != nil {
 		return complaint.RawComplaint{}, err
 	}
+	info, _ := f.Stat()
 	return complaint.RawComplaint{
-		Complaint: c,
-		Body:      body,
+		Complaint:    c,
+		Body:         body,
+		LastModified: info.ModTime(),
 	}, nil
 
 }
@@ -112,7 +114,7 @@ func (d LocalFilesystem) Attachments(c complaint.Complaint) ([]fs.DirEntry, erro
 	return out, nil
 }
 
-func (d LocalFilesystem) OpenAttachment(c complaint.Complaint, filename string) (fs.File, error) {
+func (d LocalFilesystem) OpenAttachment(c complaint.Complaint, filename string) (io.ReadCloser, error) {
 	fullPath := filepath.Join(d.FullPath(c), filename)
 	return os.Open(fullPath)
 }

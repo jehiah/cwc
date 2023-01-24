@@ -28,7 +28,8 @@ func (c Complaint) ID() string {
 
 type RawComplaint struct {
 	Complaint
-	Body []byte
+	Body         []byte
+	LastModified time.Time
 }
 
 func (c Complaint) Time() time.Time {
