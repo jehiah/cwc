@@ -131,16 +131,26 @@
     </div>
     {{ end }}
     
-    {{ if .PhotoDetails }}
+    {{ if or .PhotoDetails .Videos }}
     <div class="row">
       <div class="col-xs-12">
-      <h3>Photos</h3>
+      <h3>Photos & Video</h3>
       </div>
       {{ range .PhotoDetails }}
       <div class="col-md-4 col-lg-3 col-xs-6">
         <div class="panel {{. | PhotoClass }}"> 
           <div class="panel-heading">{{.Name}} <code class="time">{{.Created.Format "2006-01-02 03:04pm"}}</code></div>
           <a href="{{$BasePath}}complaint/{{$complaint.ID}}/{{.Name}}"><img src="{{$BasePath}}complaint/{{$complaint.ID}}/{{.Name}}?w=350" class="img-responsive complaint-photo" title="{{.Name}}" /></a>
+        </div>
+      </div>
+      {{ end }}
+      {{ range .Videos }}
+      <div class="col-md-4 col-lg-3 col-xs-6">
+        <div class="panel panel-info"> 
+          <div class="panel-heading"><a href="{{$BasePath}}complaint/{{$complaint.ID}}/{{.}}">{{.}}</a></div>
+          <video controls width="250">
+            <source src="{{$BasePath}}complaint/{{$complaint.ID}}/{{.}}" type="video/mp4">
+          </video>
         </div>
       </div>
       {{ end }}
