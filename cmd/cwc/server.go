@@ -47,7 +47,8 @@ func serverCmd() *cobra.Command {
 				}()
 			}
 
-			err = s.Serve(addr)
+			logRequests, _ := cmd.Flags().GetBool("log-requests")
+			err = s.Serve(addr, logRequests)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -59,5 +60,6 @@ func serverCmd() *cobra.Command {
 	cmd.Flags().String("base", "/", "Base URL Path")
 	cmd.Flags().Bool("skip-browser-open", false, "skip oepening address in browser")
 	cmd.Flags().Bool("read-only", false, "make UI read-only")
+	cmd.Flags().Bool("log-requests", true, "log")
 	return cmd
 }

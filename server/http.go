@@ -17,6 +17,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gorilla/handlers"
 	"github.com/jehiah/cwc/db"
 	"github.com/jehiah/cwc/internal/complaint"
 	"github.com/jehiah/cwc/internal/reg"
@@ -226,7 +227,7 @@ func (s *Server) OpenInBrowser() error {
 	return err
 }
 
-func (s *Server) Serve(addr string) error {
+func (s *Server) Serve(addr string, logRequests bool) error {
 	if addr == "" {
 		addr = ":53000"
 	}
@@ -236,7 +237,13 @@ func (s *Server) Serve(addr string) error {
 		return err
 	}
 	log.Printf("Running cwc server at %s", s.listener.Addr())
-	err = http.Serve(s.listener, s)
+
+	var h http.Handler = s
+	if logRequests {
+		h = handlers.LoggingHandler(os.Stdout, h)
+	}
+
+	err = http.Serve(s.listener, h)
 	return err
 }
 
@@ -504,7 +511,7 @@ func JsonAPI(d db.ReadOnly, f *complaint.FullComplaint) interface{} {
 	o := wrapper{
 		Complaint: f,
 		// TODO: move to JS formatting
-		DateTimeOfIncident: f.Time.Format("01/02/2006 03:04 PM"),
+		DateTimeOfIncident: f.Time.Format("1/2/2006 3:04 PM"),
 	}
 	o.Street, o.CrossStreet, _ = complaint.ParseStreetCrossStreet(o.Complaint.Location)
 	return o
