@@ -45,7 +45,7 @@ func DetectState(s string) State {
 		return ClosedInspection
 	case strings.Contains(s, "scheduled") || strings.Contains(s, "Scheduled") || strings.Contains(s, "hearing sch"):
 		return HearingScheduled
-	case strings.Contains(s, "mailed to driver") || strings.Contains(s, "sent to driver"):
+	case strings.Contains(s, "mailed to driver") || strings.Contains(s, "sent to driver") || strings.Contains(s, "issued a notice to the driver"):
 		return Fined
 	case strings.Contains(s, "unable to identify"):
 		return ClosedUnableToID
