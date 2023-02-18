@@ -47,6 +47,7 @@ chrome.runtime.onMessage.addListener(
             }
             document.getElementById("n311_description").value = request.Complaint.description;
             document.getElementById("n311_datetimeobserved_datepicker_description").value = request.DateTimeOfIncident;
+            setIsDirty("n311_datetimeobserved_datepicker_description");
         } else if (document.getElementById("n311_locationtypeid_select") !== null) {
             document.getElementById("n311_locationtypeid_select").options[1].selected = true // street
             document.getElementById("SelectAddressWhere").click()
