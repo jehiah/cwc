@@ -59,18 +59,39 @@ func HearingDateFromBody(lines []string) (time.Time, bool) {
 			dateStr = strings.Trim(line[idx+17:], ".")
 			dateStr = strings.TrimSpace(dateStr)
 		}
+		if idx := strings.Index(line, "A hearing on this summons will take place at 31-00 47th Ave, 3rd Floor, Long Island City, NY 11101, on "); idx != -1 {
+			padding := len("A hearing on this summons will take place at 31-00 47th Ave, 3rd Floor, Long Island City, NY 11101, on ")
+			line = strings.Trim(line[idx+padding:], ".")
+			fields := strings.Fields(line)
+			if len(fields) == 4 {
+				dateStr = fields[0]
+				timeStr = fields[2] + " " + fields[3]
+			}
+		}
 		if idx := strings.Index(line, "Time: "); idx != -1 && (strings.HasSuffix(line, " AM") || strings.HasSuffix(line, " PM")) {
 			timeStr = strings.TrimSpace(strings.Trim(line[idx+5:], "."))
 		}
 	}
-	if dateStr == "" || timeStr == "" {
-		return time.Time{}, false
-	}
+	var t time.Time
+	var err error 
+
 	//  December 1, 2017 2:30 PM
-	t, err := time.Parse("January 2, 2006 3:04 PM", dateStr+" "+timeStr)
+	if dateStr == "" || timeStr == "" {
+		return t, false
+	}
+
+	switch {
+	case strings.Contains(dateStr, ","):
+		t, err = time.Parse("January 2, 2006 3:04 PM", dateStr+" "+timeStr)
+	case strings.Contains(dateStr, "/"):
+		t, err = time.Parse("1/2/2006 3:04 PM", dateStr+" "+timeStr)
+	default:
+		log.Printf("unkown time format %q %q", dateStr, timeStr)
+		return t, false
+	}
 	if err != nil {
-		log.Printf("\t%s %s", dateStr, timeStr)
-		return time.Time{}, false
+		log.Printf("\t%s %s %s", dateStr, timeStr, err)
+		return t, false
 	}
 	return t, true
 }
@@ -99,6 +120,7 @@ func SRNFromTLCComplaintBody(lines []string) string {
 		{"Subject: TLC Complaint 1-1", "Subject: TLC Complaint "},
 		{"Subject: TLC Complaint # 311", "Subject: TLC Complaint # "},
 		{"COMPLAINT NUMBER: 311-", "COMPLAINT NUMBER: "},
+		{"SR #     311", "SR #     "},
 	} {
 		if line := FirstLineWithPrefix(m.pattern, lines, false); line != "" {
 			return strings.TrimSpace(line[len(m.prefix):])

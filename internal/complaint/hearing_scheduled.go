@@ -13,7 +13,7 @@ func init() {
 	nyc, _ = time.LoadLocation("America/New_York")
 }
 
-var hearingPattern = regexp.MustCompile("(Scheduled|scheduled|hearing sch) (?:on |for )?([0-9]{1,2}/[0-9]{1,2}/2?0?1[0-9]) (at |- )?([0-9]{1,2}:?[0-9]{0,2}) ?(am|AM|pm|PM)")
+var hearingPattern = regexp.MustCompile("(Scheduled|scheduled|hearing sch) (?:on |for )?([0-9]{1,2}/[0-9]{1,2}/2?0?[12][0-9]) (at |- )?([0-9]{1,2}:?[0-9]{0,2}) ?(am|AM|pm|PM)")
 var hearingLayouts = []string{
 	"1/2/06 3:04pm",
 	"1/2/2006 3:04pm",

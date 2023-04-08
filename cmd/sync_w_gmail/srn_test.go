@@ -12,7 +12,7 @@ func TestSRNFromSubject(t *testing.T) {
 	}
 	tests := []testCase{
 		{"SR Updated # 311-09751295", "311-09751295"},
-		{"SR Submitted # 311-09751295", "311-09751295"}
+		{"SR Submitted # 311-09751295", "311-09751295"},
 	}
 	for i, tc := range tests {
 		tc := tc
@@ -68,6 +68,12 @@ func TestHearingDateFromBody(t *testing.T) {
 			true,
 			time.Date(2017, 12, 21, 9, 30, 0, 0, time.UTC),
 		},
+		{
+			"A hearing on this summons will take place at 31-00 47th Ave, 3rd Floor, Long Island City, NY 11101, on 4/24/2023 at 10:30 AM.", "",
+			true,
+			time.Date(2023,4,24,10,30,0,0, time.UTC),
+		},
+
 	}
 
 	for i, tc := range tests {
