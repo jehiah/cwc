@@ -24,6 +24,7 @@ func init() {
 	RootCmd.AddCommand(json())
 	RootCmd.AddCommand(editCmd())
 	RootCmd.AddCommand(searchCmd())
+	RootCmd.AddCommand(submitComplaint())
 }
 
 func loadDB(p string, err error) db.ReadWrite {

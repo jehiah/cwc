@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -31,6 +32,23 @@ func newComplaint() *cobra.Command {
 	return cmd
 }
 
+func getMovieCreationTime(filePath string) (time.Time, error) {
+	// Use the appropriate method to extract the date-time metadata
+	// from the .mov file. This can vary depending on the operating system and available tools.
+	// Here's an example command using ffprobe (FFmpeg) on Unix-like systems:
+	cmd := exec.Command("ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream_tags=creation_time", "-of", "default=noprint_wrappers=1:nokey=1", filePath)
+	output, err := cmd.Output()
+	if err != nil {
+		return time.Time{}, err
+	}
+	t, err := time.Parse("2006-01-02T15:04:05.000000Z", strings.TrimSpace(string(output)))
+	if err != nil {
+		return t, err
+	}
+	nyc, _ := time.LoadLocation("America/New_York")
+	return t.In(nyc), nil
+}
+
 func runNewComplaint(d db.ReadWrite) error {
 	yyyymmdd, err := input.Ask("Date (YYYYMMDD) or Filename", "")
 	if err != nil {
@@ -40,15 +58,24 @@ func runNewComplaint(d db.ReadWrite) error {
 	var dt time.Time
 	switch {
 	case strings.HasPrefix(yyyymmdd, "/"):
-		x, err := exif.ParseFile(yyyymmdd)
-		if err != nil {
-			return err
+		ext := filepath.Ext(yyyymmdd)
+		switch strings.ToLower(ext) {
+		case ".jpeg", ".jpg", ".png":
+			x, err := exif.ParseFile(yyyymmdd)
+			if err != nil {
+				return err
+			}
+			if x.Created.IsZero() {
+				return fmt.Errorf("no timestamp found in %q", yyyymmdd)
+			}
+			dt = x.Created
+		case ".mov":
+			dt, err = getMovieCreationTime(yyyymmdd)
+			if err != nil {
+				return err
+			}
 		}
-		if x.Created.IsZero() {
-			return fmt.Errorf("no timestamp found in %q", yyyymmdd)
-		}
-		dt = x.Created
-		fmt.Printf("> using EXIF time %s\n", dt.Format("2006/01/02 3:04pm"))
+		fmt.Printf("> extracted time %s\n", dt.Format("2006/01/02 3:04pm"))
 	case yyyymmdd == "":
 		yyyymmdd = time.Now().Format("20060102")
 		fmt.Printf(" > using %s\n", yyyymmdd)
@@ -129,23 +156,23 @@ func runNewComplaint(d db.ReadWrite) error {
 
 	f.Close()
 
-	var url string
-	if vehicle == reg.FHV {
-		url = "https://portal.311.nyc.gov/article/?kanumber=KA-01244"
-		// url = "https://portal.311.nyc.gov/sr-step/?id=60828b57-284c-ed11-97b2-2818785c4829&stepid=3f227a9c-fb0d-e811-8127-1458d04d2538"
-	} else {
-		url = "https://portal.311.nyc.gov/article/?kanumber=KA-01241"
-		// url = "https://www1.nyc.gov/apps/311universalintake/form.htm?serviceName=TLC+Taxi+Driver+Unsafe+Driving+Non-Passenger"
-	}
-	err = exec.Command("/usr/bin/open", "-a", "/Applications/Google Chrome.app/", url).Run()
-	if err != nil {
-		return err
-	}
 	if id, ok := d.(db.Interactive); ok {
-		fmt.Printf("> opening %s\n", url)
 		id.ShowInEditor(c)
 		id.ShowInFinder(c)
 	}
+
+	yn, err := YesNo("Submit", true)
+	if yn {
+		fc, err := d.FullComplaint(c)
+		if err != nil {
+			return err
+		}
+		err = Submit(fc)
+		if err != nil {
+			return err
+		}
+	}
+
 	fmt.Printf("> done\n")
 	return nil
 }
