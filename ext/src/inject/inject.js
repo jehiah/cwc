@@ -12,10 +12,35 @@ chrome.extension.sendMessage({}, function(response) {
 	}, 10);
 });
 
+function setIsDirty(target) {
+    var el = document.getElementById(target)
+    el.classList.add("dirty")
+}
+function clickElement(target) {
+    const clickEvent = new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+        view: window
+      });
+      target.dispatchEvent(clickEvent)
+}
+
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
 
-        console.log("in inject.js onMessage ")
+        console.log("in inject.js onMessage ", request)
+
+        // on start page
+        if (document.querySelector("h1.entry-title").innerText == "Taxi Complaint") {
+            let a = document.querySelectorAll('a')
+            for (var i = 0; i < a.length; i++) {
+                if (a[i].innerText == "Report a problem with a driver, if you were NOT a passenger.") {
+                    clickElement(a[i])
+                }
+            }
+        }
+
+
         if (request.Address != undefined) {
             if (document.getElementById("n311_portalcustomeraddressline1") !== null) {
                 // TODO
@@ -44,15 +69,26 @@ chrome.runtime.onMessage.addListener(
                 // TODO: delay
                 // TODO: set n311_problemdetailid_select first?
                 document.getElementById("n311_additionaldetailsid_select").options[3].selected = true // Unsafe Driving - Non-Passenger
+                // n311_additionaldetailsid == eb4e791a-374e-e811-a94d-000d3a360e00
             }
             document.getElementById("n311_description").value = request.Complaint.description;
+            // '2023-05-26T21:08:00.0000000Z'
+            document.getElementById("n311_datetimeobserved").value = request.DateTimeOfIncidentISO
             document.getElementById("n311_datetimeobserved_datepicker_description").value = request.DateTimeOfIncident;
             setIsDirty("n311_datetimeobserved_datepicker_description");
+
+            console.log("request.Complaint.videos.length", request.Complaint.videos, request.Complaint.videos.length)
+            // attachments-addbutton
+            if (request.Complaint.videos != null  || request.Complaint.photos != null) {
+                clickElement(document.getElementById("attachments-addbutton"))
+                clickElement(document.getElementsByName("file")[0])
+            }
+
         } else if (document.getElementById("n311_locationtypeid_select") !== null) {
             document.getElementById("n311_locationtypeid_select").options[1].selected = true // street
+            document.getElementById("n311_additionallocationdetails").value = request.Complaint.location
             document.getElementById("SelectAddressWhere").click()
             document.getElementById("address-search-box-input").value = request.Street + " at " + request.CrossStreet
-            document.getElementById("n311_additionallocationdetails").value = request.Complaint.location
         }
         // sendResponse({status: "goodbye"});
         return true

@@ -23,12 +23,14 @@
   },
   "permissions": [
     "declarativeContent",
-    "https://portal.311.nyc.gov/sr-step/*"
+    "https://portal.311.nyc.gov/sr-step/*",
+    "https://portal.311.nyc.gov/article/*"
   ],
   "content_scripts": [
     {
       "matches": [
-      "https://portal.311.nyc.gov/sr-step/*"
+      "https://portal.311.nyc.gov/sr-step/*",
+      "https://portal.311.nyc.gov/article/*"
       ],
       "js": [
         "src/inject/inject.js"

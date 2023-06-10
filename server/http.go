@@ -505,6 +505,7 @@ func JsonAPI(d db.ReadOnly, f *complaint.FullComplaint) interface{} {
 	type wrapper struct {
 		Complaint          *complaint.FullComplaint
 		DateTimeOfIncident string
+		DateTimeOfIncidentISO string
 		Street             string
 		CrossStreet        string
 	}
@@ -512,6 +513,7 @@ func JsonAPI(d db.ReadOnly, f *complaint.FullComplaint) interface{} {
 		Complaint: f,
 		// TODO: move to JS formatting
 		DateTimeOfIncident: f.Time.Format("1/2/2006 3:04 PM"),
+		DateTimeOfIncidentISO: f.Time.Format("2006-01-02T15:04:05.000Z"), // 2023-05-26T21:08:00.0000000Z
 	}
 	o.Street, o.CrossStreet, _ = complaint.ParseStreetCrossStreet(o.Complaint.Location)
 	return o

@@ -9,6 +9,8 @@ import (
 )
 
 var editors []string = []string{
+	"subl",
+	"code",
 	"mate",
 	"atom",
 }
