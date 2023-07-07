@@ -1,11 +1,10 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
-	"os/exec"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -14,6 +13,7 @@ import (
 	"github.com/jehiah/cwc/input"
 	"github.com/jehiah/cwc/internal/complaint"
 	"github.com/jehiah/cwc/internal/reg"
+	"github.com/jehiah/nycgeosearch"
 	"github.com/spf13/cobra"
 )
 
@@ -32,56 +32,32 @@ func newComplaint() *cobra.Command {
 	return cmd
 }
 
-func getMovieCreationTime(filePath string) (time.Time, error) {
-	// Use the appropriate method to extract the date-time metadata
-	// from the .mov file. This can vary depending on the operating system and available tools.
-	// Here's an example command using ffprobe (FFmpeg) on Unix-like systems:
-	cmd := exec.Command("ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream_tags=creation_time", "-of", "default=noprint_wrappers=1:nokey=1", filePath)
-	output, err := cmd.Output()
-	if err != nil {
-		return time.Time{}, err
-	}
-	t, err := time.Parse("2006-01-02T15:04:05.000000Z", strings.TrimSpace(string(output)))
-	if err != nil {
-		return t, err
-	}
-	nyc, _ := time.LoadLocation("America/New_York")
-	return t.In(nyc), nil
-}
-
 func runNewComplaint(d db.ReadWrite) error {
+	ctx := context.Background()
 	yyyymmdd, err := input.Ask("Date (YYYYMMDD) or Filename", "")
 	if err != nil {
 		return err
 	}
 
 	var dt time.Time
+	var x exif.Exif
 	switch {
 	case strings.HasPrefix(yyyymmdd, "/"):
-		ext := filepath.Ext(yyyymmdd)
-		switch strings.ToLower(ext) {
-		case ".jpeg", ".jpg", ".png":
-			x, err := exif.ParseFile(yyyymmdd)
-			if err != nil {
-				return err
-			}
-			if x.Created.IsZero() {
-				return fmt.Errorf("no timestamp found in %q", yyyymmdd)
-			}
-			dt = x.Created
-		case ".mov":
-			dt, err = getMovieCreationTime(yyyymmdd)
-			if err != nil {
-				return err
-			}
+		x, err = exif.ParseImageOrVideo(yyyymmdd)
+		if err != nil {
+			return err
 		}
+		if x.Created.IsZero() {
+			return fmt.Errorf("no timestamp found in %q", yyyymmdd)
+		}
+		dt = x.Created
 		fmt.Printf("> extracted time %s\n", dt.Format("2006/01/02 3:04pm"))
 	case yyyymmdd == "":
 		yyyymmdd = time.Now().Format("20060102")
 		fmt.Printf(" > using %s\n", yyyymmdd)
 		fallthrough
 	default:
-		hhmm, err := input.Ask("Time (HHMM)", "")
+		hhmm, err := input.Ask("Time (HHMM lcl)", "")
 		if err != nil {
 			return err
 		}
@@ -117,6 +93,22 @@ func runNewComplaint(d db.ReadWrite) error {
 		}
 	}
 
+	var nearestAddress string
+	if x.Lat != 0 {
+		geo, err := nycgeosearch.PlanningLabs.ReverseGeocode(ctx, nycgeosearch.Location{
+			Lat: x.Lat,
+			Lng: x.Long,
+		}, nycgeosearch.Options{Size: 1})
+		if err != nil {
+			log.Printf("error doing reverse geo lookup %s", err)
+		} else {
+			if len(geo.Features) >= 1 {
+				nearestAddress = geo.Features[0].PropertyMustString("label")
+				fmt.Printf("> Nearest Address: %s\n", nearestAddress)
+			}
+		}
+	}
+
 	where, err := input.Ask("Where", latest.Location)
 	if err != nil {
 		return err
@@ -131,6 +123,8 @@ func runNewComplaint(d db.ReadWrite) error {
 	}
 
 	fmt.Fprintf(f, "%s %s %s %s\n", dt.Format("2006/01/02 3:04pm"), vehicle, license, where)
+
+	// TODO: convert HEIC to jpeg
 
 	for {
 		r, err := getReg(vehicle)
@@ -152,6 +146,13 @@ func runNewComplaint(d db.ReadWrite) error {
 		if !yn {
 			break
 		}
+	}
+
+	if nearestAddress != "" {
+		fmt.Fprintf(f, "Address: %s\n", nearestAddress)
+	}
+	if x.Lat != 0 {
+		fmt.Fprintf(f, "[ll:%f,%f]\n", x.Lat, x.Long)
 	}
 
 	f.Close()

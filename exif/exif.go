@@ -19,25 +19,25 @@ type Exif struct {
 	ExifFlip     bool
 }
 
-func ParseFile(filename string) (*Exif, error) {
+func ParseFile(filename string) (Exif, error) {
 	f, err := os.Open(filename)
 	if err != nil {
-		return nil, err
+		return Exif{}, err
 	}
 	defer f.Close()
 	e, err := Parse(f)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing time from %s %w", filename, err)
+		return e, fmt.Errorf("error parsing time from %s %w", filename, err)
 	}
 	return e, nil
 }
 
-func Parse(f io.Reader) (*Exif, error) {
+func Parse(f io.Reader) (Exif, error) {
+	e := Exif{}
 	x, err := exif.Decode(f)
 	if err != nil {
-		return nil, err
+		return e, err
 	}
-	e := &Exif{}
 	if dt, err := x.DateTime(); err == nil {
 		e.Created = dt
 	}

@@ -41,7 +41,7 @@ func (s *Server) Image(w http.ResponseWriter, r *http.Request, c complaint.Compl
 
 	x, err := exif.Parse(r2)
 	if err != nil {
-		x = &exif.Exif{}
+		log.Printf("error parsing exif %s", err)
 	}
 
 	// rotate & transform

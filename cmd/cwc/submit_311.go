@@ -76,6 +76,7 @@ func Submit(fc *complaint.FullComplaint) error {
 	opts := []chromedp.ExecAllocatorOption{
 		chromedp.NoFirstRun,
 		chromedp.NoDefaultBrowserCheck,
+		chromedp.CombinedOutput(os.Stderr), // stdout and stderr from the browser
 		// Headless,
 
 		// After Puppeteer's default behavior.
@@ -176,7 +177,7 @@ func Submit(fc *complaint.FullComplaint) error {
 		return err
 	}
 	input.Ask("Done?", "")
-	return nil
+	return chromedp.Cancel(ctx)
 }
 
 func SubmitTaxi(ctx context.Context, fc *complaint.FullComplaint) error {
