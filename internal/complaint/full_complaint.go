@@ -17,6 +17,7 @@ type FullComplaint struct {
 	License     string    `json:"license_plate"`
 	VehicleType string    `json:"vehicle_type"`
 	Location    string    `json:"location"`
+	Address     string    `json:"address"`
 	Description string    `json:"description"`
 
 	Status           State     `json:"status"`
@@ -83,6 +84,11 @@ func ParseComplaint(c RawComplaint, files []string) (*FullComplaint, error) {
 	}
 	if len(f.Lines) >= 2 {
 		f.Description = f.Lines[1]
+		for _, line := range lines[1:] {
+			if strings.HasPrefix(line, "Address: ") {
+				f.Address = strings.TrimSpace(line[len("Address: "):])
+			}
+		}
 	}
 
 	for _, filename := range files {

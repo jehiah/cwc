@@ -149,7 +149,7 @@ func runNewComplaint(d db.ReadWrite) error {
 	}
 
 	if nearestAddress != "" {
-		fmt.Fprintf(f, "Address: %s\n", nearestAddress)
+		fmt.Fprintf(f, "\nAddress: %s\n", nearestAddress)
 	}
 	if x.Lat != 0 {
 		fmt.Fprintf(f, "[ll:%f,%f]\n", x.Lat, x.Long)
@@ -168,7 +168,7 @@ func runNewComplaint(d db.ReadWrite) error {
 		if err != nil {
 			return err
 		}
-		err = Submit(fc)
+		err = Submit(d, fc)
 		if err != nil {
 			return err
 		}

@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/chromedp/chromedp"
@@ -65,10 +66,10 @@ func runSubmitComplaint(d db.ReadWrite, args ...string) error {
 	if err != nil {
 		return err
 	}
-	return Submit(fc)
+	return Submit(d, fc)
 }
 
-func Submit(fc *complaint.FullComplaint) error {
+func Submit(d db.ReadOnly, fc *complaint.FullComplaint) error {
 	hd, err := os.UserHomeDir()
 	if err != nil {
 		return err
@@ -89,8 +90,6 @@ func Submit(fc *complaint.FullComplaint) error {
 		chromedp.Flag("disable-default-apps", true),
 		chromedp.Flag("disable-dev-shm-usage", true),
 		// chromedp.Flag("disable-extensions", true),
-		// load-extension=/path/to/extension from https://stackoverflow.com/questions/66970005/c-sharp-selenium-enable-default-extensions
-		chromedp.Flag("load-extensions", filepath.Join(hd, "/Library/Application Support/Google/Chrome/Default/Extensions")),
 		chromedp.Flag("disable-features", "site-per-process,Translate,BlinkGenPropertyTrees"),
 		chromedp.Flag("disable-hang-monitor", true),
 		chromedp.Flag("disable-ipc-flooding-protection", true),
@@ -113,6 +112,11 @@ func Submit(fc *complaint.FullComplaint) error {
 
 	ctx, cancel := chromedp.NewContext(allocCtx)
 	defer cancel()
+	defer chromedp.Cancel(ctx)
+
+	// set a parent timeout so we bound our total time in case something hangs
+	ctx, cancel = context.WithTimeout(ctx, time.Minute*10)
+	defer cancel()
 
 	var url, title string
 	switch fc.VehicleType {
@@ -124,16 +128,17 @@ func Submit(fc *complaint.FullComplaint) error {
 		title = "Taxi Complaint"
 	}
 
-	// navigate
+	// open start page
 	fmt.Printf("> opening %s\n", url)
-	var loginLink string
 	if err := chromedp.Run(ctx,
 		chromedp.Navigate(url),
 	); err != nil {
 		return err
 	}
 
+	// get the contents of the login area.
 	log.Printf("waiting for page %q", title)
+	var loginLink string
 	if err := chromedp.Run(ctx,
 		// chromedp.WaitVisible(fmt.Sprintf(`//h1[text()=%q]]`, title)),
 		chromedp.TextContent(`.login-area > a`, &loginLink, chromedp.ByQuery),
@@ -142,14 +147,18 @@ func Submit(fc *complaint.FullComplaint) error {
 	}
 	log.Printf("login link %#v", loginLink)
 
+	// if unauthenticated, go to the sign in page and wait for the browser to return to the desired URL
 	if loginLink == "Sign In" {
 		fmt.Printf("> Sign In\n")
-		if err := chromedp.Run(ctx,
+		if resp, err := chromedp.RunResponse(ctx,
 			chromedp.Click(`.login-area > a`, chromedp.NodeVisible, chromedp.ByQuery),
 		); err != nil {
 			return err
+		} else {
+			fmt.Println("RunResponse status code:", resp.Status)
 		}
 
+		fmt.Printf("> waiting for sign in and redirect to %s", url)
 		var currentAddress string
 		for currentAddress != url {
 			time.Sleep(500 * time.Millisecond)
@@ -158,52 +167,186 @@ func Submit(fc *complaint.FullComplaint) error {
 			); err != nil {
 				return err
 			}
+			// fmt.Printf("current url is %q", currentAddress)
 		}
-		log.Printf("checking title")
-		if err := chromedp.Run(ctx); // chromedp.WaitVisible(fmt.Sprintf(`//h1[text()=%q]]`, title)),
-		err != nil {
-			return err
-		}
+
+		// TODO: re-confirm title
+		// log.Printf("checking for title %q", title)
+		// if err := chromedp.Run(ctx); // chromedp.WaitVisible(fmt.Sprintf(`//h1[text()=%q]]`, title)),
+		// err != nil {
+		// 	return err
+		// }
 
 		fmt.Printf("> authenticated")
 	}
 	switch fc.VehicleType {
 	case reg.FHV.String():
-		err = SubmitFHV(ctx, fc)
+		err = SubmitFHV(ctx, d, fc)
 	default:
-		err = SubmitTaxi(ctx, fc)
+		err = SubmitTaxi(ctx, d, fc)
 	}
 	if err != nil {
+		log.Printf("err %s", err)
+		var buf []byte
+		chromedp.Run(ctx,
+			chromedp.FullScreenshot(&buf, 90),
+		)
+		if len(buf) > 0 {
+			log.Printf("> screnshot saved as fullScreenshot.png")
+			os.WriteFile("fullScreenshot.png", buf, 0o644)
+		}
+
 		return err
 	}
 	input.Ask("Done?", "")
-	return chromedp.Cancel(ctx)
+	return nil
 }
 
-func SubmitTaxi(ctx context.Context, fc *complaint.FullComplaint) error {
+func SubmitTaxi(ctx context.Context, d db.ReadOnly, fc *complaint.FullComplaint) error {
 	// click = "You were not a passenger"
 	return fmt.Errorf("not implemented")
 }
 
-func SubmitFHV(ctx context.Context, fc *complaint.FullComplaint) error {
+func SubmitFHV(ctx context.Context, d db.ReadOnly, fc *complaint.FullComplaint) error {
 	log.Printf("SubmitFHV")
-	start := `//h5/a[text()[contains(.,"you were NOT a passenger")]]`
+	sel := `//button/div/div[text()='Driver Complaint']`
 	if err := chromedp.Run(ctx,
-		chromedp.Click(`//button/div/div[text()='Driver Complaint']`),
+		chromedp.ScrollIntoView(sel),
+		chromedp.Click(sel),
 	); err != nil {
 		return err
 	}
+	time.Sleep(time.Millisecond * 100)
+	start := `//h5/a[text()[contains(.,"not a passenger")]]`
 	log.Printf("click start %s", start)
-	if err := chromedp.Run(ctx,
-		chromedp.WaitVisible(start),
+	if resp, err := chromedp.RunResponse(ctx,
+		chromedp.ScrollIntoView(start),
 		chromedp.Click(start),
+	); err != nil {
+		return err
+	} else {
+		fmt.Println("RunResponse status code:", resp.Status)
+	}
+
+	time.Sleep(time.Microsecond * 100)
+	if err := checkStep(ctx, "What"); err != nil {
+		return err
+	}
+
+	log.Printf("> filling fields")
+	if err := chromedp.Run(ctx,
+		chromedp.WaitVisible(`#n311_attendhearing_1`, chromedp.ByID),
+		chromedp.Click(`#n311_attendhearing_1`, chromedp.ByID),
+		chromedp.Click(`#n311_coloroftaxi_2`, chromedp.ByID, chromedp.NodeVisible),
+		chromedp.ScrollIntoView(`n311_licensenumber`, chromedp.ByID),
+		chromedp.SetValue(`#n311_licensenumber`, fc.License, chromedp.ByID),
+		chromedp.SetValue(`#n311_datetimeobserved`, fc.Time.Format("2006-01-02T15:04:05.000Z"), chromedp.ByID),
+		chromedp.SetValue(`#n311_datetimeobserved_datepicker_description`, fc.Time.Format("1/2/2006 3:04 PM"), chromedp.ByID),
 	); err != nil {
 		return err
 	}
 
-	// chromedp.Nodes(`document`, &nodes, chromedp.ByJSPath),
-	// chromedp.Click(`#example-After`, chromedp.NodeVisible),
-	// chromedp.Value(`#example-After textarea`, &example),
-	// chromedp.TextContent
+	// upload attachments; video first
+	for _, file := range uploads(fc) {
+		f := filepath.Join(d.FullPath(fc.Complaint), file)
+		err := uploadFile(ctx, f, time.Second*90)
+		if err != nil {
+			return err
+		}
+	}
+
+	// do this last so we can wait on a 'RunResponse'
+	fmt.Println("waiting for Next")
+	if resp, err := chromedp.RunResponse(ctx,
+		chromedp.SetValue(`#n311_description`, fc.Description, chromedp.ByID),
+	); err != nil {
+		return err
+	} else {
+		fmt.Println("RunResponse status code:", resp.Status)
+	}
+
+	err := upload311Location(ctx, fc)
+	if err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func uploads(fc *complaint.FullComplaint) []string {
+	// TODO: check for file size
+	uploads := append(fc.Videos)
+	for _, p := range fc.Photos {
+		switch filepath.Ext(strings.ToLower(p)) {
+		case ".heic":
+		default:
+			uploads = append(uploads, p)
+		}
+	}
+	if len(uploads) > 3 {
+		uploads = uploads[:3]
+	}
+	return uploads
+}
+
+func uploadFile(ctx context.Context, f string, timeout time.Duration) error {
+	log.Printf("uploading %q", f)
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+	if err := chromedp.Run(ctx,
+		chromedp.ScrollIntoView(`#attachments-addbutton`, chromedp.ByID),
+		chromedp.Click(`#attachments-addbutton`, chromedp.ByID),      // add attachment
+		chromedp.WaitVisible(`input[type="file"]`, chromedp.ByQuery), // wait for modal
+		chromedp.SetUploadFiles(`input[type="file"]`, []string{f}, chromedp.ByQuery),
+		chromedp.Click(`//button[text() = 'Add Attachment']`), // upload
+		// TODO: check for error uploading?
+		chromedp.WaitVisible(fmt.Sprintf(`//p[contains(@class, 'attachmentTitle') and text()='%s']`, filepath.Base(f))), // the final results table
+	); err != nil {
+		return err
+	}
+	return nil
+}
+
+func checkStep(ctx context.Context, expected string) error {
+	var step string
+	err := chromedp.Run(ctx,
+		chromedp.Text(".step.active", &step, chromedp.ByQueryAll),
+	)
+	if err != nil {
+		return err
+	}
+	if step != expected {
+		return fmt.Errorf("on step %q expected %q", step, expected)
+	}
+	return nil
+}
+
+func upload311Location(ctx context.Context, fc *complaint.FullComplaint) error {
+	// https://portal.311.nyc.gov/sr-step/?id=4a3484e4-cd1e-ee11-a81c-6045bdb05de8&stepid=9241458f-fb0d-e811-8127-1458d04d2538
+	// wait for title?
+
+	time.Sleep(time.Second) // TODO: wait for spinner to go away
+
+	if err := checkStep(ctx, "Where"); err != nil {
+		return err
+	}
+
+	fmt.Println("> filling location")
+	fmt.Println("waiting for Next")
+	if resp, err := chromedp.RunResponse(ctx,
+		chromedp.SetJavascriptAttribute(`#n311_locationtypeid_select`, "selectedIndex", "a7c99a56-e64e-e811-a951-000d3a3606de", chromedp.ByID), // street
+		chromedp.SetValue(`#address-search-box-input`, fc.Address, chromedp.ByID),                                                              // this is search pre-population
+		// .address-picker-input ?
+		chromedp.SetValue(`#n311_additionallocationdetails`, fc.Location, chromedp.ByID),
+	); err != nil {
+		return err
+	} else {
+		fmt.Println("RunResponse status code:", resp.Status)
+	}
+	return nil
+}
+
+func save311(ctx context.Context) {
+	// #n311_name .value
+
 }
