@@ -22,7 +22,8 @@ func Ffmpeg(f string) (Exif, error) {
 }
 
 func getFFMetaData(filePath string) (Exif, error) {
-	cmd := exec.Command("ffprobe", "-v", "error", "-ffmetadata", "-i", filePath, "pipe:1")
+	// order of parameters matters
+	cmd := exec.Command("ffmpeg", "-v", "error", "-i", filePath, "-f", "ffmetadata", "pipe:1")
 	output, err := cmd.Output()
 	if err != nil {
 		return Exif{}, err
@@ -30,7 +31,7 @@ func getFFMetaData(filePath string) (Exif, error) {
 	var e Exif
 	scanner := bufio.NewScanner(bytes.NewBuffer(output))
 	for scanner.Scan() {
-		line := scanner.Text()
+		line := strings.TrimSpace(scanner.Text())
 		if !strings.Contains(line, "=") {
 			continue
 		}
@@ -49,20 +50,23 @@ func getFFMetaData(filePath string) (Exif, error) {
 			e.Lat, remain = parseISO6709Part(value)
 			e.Long, _ = parseISO6709Part(remain)
 		case "com.apple.quicktime.creationdate":
-			e.Created, err = time.Parse("2006-01-02T15:04:05.000000Z", value)
+			e.Created, err = time.Parse("2006-01-02T15:04:05-0700", value) //  "2006-01-02T15:04:05.000000Z"
 			if err != nil {
 				return e, err
 			}
 		}
 	}
-
+	// log.Printf("parsed %#v", e)
 	return e, nil
 }
+
 func parseISO6709Part(s string) (f float64, remain string) {
 	i := strings.Index(s, ".")
-	split := strings.Index(s[i:], "+")
-	if split == -1 {
-		split = strings.Index(s[i:], "-")
+	splitpluss := strings.Index(s[i:], "+")
+	splitminus := strings.Index(s[i:], "-")
+	split := splitpluss
+	if splitminus != -1 && splitminus < splitpluss {
+		split = splitminus
 	}
 	f, _ = strconv.ParseFloat(s[:split+i], 64)
 	return f, s[split+i:]
