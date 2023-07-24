@@ -56,7 +56,7 @@ func getFFMetaData(filePath string) (Exif, error) {
 			}
 		}
 	}
-	// log.Printf("parsed %#v", e)
+	// log.Printf("getFFMetaData parsed %#v", e)
 	return e, nil
 }
 
@@ -81,6 +81,7 @@ func getMovieCreationTime(filePath string) (time.Time, error) {
 	if err != nil {
 		return time.Time{}, err
 	}
+	// log.Printf("got output %s", string(output))
 	t, err := time.Parse("2006-01-02T15:04:05.000000Z", strings.TrimSpace(string(output)))
 	if err != nil {
 		return t, err

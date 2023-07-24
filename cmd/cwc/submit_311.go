@@ -195,6 +195,7 @@ func Submit(d db.ReadOnly, fc *complaint.FullComplaint) error {
 			log.Printf("> screnshot saved as fullScreenshot.png")
 			os.WriteFile("fullScreenshot.png", buf, 0o644)
 		}
+		input.Ask("Close?", "")
 
 		return err
 	}
@@ -204,7 +205,59 @@ func Submit(d db.ReadOnly, fc *complaint.FullComplaint) error {
 
 func SubmitTaxi(ctx context.Context, d db.ReadOnly, fc *complaint.FullComplaint) error {
 	// click = "You were not a passenger"
-	return fmt.Errorf("not implemented")
+
+	if resp, err := chromedp.RunResponse(ctx,
+		chromedp.Click(`//h5/a[text()[contains(.,"NOT a passenger")]]`),
+	); err != nil {
+		return err
+	} else {
+		fmt.Println("RunResponse status code:", resp.Status)
+	}
+
+	time.Sleep(time.Second)
+
+	if err := checkStep(ctx, "What"); err != nil {
+		return err
+	}
+
+	log.Printf("> filling fields")
+	if err := chromedp.Run(ctx,
+		chromedp.Click(`#n311_attendhearing_1`, chromedp.ByID),                                                       // yes
+		chromedp.Click(`#n311_coloroftaxi_1`, chromedp.ByID, chromedp.NodeVisible),                                   // yellow
+		chromedp.SetValue(`#n311_problemdetailid_select`, "87779989-ee94-e811-a961-000d3a1993e0", chromedp.ByID),     // Driver complaint - non passenger
+		chromedp.SetValue(`#n311_additionaldetailsid_select`, "eb4e791a-374e-e811-a94d-000d3a360e00", chromedp.ByID), // Unsafe Driving - Non-Passenger
+		chromedp.SetValue(`#n311_taximedallionnumber_name`, fc.License, chromedp.ByID),
+		chromedp.SetValue(`#n311_datetimeobserved`, fc.Time.Format("2006-01-02T15:04:05.000Z"), chromedp.ByID),
+		chromedp.SetValue(`#n311_datetimeobserved_datepicker_description`, fc.Time.Format("1/2/2006 3:04 PM"), chromedp.ByID),
+	); err != nil {
+		return err
+	}
+
+	// upload attachments; video first
+	for _, file := range uploads(fc) {
+		f := filepath.Join(d.FullPath(fc.Complaint), file)
+		err := uploadFile(ctx, f, time.Second*90)
+		if err != nil {
+			return err
+		}
+	}
+
+	// do this last so we can wait on a 'RunResponse'
+	fmt.Println("waiting for Next")
+	if resp, err := chromedp.RunResponse(ctx,
+		chromedp.SetValue(`#n311_description`, fc.Description, chromedp.ByID),
+	); err != nil {
+		return err
+	} else {
+		fmt.Println("RunResponse status code:", resp.Status)
+	}
+
+	err := upload311Location(ctx, fc)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func SubmitFHV(ctx context.Context, d db.ReadOnly, fc *complaint.FullComplaint) error {
@@ -228,7 +281,7 @@ func SubmitFHV(ctx context.Context, d db.ReadOnly, fc *complaint.FullComplaint) 
 		fmt.Println("RunResponse status code:", resp.Status)
 	}
 
-	time.Sleep(time.Microsecond * 100)
+	time.Sleep(time.Second * 2)
 	if err := checkStep(ctx, "What"); err != nil {
 		return err
 	}
@@ -310,8 +363,10 @@ func uploadFile(ctx context.Context, f string, timeout time.Duration) error {
 func checkStep(ctx context.Context, expected string) error {
 	var step string
 	err := chromedp.Run(ctx,
-		chromedp.Text(".step.active", &step, chromedp.ByQueryAll),
+		chromedp.TextContent(".step.active", &step, chromedp.ByQueryAll),
 	)
+	step = strings.TrimSpace(step)
+	fmt.Println("on step", step)
 	if err != nil {
 		return err
 	}
@@ -325,7 +380,7 @@ func upload311Location(ctx context.Context, fc *complaint.FullComplaint) error {
 	// https://portal.311.nyc.gov/sr-step/?id=4a3484e4-cd1e-ee11-a81c-6045bdb05de8&stepid=9241458f-fb0d-e811-8127-1458d04d2538
 	// wait for title?
 
-	time.Sleep(time.Second) // TODO: wait for spinner to go away
+	time.Sleep(time.Second * 2) // TODO: wait for spinner to go away
 
 	if err := checkStep(ctx, "Where"); err != nil {
 		return err
@@ -334,8 +389,10 @@ func upload311Location(ctx context.Context, fc *complaint.FullComplaint) error {
 	fmt.Println("> filling location")
 	fmt.Println("waiting for Next")
 	if resp, err := chromedp.RunResponse(ctx,
-		chromedp.SetJavascriptAttribute(`#n311_locationtypeid_select`, "selectedIndex", "a7c99a56-e64e-e811-a951-000d3a3606de", chromedp.ByID), // street
-		chromedp.SetValue(`#address-search-box-input`, fc.Address, chromedp.ByID),                                                              // this is search pre-population
+		chromedp.SetValue(`#n311_locationtypeid_select`, "a7c99a56-e64e-e811-a951-000d3a3606de", chromedp.ByID), // street
+		chromedp.Click(`#SelectAddressWhere`, chromedp.ByID),
+		chromedp.Sleep(time.Second),
+		chromedp.SetValue(`#address-search-box-input`, fc.Address, chromedp.ByID), // this is search pre-population
 		// .address-picker-input ?
 		chromedp.SetValue(`#n311_additionallocationdetails`, fc.Location, chromedp.ByID),
 	); err != nil {

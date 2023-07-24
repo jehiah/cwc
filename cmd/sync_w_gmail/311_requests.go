@@ -142,8 +142,12 @@ func interestingLine(lines []string) string {
 	// line before 'Get Service Request Details' is most likely interesting
 	for i, line := range lines {
 		if line == "TLC provided the following information:" {
-			if i < len(lines) {
-				return lines[i+1]
+			for j := i + 1; j < len(lines); j++ {
+				l := lines[j]
+				if l == "A hearing was scheduled at the OATH/Taxi and Limousine Tribunal." {
+					continue
+				}
+				return l
 			}
 		}
 		if line != "Get Service Request Details" {

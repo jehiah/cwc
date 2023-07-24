@@ -94,7 +94,7 @@ func ParseComplaint(c RawComplaint, files []string) (*FullComplaint, error) {
 	for _, filename := range files {
 		ext := strings.ToLower(filepath.Ext(filename))
 		switch ext {
-		case ".mov", ".m4v":
+		case ".mov", ".m4v", ".mp4":
 			f.Videos = append(f.Videos, filename)
 		case ".bmp", ".png", ".jpg", ".jpeg", ".tif", ".gif", ".heic":
 			f.Photos = append(f.Photos, filename)

@@ -10,7 +10,7 @@ func ParseImageOrVideo(f string) (Exif, error) {
 	switch strings.ToLower(ext) {
 	case ".jpeg", ".jpg", ".png":
 		return ParseFile(f)
-	case ".mov", "mp4":
+	case ".mov", ".mp4":
 		return Ffmpeg(f)
 	case ".heic":
 		// TODO?
