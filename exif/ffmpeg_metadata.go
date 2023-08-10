@@ -46,9 +46,7 @@ func getFFMetaData(filePath string) (Exif, error) {
 			// location-eng=+40.7635-073.9853/
 			// Defined in ISO 6709:2008.
 			// 	"+27.5916+086.5640+8850/"
-			var remain string
-			e.Lat, remain = parseISO6709Part(value)
-			e.Long, _ = parseISO6709Part(remain)
+			e.Lat, e.Long, _ = parseISO6709(value)
 		case "com.apple.quicktime.creationdate":
 			e.Created, err = time.Parse("2006-01-02T15:04:05-0700", value) //  "2006-01-02T15:04:05.000000Z"
 			if err != nil {
@@ -60,16 +58,31 @@ func getFFMetaData(filePath string) (Exif, error) {
 	return e, nil
 }
 
+func parseISO6709(s string) (lat, lon float64, remain string) {
+	lat, remain = parseISO6709Part(s)
+	lon, remain = parseISO6709Part(remain)
+	return
+}
+
 func parseISO6709Part(s string) (f float64, remain string) {
 	i := strings.Index(s, ".")
 	splitpluss := strings.Index(s[i:], "+")
 	splitminus := strings.Index(s[i:], "-")
-	split := splitpluss
-	if splitminus != -1 && splitminus < splitpluss {
+	split := len(s) - i
+	end := len(s)
+	if e := strings.Index(s, "/"); e != -1 {
+		end = e
+		split = e - i
+	}
+	if splitpluss != -1 {
+		split = splitpluss
+	}
+	if splitminus != -1 && splitminus < split {
 		split = splitminus
 	}
+	// log.Printf("using %q leaving %q", s[:split+i], s[split+i:end])
 	f, _ = strconv.ParseFloat(s[:split+i], 64)
-	return f, s[split+i:]
+	return f, s[split+i : end]
 }
 
 func getMovieCreationTime(filePath string) (time.Time, error) {

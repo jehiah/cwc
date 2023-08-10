@@ -13,7 +13,7 @@ func mustParse(t time.Time, err error) time.Time {
 	return t
 }
 
-func TestParse(t *testing.T) {
+func TestParseFile(t *testing.T) {
 	type testCase struct {
 		filename string
 		expect   *Exif
@@ -27,7 +27,7 @@ func TestParse(t *testing.T) {
 		}},
 	}
 	for _, tc := range tests {
-		got, err := Parse(tc.filename)
+		got, err := ParseFile(tc.filename)
 		if err != nil {
 			t.Fatalf("got err %s", err)
 		}
