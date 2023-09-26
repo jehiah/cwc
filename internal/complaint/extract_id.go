@@ -21,13 +21,13 @@ func findServiceRequestID(lines []string) string {
 	return ""
 }
 
-var tlcIDPattern = regexp.MustCompile("stip #? ?(10[0-3][0-9]{5})[scC]?")
+var tlcIDPattern = regexp.MustCompile("(stip #?|complaint) ?(10[0-3][0-9]{5})[scC]?")
 
 func findTLCID(lines []string) string {
 	for _, line := range lines {
 		matches := tlcIDPattern.FindAllStringSubmatch(strings.ToLower(line), -1)
-		if len(matches) >= 1 && len(matches[0]) >= 1 {
-			return matches[0][1]
+		if len(matches) >= 1 && len(matches[0]) >= 2 {
+			return matches[0][2]
 		}
 	}
 	return ""
