@@ -9,11 +9,20 @@ import (
 )
 
 type NYC311RequestExporter struct {
+	version int
 }
 
 func (s *NYC311RequestExporter) BuildQuery(u *gmail.UsersMessagesListCall) *gmail.UsersMessagesListCall {
-	// label == nyc/311
-	return u.LabelIds("Label_7662191922466997049").Q("from:SRNotice@customercare.nyc.gov subject:\"SR Submitted #\"")
+	switch s.version {
+	case 1:
+		// SRNotification@customerservice.nyc.gov
+		// Confirmation | Updated | Closed
+		// 311 Service Request Closed #: C1-1-1626059981 , Street Sign - Missing
+	default:
+		// label == nyc/311
+		return u.LabelIds("Label_7662191922466997049").Q("from:SRNotice@customercare.nyc.gov subject:\"SR Submitted #\" after:2023-01-01")
+	}
+	return nil
 }
 
 func (s *NYC311RequestExporter) Handle(m *gmail.Message) error {

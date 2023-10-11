@@ -119,7 +119,7 @@ func (s *Server) AuthorizedMedallions() ([]AuthorizedMedallion, error) {
 
 func (s *Server) TaxiReport(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	query := r.Form.Get("q")
+	query := strings.TrimSpace(r.Form.Get("q"))
 	var complaints []complaint.Complaint
 	var err error
 	if query == "" {
@@ -264,7 +264,7 @@ func (s *Server) Complaints(w http.ResponseWriter, r *http.Request) {
 		BasePath        string
 	}
 	p := payload{
-		Query:    r.Form.Get("q"),
+		Query:    strings.TrimSpace(r.Form.Get("q")),
 		Page:     "Complaints",
 		BasePath: s.BasePath,
 	}
@@ -503,16 +503,16 @@ func (s *Server) Address(w http.ResponseWriter, r *http.Request) {
 
 func JsonAPI(d db.ReadOnly, f *complaint.FullComplaint) interface{} {
 	type wrapper struct {
-		Complaint          *complaint.FullComplaint
-		DateTimeOfIncident string
+		Complaint             *complaint.FullComplaint
+		DateTimeOfIncident    string
 		DateTimeOfIncidentISO string
-		Street             string
-		CrossStreet        string
+		Street                string
+		CrossStreet           string
 	}
 	o := wrapper{
 		Complaint: f,
 		// TODO: move to JS formatting
-		DateTimeOfIncident: f.Time.Format("1/2/2006 3:04 PM"),
+		DateTimeOfIncident:    f.Time.Format("1/2/2006 3:04 PM"),
 		DateTimeOfIncidentISO: f.Time.Format("2006-01-02T15:04:05.000Z"), // 2023-05-26T21:08:00.0000000Z
 	}
 	o.Street, o.CrossStreet, _ = complaint.ParseStreetCrossStreet(o.Complaint.Location)

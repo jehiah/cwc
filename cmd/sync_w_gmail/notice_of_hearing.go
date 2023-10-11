@@ -55,11 +55,11 @@ func (s *NoticeOfHearing) Handle(m *gmail.Message) error {
 	}
 
 	srn := SRNFromTLCComplaintBody(lines)
+	query := srn
 	if srn == "" {
 		log.Printf("warning: no 311 service request number found")
-		return nil
+		query = strings.Trim(tlcid, "cC")
 	}
-
 
 	hearing, ok := HearingDateFromBody(lines)
 	if !ok {
@@ -68,13 +68,13 @@ func (s *NoticeOfHearing) Handle(m *gmail.Message) error {
 	}
 	log.Printf("\tHearing scheduled for %s", hearing)
 
-	complaints, err := db.Default.Find(srn)
+	complaints, err := db.Default.Find(query)
 	if err != nil {
 		log.Printf("%s", err)
 		return nil
 	}
 	if len(complaints) != 1 {
-		log.Printf("found unexpected number of complaints %d for %s", len(complaints), tlcid)
+		log.Printf("found unexpected number of complaints %d for %q (tlcid:%q srn:%q)", len(complaints), query, tlcid, srn)
 		return nil
 	}
 	complaint := complaints[0]
