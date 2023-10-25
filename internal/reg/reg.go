@@ -29,9 +29,10 @@ var All []Reg = []Reg{
 	{Code: "4-08(j)(2)", Description: "obstructed license plate", Type: "parking", Vehicle: either},
 	{Code: "4-07(b)(2)", Description: "blocking intersection and crosswalks", Type: "parking", Vehicle: either, Short: "blocking intersection/xwalk"},
 	{Code: "4-05(b)(1)", Description: "no u-turns in business district", Type: "moving", Vehicle: either, Short: "no u-turns"},
-	{Code: "4-05(a)", Description:"compliance with turning restrictions", Type: "moving", Vehicle: either},
+	{Code: "4-05(a)", Description: "compliance with turning restrictions", Type: "moving", Vehicle: either},
 	{Code: "4-12(i)", Description: "no honking in non-danger situations", Type: "parking", Vehicle: either, Short: "no honking"},
 	{Code: "4-12(m)", Description: "no driving in bus & right turn only lane", Type: "moving", Vehicle: either, Short: "no driving in bus lane"},
+	{Code: "4-04(b)(3)", Description: "no overtaking a vehicle stopped for pedestrians", Type: "moving", Vehicle: either},
 
 	{Code: "NY VTL 1160(a)", Description: "no right from center lane", Type: "moving", Vehicle: either, Short: "no R from center lane"},
 	{Code: "NY VTL 1160(b)", Description: "no left from center lane when both two-way streets", Type: "moving", Vehicle: either, Short: "no L from center (@ 2-way)"},
