@@ -20,7 +20,7 @@ func (s *NYC311RequestExporter) BuildQuery(u *gmail.UsersMessagesListCall) *gmai
 		// 311 Service Request Closed #: C1-1-1626059981 , Street Sign - Missing
 	default:
 		// label == nyc/311
-		return u.LabelIds("Label_7662191922466997049").Q("from:SRNotice@customercare.nyc.gov subject:\"SR Submitted #\" after:2023-01-01")
+		return u.LabelIds("Label_7662191922466997049").Q("from:SRNotice@customercare.nyc.gov subject:\"SR Submitted #\" after:2023-10-07")
 	}
 	return nil
 }
