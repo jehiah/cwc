@@ -165,7 +165,7 @@ func (d *S3DB) Attachments(c complaint.Complaint) ([]fs.DirEntry, error) {
 			log.Printf("got obj %s", *obj.Key)
 			items = append(items, s3Obj{
 				name:    strings.TrimPrefix(*obj.Key, p),
-				size:    obj.Size,
+				size:    *obj.Size,
 				modTime: *obj.LastModified,
 			})
 		}

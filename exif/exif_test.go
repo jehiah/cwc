@@ -16,10 +16,10 @@ func mustParse(t time.Time, err error) time.Time {
 func TestParseFile(t *testing.T) {
 	type testCase struct {
 		filename string
-		expect   *Exif
+		expect   Exif
 	}
 	tests := []testCase{
-		{"testdata/IMG_4056.JPG", &Exif{
+		{"testdata/IMG_4056.JPG", Exif{
 			Lat:          40.75985277777778,
 			Long:         -73.99134722222222,
 			Created:      mustParse(time.Parse("2006-01-02 15:04:05 -0700 MST", "2016-11-04 17:28:19 -0400 EDT")),
