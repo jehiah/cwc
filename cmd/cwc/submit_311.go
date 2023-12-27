@@ -390,16 +390,31 @@ func upload311Location(ctx context.Context, fc *complaint.FullComplaint) error {
 	fmt.Println("waiting for Next")
 	if resp, err := chromedp.RunResponse(ctx,
 		chromedp.SetValue(`#n311_locationtypeid_select`, "a7c99a56-e64e-e811-a951-000d3a3606de", chromedp.ByID), // street
+		chromedp.Sleep(time.Second),
+		chromedp.SetValue(`#n311_additionallocationdetails`, fc.Location, chromedp.ByID),
 		chromedp.Click(`#SelectAddressWhere`, chromedp.ByID),
 		chromedp.Sleep(time.Second),
-		chromedp.SetValue(`#address-search-box-input`, fc.Address, chromedp.ByID), // this is search pre-population
-		// .address-picker-input ?
-		chromedp.SetValue(`#n311_additionallocationdetails`, fc.Location, chromedp.ByID),
 	); err != nil {
 		return err
 	} else {
 		fmt.Println("RunResponse status code:", resp.Status)
 	}
+
+	if fc.Address != "" {
+		if resp, err := chromedp.RunResponse(ctx,
+			chromedp.SetValue(`#address-search-box-input`, fc.Address, chromedp.ByID), // this is search pre-population
+		); err != nil {
+			return err
+		} else {
+			fmt.Println("RunResponse status code:", resp.Status)
+		}
+
+		// ui-id-1 > li > div
+		// document.getElementById('SelectAddressMap').click()
+
+	}
+	// .address-picker-input ?
+	// chromedp.SetValue(`#n311_additionallocationdetails`, fc.Location, chromedp.ByID),
 	return nil
 }
 

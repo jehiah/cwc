@@ -4,7 +4,7 @@
 function lookup() {
     local SRNUMBER=$1
     curl -s -H "${OCP_AUTH_HEADER}" -X GET "https://api.nyc.gov/public/api/GetServiceRequest?srnumber=${SRNUMBER}" | jq -c . 
-    sleep 1.5
+    sleep 1
 }
 
 lookup $1

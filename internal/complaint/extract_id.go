@@ -21,7 +21,7 @@ func findServiceRequestID(lines []string) string {
 	return ""
 }
 
-var tlcIDPattern = regexp.MustCompile("(stip #?|complaint) ?(10[0-3][0-9]{5})[scC]?")
+var tlcIDPattern = regexp.MustCompile("(stip.? #?|complaint) ?(10[0-3][0-9]{5})[scC]?")
 
 func findTLCID(lines []string) string {
 	for _, line := range lines {

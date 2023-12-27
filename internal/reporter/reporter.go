@@ -6,10 +6,15 @@ import (
 	"html/template"
 	"io"
 	"log"
+	"time"
 
 	"github.com/jehiah/cwc/db"
 	"github.com/jehiah/cwc/internal/complaint"
 )
+
+type Options struct {
+	Start time.Time
+}
 
 type Reporter interface {
 	HTML() template.HTML
@@ -41,13 +46,16 @@ func Run(d db.ReadOnly, w io.Writer) error {
 	return nil
 }
 
-func RunHTML(d db.ReadOnly) ([]template.HTML, error) {
+func RunHTML(d db.ReadOnly, opts Options) ([]template.HTML, error) {
 	var full []*complaint.FullComplaint
 	complaints, err := d.Index()
 	if err != nil {
 		return nil, err
 	}
 	for _, c := range complaints {
+		if c.Time().Before(opts.Start) {
+			continue
+		}
 		f, err := d.FullComplaint(c)
 		if err != nil {
 			continue
@@ -70,7 +78,7 @@ func RunHTML(d db.ReadOnly) ([]template.HTML, error) {
 	return o, nil
 }
 
-func JSON(w io.Writer, d db.ReadOnly) error {
+func JSON(w io.Writer, d db.ReadOnly, opts Options) error {
 	complaints, err := d.Index()
 	if err != nil {
 		return err
@@ -79,6 +87,10 @@ func JSON(w io.Writer, d db.ReadOnly) error {
 	e.SetEscapeHTML(false)
 
 	for _, c := range complaints {
+		if c.Time().Before(opts.Start) {
+			continue
+		}
+
 		fc, err := d.FullComplaint(c)
 		if err != nil {
 			return err

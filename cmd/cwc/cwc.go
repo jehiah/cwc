@@ -80,7 +80,7 @@ func json() *cobra.Command {
 		Short: "Output all complaints as JSON",
 		Run: func(cmd *cobra.Command, args []string) {
 			db := loadDB(cmd.Flags().GetString("db"))
-			err := reporter.JSON(os.Stdout, db)
+			err := reporter.JSON(os.Stdout, db, reporter.Options{})
 			if err != nil {
 				log.Fatal(err)
 			}

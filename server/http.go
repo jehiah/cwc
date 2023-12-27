@@ -178,8 +178,20 @@ func (s *Server) Report(w http.ResponseWriter, r *http.Request) {
 		BasePath string
 		Reports  []template.HTML
 	}
+	r.ParseForm()
 
-	reports, err := reporter.RunHTML(s.DB)
+	var opts reporter.Options
+	if dt := r.Form.Get("start"); dt != "" {
+		var err error
+		opts.Start, err = time.Parse("2006-01-02", dt)
+		log.Printf("date %#v", opts.Start)
+		if err != nil {
+			s.Error(w, err)
+			return
+		}
+	}
+
+	reports, err := reporter.RunHTML(s.DB, opts)
 	if err != nil {
 		log.Printf("%s", err)
 		s.Error(w, err)
@@ -195,9 +207,20 @@ func (s *Server) Report(w http.ResponseWriter, r *http.Request) {
 
 // for /data/report
 func (s *Server) DataReport(w http.ResponseWriter, r *http.Request) {
+
+	var opts reporter.Options
+	if dt := r.Form.Get("start"); dt != "" {
+		var err error
+		opts.Start, err = time.Parse("2003-01-02", dt)
+		if err != nil {
+			s.Error(w, err)
+			return
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	var b bytes.Buffer
-	err := reporter.JSON(&b, s.DB)
+	err := reporter.JSON(&b, s.DB, opts)
 	if err != nil {
 		log.Printf("%s", err)
 		s.Error(w, err)

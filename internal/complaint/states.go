@@ -41,16 +41,18 @@ func DetectState(s string) State {
 	switch {
 	case strings.Contains(s, "pled guilty") || strings.Contains(s, "STIP violation") || strings.Contains(s, "has paid a penalty") || strings.Contains(s, "pleaded guilty"):
 		return ClosedPenalty
-	case strings.Contains(s, "Referred to S&E") || strings.Contains(s, "S&E Referral"):
+	case strings.Contains(s, "Referred to S&E") || strings.Contains(s, "S&E Referral") || strings.Contains(s, "inspected at the TLC inspection facility"):
 		return ClosedInspection
 	case strings.Contains(s, "scheduled") || strings.Contains(s, "Scheduled") || strings.Contains(s, "hearing sch"):
 		return HearingScheduled
 	case strings.Contains(s, "mailed to driver") || strings.Contains(s, "sent to driver") || strings.Contains(s, "issued a notice to the driver"):
 		return Fined
-	case strings.Contains(s, "unable to identify"):
+	case strings.Contains(strings.ToLower(s), "unable to identify") || strings.Contains(s, "not been able to identify the driver"):
 		return ClosedUnableToID
-	case strings.Contains(s, "Not a TLC violation") || strings.Contains(s, "not a violation of TLC rules"):
+	case strings.Contains(s, "Not a TLC violation") || strings.Contains(s, "not a violation of TLC rules") || strings.Contains(s, "not against TLC rules"):
 		return Invalid
+	case strings.Contains(s, "We have been unable to reach you"):
+		return Expired
 	}
 	return Unknown
 }
