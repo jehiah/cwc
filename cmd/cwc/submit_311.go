@@ -179,6 +179,7 @@ func Submit(d db.ReadOnly, fc *complaint.FullComplaint) error {
 
 		fmt.Printf("> authenticated")
 	}
+	time.Sleep(time.Millisecond * 150)
 	switch fc.VehicleType {
 	case reg.FHV.String():
 		err = SubmitFHV(ctx, d, fc)
@@ -265,7 +266,9 @@ func SubmitFHV(ctx context.Context, d db.ReadOnly, fc *complaint.FullComplaint) 
 	sel := `//button/div/div[text()='Driver Complaint']`
 	if err := chromedp.Run(ctx,
 		chromedp.ScrollIntoView(sel),
+		chromedp.Sleep(time.Millisecond*100),
 		chromedp.Click(sel),
+		chromedp.Sleep(time.Millisecond*100),
 	); err != nil {
 		return err
 	}
@@ -274,6 +277,7 @@ func SubmitFHV(ctx context.Context, d db.ReadOnly, fc *complaint.FullComplaint) 
 	log.Printf("click start %s", start)
 	if resp, err := chromedp.RunResponse(ctx,
 		chromedp.ScrollIntoView(start),
+		chromedp.Sleep(time.Millisecond*10),
 		chromedp.Click(start),
 	); err != nil {
 		return err
@@ -328,7 +332,7 @@ func SubmitFHV(ctx context.Context, d db.ReadOnly, fc *complaint.FullComplaint) 
 
 func uploads(fc *complaint.FullComplaint) []string {
 	// TODO: check for file size
-	uploads := append(fc.Videos)
+	uploads := fc.Videos
 	for _, p := range fc.Photos {
 		switch filepath.Ext(strings.ToLower(p)) {
 		case ".heic":
@@ -386,27 +390,38 @@ func upload311Location(ctx context.Context, fc *complaint.FullComplaint) error {
 		return err
 	}
 
-	fmt.Println("> filling location")
-	fmt.Println("waiting for Next")
+	fmt.Println("> filling location ", fc.Location)
 	if resp, err := chromedp.RunResponse(ctx,
 		chromedp.SetValue(`#n311_locationtypeid_select`, "a7c99a56-e64e-e811-a951-000d3a3606de", chromedp.ByID), // street
 		chromedp.Sleep(time.Second),
+		// Bug - the RunResponse is stalling here
 		chromedp.SetValue(`#n311_additionallocationdetails`, fc.Location, chromedp.ByID),
-		chromedp.Click(`#SelectAddressWhere`, chromedp.ByID),
-		chromedp.Sleep(time.Second),
+		chromedp.Sleep(time.Millisecond*100),
 	); err != nil {
 		return err
 	} else {
-		fmt.Println("RunResponse status code:", resp.Status)
+		fmt.Println("location RunResponse status code:", resp.Status)
 	}
 
 	if fc.Address != "" {
+		fmt.Println("> filling address ", fc.Address)
 		if resp, err := chromedp.RunResponse(ctx,
+			chromedp.Sleep(time.Second),
+			chromedp.Click(`#SelectAddressWhere`, chromedp.ByID),
+			chromedp.Sleep(time.Second),
+			chromedp.WaitVisible(`#address-search-box-input`, chromedp.ByID),
 			chromedp.SetValue(`#address-search-box-input`, fc.Address, chromedp.ByID), // this is search pre-population
+			chromedp.Sleep(time.Second),
+			// wait for #ui-id-1 > li > div
+			chromedp.WaitVisible(`#ui-id-2`, chromedp.ByID),
+			chromedp.Click(`#ui-id-2`, chromedp.ByID, chromedp.NodeVisible),
+			chromedp.Sleep(time.Millisecond*100),
+			chromedp.ScrollIntoView(`#SelectAddressMap`, chromedp.ByID),
+			chromedp.Click(`#SelectAddressMap`, chromedp.ByID, chromedp.NodeVisible),
 		); err != nil {
 			return err
 		} else {
-			fmt.Println("RunResponse status code:", resp.Status)
+			fmt.Println("address RunResponse status code:", resp.Status)
 		}
 
 		// ui-id-1 > li > div
@@ -414,7 +429,6 @@ func upload311Location(ctx context.Context, fc *complaint.FullComplaint) error {
 
 	}
 	// .address-picker-input ?
-	// chromedp.SetValue(`#n311_additionallocationdetails`, fc.Location, chromedp.ByID),
 	return nil
 }
 
