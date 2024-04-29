@@ -22,7 +22,7 @@ func (s *ServiceReqeustUpdate) BuildQuery(u *gmail.UsersMessagesListCall) *gmail
 	if s.version == 1 {
 		return u.LabelIds("INBOX").Q("subject:\"TLC Complaint Received\" from:\"tlccomplaintreceived@tlc.nyc.gov\"")
 	}
-	return u.LabelIds("INBOX").Q("(subject:\"311 Service Request Update\" OR subject:\"311 Service Request Closed\" OR subject:\"SR Updated\" OR subject:\"SR Closed\") -\"New York City Police Department\"")
+	return u.LabelIds("INBOX").Q("(subject:\"311 Service Request Update\" OR subject:\"311 Service Request Closed\" OR subject:\"SR Updated\" OR subject:\"SR Closed\") \"TLC\"")
 }
 
 func (s *ServiceReqeustUpdate) Handle(m *gmail.Message) error {
