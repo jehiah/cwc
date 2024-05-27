@@ -4,10 +4,12 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/jehiah/cwc/db"
 	"github.com/jehiah/cwc/internal/gmailutils"
+	"github.com/jehiah/cwc/internal/nycapi"
 	"golang.org/x/net/context"
 	gmail "google.golang.org/api/gmail/v1"
 )
@@ -56,7 +58,11 @@ func main() {
 	}
 	if *export {
 		handlers = []EmailHandler{
-			&NYC311RequestExporter{},
+			&NYC311RequestExporter{
+				nycAPI: nycapi.Client{
+					SubscriptionKey: os.Getenv("OCP_APM_KEY"),
+				},
+			},
 		}
 	}
 	for _, h := range handlers {
