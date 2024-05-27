@@ -6,9 +6,6 @@ import (
 )
 
 func TestParseISO6709(t *testing.T) {
-	type args struct {
-		s string
-	}
 	tests := []struct {
 		have    string
 		wantLat float64
@@ -17,6 +14,10 @@ func TestParseISO6709(t *testing.T) {
 		{
 			have:    "+40.7635-073.9853/",
 			wantLat: 40.7635, wantLon: -73.9853,
+		},
+		{
+			have:    "+40.7627-073.9971+005.837/",
+			wantLat: 40.7627, wantLon: -73.9971,
 		},
 	}
 	for i, tc := range tests {

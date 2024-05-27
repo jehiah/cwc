@@ -32,9 +32,6 @@ func getFFMetaData(filePath string) (Exif, error) {
 	scanner := bufio.NewScanner(bytes.NewBuffer(output))
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
-		if !strings.Contains(line, "=") {
-			continue
-		}
 		key, value, ok := strings.Cut(line, "=")
 		if !ok {
 			continue
@@ -54,7 +51,6 @@ func getFFMetaData(filePath string) (Exif, error) {
 			}
 		}
 	}
-	// log.Printf("getFFMetaData parsed %#v", e)
 	return e, nil
 }
 
@@ -89,6 +85,8 @@ func getMovieCreationTime(filePath string) (time.Time, error) {
 	// Use the appropriate method to extract the date-time metadata
 	// from the .mov file. This can vary depending on the operating system and available tools.
 	// Here's an example command using ffprobe (FFmpeg) on Unix-like systems:
+	//
+	// TODO:: use -of json
 	cmd := exec.Command("ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream_tags=creation_time", "-of", "default=noprint_wrappers=1:nokey=1", filePath)
 	output, err := cmd.Output()
 	if err != nil {
