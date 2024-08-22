@@ -52,7 +52,7 @@ var getJSON = function(url) {
 
 chrome.pageAction.onClicked.addListener(function(tab){
     console.log("pageAction.onClicked")
-    getJSON("http://[::]:53000/complaint/latest.json").then(function(data) {
+    getJSON("http://[::]:5300/complaint/latest.json").then(function(data) {
         console.log("got latest.json", data)
         chrome.tabs.sendMessage(tab.id, data, function(response) {
           console.log(response);
@@ -60,7 +60,7 @@ chrome.pageAction.onClicked.addListener(function(tab){
     }, function(status) {
     	alert('Something went wrong.');
     });
-    getJSON("http://[::]:53000/address.json").then(function(data) {
+    getJSON("http://[::]:5300/address.json").then(function(data) {
         console.log("got address.json", data)
         chrome.tabs.sendMessage(tab.id, data, function(response) {
           console.log(response);

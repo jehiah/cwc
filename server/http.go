@@ -252,7 +252,7 @@ func (s *Server) OpenInBrowser() error {
 
 func (s *Server) Serve(addr string, logRequests bool) error {
 	if addr == "" {
-		addr = ":53000"
+		addr = ":5300"
 	}
 	var err error
 	s.listener, err = net.Listen("tcp", addr)

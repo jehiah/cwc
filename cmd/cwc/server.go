@@ -55,7 +55,7 @@ func serverCmd() *cobra.Command {
 		},
 	}
 	cmd.Flags().String("db", string(db.Default), "DB path")
-	cmd.Flags().String("addr", ":53000", "http listen address")
+	cmd.Flags().String("addr", ":5300", "http listen address")
 	cmd.Flags().StringP("template-path", "t", "", "path to templates")
 	cmd.Flags().String("base", "/", "Base URL Path")
 	cmd.Flags().Bool("skip-browser-open", false, "skip oepening address in browser")

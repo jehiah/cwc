@@ -147,7 +147,7 @@ Usage:
   cwc server [flags]
 
 Flags:
-      --addr string            http listen address (default ":53000")
+      --addr string            http listen address (default ":5300")
       --db string              DB path (default "/Users/jehiah/Documents/cyclists_with_cameras")
   -h, --help                   help for server
   -t, --template-path string   path to templates (default "src/templates")
