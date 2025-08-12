@@ -10,6 +10,8 @@ import (
 	"github.com/jehiah/cwc/db"
 	"github.com/jehiah/cwc/internal/complaint"
 	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/renderer"
+	"github.com/olekukonko/tablewriter/tw"
 )
 
 type ByMonth struct {
@@ -84,8 +86,10 @@ func (r ByMonth) Text() string {
 
 	// io.WriteString(w, "TLC Complaints by month\n")
 	table := tablewriter.NewWriter(w)
-	table.SetBorder(false)
-	table.SetHeader([]string{"Month", "Complaints", r.Scale.String()})
+	c := table.Renderer().Config()
+	c.Borders = tw.BorderNone
+	table.Options(tablewriter.WithRenderer(renderer.NewBlueprint(c)))
+	table.Header([]string{"Month", "Complaints", r.Scale.String()})
 	for _, month := range r.Months {
 		n := r.Counts[month]
 		table.Append([]string{month, fmt.Sprintf("%d", n), strings.Repeat("∎", n/r.Scale.Scale)})

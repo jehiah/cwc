@@ -10,6 +10,8 @@ import (
 	"github.com/jehiah/cwc/db"
 	"github.com/jehiah/cwc/internal/complaint"
 	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/renderer"
+	"github.com/olekukonko/tablewriter/tw"
 )
 
 type ByHour struct {
@@ -98,13 +100,15 @@ func (r ByHour) Text() string {
 	w := &bytes.Buffer{}
 
 	table := tablewriter.NewWriter(w)
-	table.SetBorder(false)
-	table.SetHeader([]string{"Hour", "Complaints", strings.TrimSpace(r.Scale.String())})
+	c := table.Renderer().Config()
+	c.Borders = tw.BorderNone
+	table.Options(tablewriter.WithRenderer(renderer.NewBlueprint(c)))
+	table.Header([]string{"Hour", "Complaints", strings.TrimSpace(r.Scale.String())})
 	for h, v := range r.Hours[r.Start+1 : r.Stop] {
 		t := time.Date(2010, 1, 1, h+r.Start+1, 0, 0, 0, time.UTC)
 		table.Append([]string{t.Format("3pm"), fmt.Sprintf("%d", v), strings.Repeat("∎", v/r.Scale.Scale)})
 	}
-	table.SetFooter([]string{"Total:", fmt.Sprintf("%d", r.Total), ""})
+	table.Footer([]string{"Total:", fmt.Sprintf("%d", r.Total), ""})
 	table.Render()
 	fmt.Fprint(w, "\n")
 	return w.String()
