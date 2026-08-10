@@ -14,13 +14,13 @@ func (i *UI) Ask(query, defaultVal string) (string, error) {
 	}
 
 	buf.WriteString(": ")
-	fmt.Fprintf(i.Writer, buf.String())
+	fmt.Fprint(i.Writer, buf.String())
 
 	line, err := i.readline()
 	if line == "" {
 		line = defaultVal
 	}
-	fmt.Fprintf(i.Writer, "\n")
+	fmt.Fprint(i.Writer, "\n")
 	return line, err
 }
 

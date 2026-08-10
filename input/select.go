@@ -78,7 +78,7 @@ func (i *UI) Select(query string, dflt interface{}, list ...interface{}) (interf
 		}
 
 		buf.WriteString(": ")
-		fmt.Fprintf(i.Writer, buf.String())
+		fmt.Fprint(i.Writer, buf.String())
 
 		// Read user input from reader.
 		line, err := i.readline()
